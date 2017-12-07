@@ -1,0 +1,68 @@
+[
+    {
+    "title": "Bottom navigation",
+    "text": "Tapping on a bottom navigation icon takes you directly to the associated view or refreshes the currently active view. Bottom navigation is primarily for use on mobile. To achieve a similar effect for desktop, use side navigation.",
+    "date": "01.01.2001"
+    },
+
+
+    {
+    "title": "Bottom sheets",
+    "text": "Modal bottom sheets are primarily for mobile and can also present deep-linked content from other apps. Persistent bottom sheets integrate with the app to display supporting content.",
+    "date": "02.02.2002"
+    },
+
+
+    {
+    "title": "Buttons",
+    "text": "Material buttons trigger an ink reaction on press. They may display text, imagery, or both. Flat buttons and raised buttons are the most commonly used types. Additional button types include: Persistent footer buttons are flat buttons that may be used in screen footers or dialogs. Dropdown buttons display multiple selections. Toggle buttons group related options. Icon toggles allow a single choice to be selected or deselected.",
+    "date": "03.03.2003"
+    },
+
+
+    {
+    "title": "Buttons: Floating Action Button",
+    "text": "A floating action button is used for a promoted action. Shaped like a circled icon floating above the UI, it changes color upon focus and lifts upon selection. When pressed, it may contain more related actions.",
+    "date": "04.04.2004"
+    },
+
+    {
+    "title": "Cards",
+    "text": "Cards may contain a photo, text, and a link about a single subject. They may display content containing elements of varying size, such as photos with captions of variable length. A card collection is a layout of cards on the same plane.",
+    "date": "05.05.2005"
+    },
+
+
+    {
+    "title": "Chips",
+    "text": "A chip may contain entities such as a photo, text, rules, an icon, or a contact. Contact chips may represent contact information in a compact way.",
+    "date": "06.06.2006"
+    },
+
+
+    {
+    "title": "Data tables",
+    "text": "Data tables may be embedded on a surface, such as a card. They can include: A corresponding visualization The ability to query and manipulate data Data tables on cards may display navigation and data manipulation tools at the top and bottom.",
+    "date": "07.07.2007"
+    },
+
+
+    {
+    "title": "Dialogs",
+    "text": "Dialogs contain text and UI controls. They retain focus until dismissed or a required action has been taken. Use dialogs sparingly because they are interruptive. Some dialog types include: Alerts are urgent interruptions that inform about a situation and require acknowledgement. Simple menus display options for list items, whereas simple dialogs can provide details or actions about a list item. Confirmation dialogs require users to explicitly confirm a choice.",
+    "date": "08.08.2008"
+    },
+
+
+    {
+    "title": "Dividers",
+    "text": "Dividers help organize page content and hierarchy into individual tiles. Full-bleed dividers emphasize separate content areas and sections that require more distinct visual separation. Alternatives to full-bleed dividers include white space, subheaders, or inset dividers. Image-based content in grid lists does not need dividers. Grid lists adequately separate content using white space and subheaders.",
+    "date": "09.09.2009"
+    },
+
+    {
+    "title": "Expansion panels",
+    "text": "An expansion panel is a lightweight container that may either stand alone or be connected to a larger surface, such as a card. They may be used for a variety of tasks, such as: To edit a setting To create a tool for ad campaigns",
+    "date": "10.10.2010"
+    }
+]

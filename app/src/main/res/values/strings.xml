@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">MyFirstApplication</string>
+    <string name="new_note">New note</string>
+    <string name="message_about_delete">Delete note?</string>
+    <string name="theme">Theme</string>
+    <string name="pick_theme">Choice color theme:</string>
+</resources>
