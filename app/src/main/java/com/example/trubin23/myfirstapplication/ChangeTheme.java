@@ -18,7 +18,7 @@ import static android.content.Context.MODE_PRIVATE;
 class ChangeTheme {
 
     private final static String TYPE_THEME = "type_theme";
-    private static final String LOG_THEME = "tag_theme";
+    private static final String LOG = "ChangeTheme";
 
     enum Theme {
         RED(R.style.AppThemeRed),
@@ -54,7 +54,7 @@ class ChangeTheme {
         try {
             theme = Theme.valueOf(themeName);
         } catch (IllegalArgumentException e){
-            Log.e(LOG_THEME, "Theme.valueOf(themeName)", e);// message log ?
+            Log.e(LOG, "static void onActivityCreateSetTheme(@NonNull Activity activity)", e);
         }
 
         activity.setTheme(theme.themeId);

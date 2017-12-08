@@ -19,7 +19,6 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -47,8 +46,6 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         dbNotes = new DBNotes(this);
-
-        //testLocation();
 
         mRecyclerView.setHasFixedSize(true);
 
@@ -80,14 +77,6 @@ public class MainActivity extends AppCompatActivity {
 
         FloatingActionButton buttonCreateNote = findViewById(R.id.button_create_note);
         buttonCreateNote.setOnClickListener(mOnClickCreateNote);
-    }
-
-    void testLocation(){
-        Locale locale = new Locale("ru");
-        Locale.setDefault(locale);
-        Configuration configuration = new Configuration();
-        configuration.locale = locale;
-        getBaseContext().getResources().updateConfiguration(configuration, null);
     }
 
     @Override

@@ -38,8 +38,7 @@ class DBNotes extends SQLiteOpenHelper {
     private static final String COLUMN_NOTE_TEXT = "note_text";
     private static final String COLUMN_NOTE_DATE = "note_date";
 
-    private static final String LOG_MOSHI = "tag_moshi";
-    private static final String LOG_INITIALIZE = "tag_initialize";
+    private static final String LOG = "DBNotes";
 
     private final Context context;
 
@@ -78,7 +77,7 @@ class DBNotes extends SQLiteOpenHelper {
             inputStream.read(b);
             json = new String(b);
         } catch (IOException e) {
-            Log.e(LOG_INITIALIZE, "inputStream.read(...)", e);// message log ?
+            Log.e(LOG, "List<Note> initializeData()", e);
         }
 
         Moshi moshi = new Moshi.Builder().build();
@@ -91,11 +90,11 @@ class DBNotes extends SQLiteOpenHelper {
             List<NoteParse> notesParse = jsonAdapter.fromJson(json);
             if (notesParse != null) {
                 for (NoteParse noteParse : notesParse) {
-                    notes.add(Note.createWithoutId(noteParse.title, noteParse.text, noteParse.date));
+                    notes.add(new Note(noteParse.title, noteParse.text, noteParse.date));
                 }
             }
         } catch (IOException e) {
-            Log.e(LOG_MOSHI, "jsonAdapter.fromJson(json)", e);// message log ?
+            Log.e(LOG, "List<Note> initializeData()", e);
         }
 
         return notes;

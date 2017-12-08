@@ -30,19 +30,23 @@ public class Note implements Parcelable {
         this.mDate = date;
     }
 
-    static Note createWithoutId(@NonNull String title, @NonNull String text, String dateString) {
-        Date date;
-        try {
-            date = mDateFormat.parse(dateString);
-        } catch (ParseException e) {
-            date = new Date(0);
-        }
+    Note(@NonNull String title, @NonNull String text, String date) {
+        this.id = DEFAULT_ID;
+        this.mTitle = title;
+        this.mText = text;
 
-        return new Note(DEFAULT_ID, title, text, date);
+        try {
+            this.mDate =  mDateFormat.parse(date);
+        } catch (ParseException e) {
+            this.mDate =  new Date(0);
+        }
     }
 
-    static Note createWithoutId(@NonNull String title, @NonNull String text) {
-        return new Note(DEFAULT_ID, title, text, new Date());
+    Note(@NonNull String title, @NonNull String text) {
+        this.id = DEFAULT_ID;
+        this.mTitle = title;
+        this.mText = text;
+        this.mDate =  new Date(0);
     }
 
     private Note(Parcel in) {

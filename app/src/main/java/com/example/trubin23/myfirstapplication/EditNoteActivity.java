@@ -109,7 +109,7 @@ public class EditNoteActivity extends AppCompatActivity {
                 mNote.setText(mEditText.getText().toString());
                 mNote.setDate(new Date());
             } else {
-                mNote = Note.createWithoutId(mEditTitle.getText().toString(),
+                mNote = new Note(mEditTitle.getText().toString(),
                         mEditText.getText().toString());
             }
             intent.putExtra(RecyclerNoteAdapter.NOTE, mNote);
