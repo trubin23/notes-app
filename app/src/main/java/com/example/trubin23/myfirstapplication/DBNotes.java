@@ -16,10 +16,7 @@ import com.squareup.moshi.Types;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -42,8 +39,6 @@ class DBNotes extends SQLiteOpenHelper {
 
     private final Context context;
 
-    private final SimpleDateFormat mDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
     DBNotes(@NonNull Context context) {
         super(context, DB_NAME, null, DB_VERSION);
         this.context = context;
@@ -54,7 +49,7 @@ class DBNotes extends SQLiteOpenHelper {
                 + COLUMN_NOTE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + COLUMN_NOTE_TITLE + " TEXT,"
                 + COLUMN_NOTE_TEXT + " TEXT,"
-                + COLUMN_NOTE_DATE + " DATE)");
+                + COLUMN_NOTE_DATE + " TEXT)");
 
         List<Note> notes = initializeData();
         for (Note note : notes){
@@ -121,14 +116,7 @@ class DBNotes extends SQLiteOpenHelper {
                 int id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_ID)));
                 String title = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_TITLE));
                 String text = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_TEXT));
-                String dateString = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_DATE));
-
-                Date date;
-                try {
-                    date = mDateFormat.parse(dateString);
-                } catch (ParseException e) {
-                    date = new Date(0);
-                }
+                String date = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_DATE));
 
                 Note note = new Note(id, title, text, date);
 
@@ -157,7 +145,7 @@ class DBNotes extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(COLUMN_NOTE_TITLE, noteInsert.getTitle());
         values.put(COLUMN_NOTE_TEXT, noteInsert.getText());
-        values.put(COLUMN_NOTE_DATE, mDateFormat.format(noteInsert.getDate()));
+        values.put(COLUMN_NOTE_DATE, noteInsert.getDate());
 
         // Inserting Row
         long id = db.insert(TABLE_NOTE, null, values);
@@ -189,7 +177,7 @@ class DBNotes extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(COLUMN_NOTE_TITLE, note.getTitle());
         values.put(COLUMN_NOTE_TEXT, note.getText());
-        values.put(COLUMN_NOTE_DATE, mDateFormat.format(note.getDate()));
+        values.put(COLUMN_NOTE_DATE, note.getDate());
 
         // updating row
         int rowsUpdate = db.update(TABLE_NOTE, values, COLUMN_NOTE_ID + " = ?",

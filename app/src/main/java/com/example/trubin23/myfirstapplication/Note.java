@@ -3,6 +3,7 @@ package com.example.trubin23.myfirstapplication;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -23,30 +24,24 @@ public class Note implements Parcelable {
 
     private static final SimpleDateFormat mDateFormat = new SimpleDateFormat("dd.MM.yyyy");
 
-    Note(long id, @NonNull String title, @NonNull String text, Date date) {
+    Note(long id, @NonNull String title, @NonNull String text, @Nullable String date) {
         this.id = id;
-        this.mTitle = title;
-        this.mText = text;
-        this.mDate = date;
-    }
-
-    Note(@NonNull String title, @NonNull String text, String date) {
-        this.id = DEFAULT_ID;
         this.mTitle = title;
         this.mText = text;
 
         try {
-            this.mDate =  mDateFormat.parse(date);
-        } catch (ParseException e) {
-            this.mDate =  new Date(0);
+            this.mDate = mDateFormat.parse(date);
+        } catch (ParseException | NullPointerException e) {
+            this.mDate =  new Date();
         }
     }
 
+    Note(@NonNull String title, @NonNull String text, @Nullable String date) {
+        this(DEFAULT_ID, title, text, date);
+    }
+
     Note(@NonNull String title, @NonNull String text) {
-        this.id = DEFAULT_ID;
-        this.mTitle = title;
-        this.mText = text;
-        this.mDate =  new Date(0);
+        this(DEFAULT_ID, title, text, null);
     }
 
     private Note(Parcel in) {
@@ -84,12 +79,7 @@ public class Note implements Parcelable {
     }
 
     @NonNull
-    Date getDate() {
-        return mDate;
-    }
-
-    @NonNull
-    String getDateToString() {
+    String getDate() {
         return mDateFormat.format(mDate);
     }
 
