@@ -97,7 +97,7 @@ public class Note implements Parcelable {
         this.mDate = date;
     }
 
-    static final Creator<Note> CREATOR = new Creator<Note>() {
+    public static final Creator<Note> CREATOR = new Creator<Note>() {
         @Override
         public Note createFromParcel(Parcel in) {
             return new Note(in);
