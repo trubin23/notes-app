@@ -15,8 +15,6 @@ import java.util.Date;
 
 public class Note implements Parcelable {
 
-    static final long DEFAULT_ID = -1;
-
     private long mId;
     private String mTitle;
     private String mText;
@@ -37,11 +35,11 @@ public class Note implements Parcelable {
     }
 
     public Note(@NonNull String title, @NonNull String text, @Nullable String date) {
-        this(DEFAULT_ID, title, text, date);
+        this(DBNotes.DEFAULT_ID, title, text, date);
     }
 
     Note(@NonNull String title, @NonNull String text) {
-        this(DEFAULT_ID, title, text, null);
+        this(DBNotes.DEFAULT_ID, title, text, null);
     }
 
     private Note(Parcel in) {

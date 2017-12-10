@@ -36,6 +36,7 @@ class DBNotes extends SQLiteOpenHelper {
             COLUMN_NOTE_DATE
     };
 
+    static final long DEFAULT_ID = -1;
     private final Context mContext;
 
     DBNotes(@NonNull Context context) {
@@ -51,8 +52,20 @@ class DBNotes extends SQLiteOpenHelper {
                 + COLUMN_NOTE_DATE + " TEXT)");
 
         List<Note> notes = InitializeData.initializeData(mContext);
-        for (Note note : notes){
-            addNote(db, note);
+        for (Note note : notes) {
+            db.beginTransaction();
+            try {
+                ContentValues values = new ContentValues();
+                values.put(COLUMN_NOTE_TITLE, note.getTitle());
+                values.put(COLUMN_NOTE_TEXT, note.getText());
+                values.put(COLUMN_NOTE_DATE, note.getDate());
+
+                db.insert(TABLE_NOTE, null, values);
+
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
         }
     }
 
@@ -65,50 +78,55 @@ class DBNotes extends SQLiteOpenHelper {
         List<Note> noteList = new ArrayList<>();
 
         SQLiteDatabase db = this.getReadableDatabase();
+        db.beginTransaction();// transaction for readable ?
+        try {
+            Cursor cursor = db.query(TABLE_NOTE,
+                    COLUMNS, null, null, null, null, null);
 
-        Cursor cursor = db.query(TABLE_NOTE,
-                COLUMNS, null, null, null, null, null);
+            if (cursor.moveToFirst()) {
+                do {
+                    int id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_ID)));
+                    String title = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_TITLE));
+                    String text = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_TEXT));
+                    String date = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_DATE));
 
-        if (cursor.moveToFirst()) {
-            do {
-                int id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_ID)));
-                String title = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_TITLE));
-                String text = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_TEXT));
-                String date = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_DATE));
+                    Note note = new Note(id, title, text, date);
 
-                Note note = new Note(id, title, text, date);
+                    noteList.add(note);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
 
-                noteList.add(note);
-            } while (cursor.moveToNext());
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+            db.close();
         }
-        cursor.close();
-        db.close();
 
         return noteList;
     }
 
     @Nullable
-    Note addNote(@NonNull Note noteInsert){
+    Note addNote(@NonNull Note noteInsert) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        Note note = addNote(db, noteInsert);
+        long id = DEFAULT_ID; // need '-1' - is redundant ?
+        db.beginTransaction();
+        try {
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_NOTE_TITLE, noteInsert.getTitle());
+            values.put(COLUMN_NOTE_TEXT, noteInsert.getText());
+            values.put(COLUMN_NOTE_DATE, noteInsert.getDate());
 
-        db.close();
+            id = db.insert(TABLE_NOTE, null, values);
 
-        return note;
-    }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+            db.close();
+        }
 
-    @Nullable
-    private Note addNote(@NonNull SQLiteDatabase db, @NonNull Note noteInsert){
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_NOTE_TITLE, noteInsert.getTitle());
-        values.put(COLUMN_NOTE_TEXT, noteInsert.getText());
-        values.put(COLUMN_NOTE_DATE, noteInsert.getDate());
-
-        // Inserting Row
-        long id = db.insert(TABLE_NOTE, null, values);
-
-        if (id != Note.DEFAULT_ID){
+        if (id != DEFAULT_ID) {
             return new Note(id, noteInsert.getTitle(), noteInsert.getText(), noteInsert.getDate());
         } else {
             return null;
@@ -117,35 +135,47 @@ class DBNotes extends SQLiteOpenHelper {
 
     boolean deleteNote(@NonNull Note note) {
         SQLiteDatabase db = this.getWritableDatabase();
-        // delete user record by id
-        int rowsDelete = db.delete(TABLE_NOTE, COLUMN_NOTE_ID + " = ?",
-                new String[]{String.valueOf(note.getId())});
-        db.close();
 
-        if (rowsDelete!=0){
-            return true;
-        }else{
-            return false;
+        boolean result = false; // need 'false' - is redundant ?
+        db.beginTransaction();
+        try {
+            int rowsDelete = db.delete(TABLE_NOTE, COLUMN_NOTE_ID + " = ?",
+                    new String[]{String.valueOf(note.getId())});
+
+            result = rowsDelete > 0;
+
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+            db.close();
         }
+
+        return result;
     }
 
     boolean updateNote(@NonNull Note note) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_NOTE_TITLE, note.getTitle());
-        values.put(COLUMN_NOTE_TEXT, note.getText());
-        values.put(COLUMN_NOTE_DATE, note.getDate());
+        boolean result = false; // need 'false' - is redundant ?
+        db.beginTransaction();
+        try {
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_NOTE_TITLE, note.getTitle());
+            values.put(COLUMN_NOTE_TEXT, note.getText());
+            values.put(COLUMN_NOTE_DATE, note.getDate());
 
-        // updating row
-        int rowsUpdate = db.update(TABLE_NOTE, values, COLUMN_NOTE_ID + " = ?",
-                new String[]{String.valueOf(note.getId())});
-        db.close();
+            // updating row
+            int rowsUpdate = db.update(TABLE_NOTE, values, COLUMN_NOTE_ID + " = ?",
+                    new String[]{String.valueOf(note.getId())});
 
-        if (rowsUpdate!=0){
-            return true;
-        }else{
-            return false;
+            result = rowsUpdate > 0;
+
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+            db.close();
         }
+
+        return result;
     }
 }
