@@ -17,7 +17,6 @@ import android.view.MenuItem;
 import android.view.View;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import butterknife.BindView;
@@ -30,6 +29,11 @@ public class MainActivity extends AppCompatActivity {
     static final String ITEM_POSITION = "item_position";
 
     public static final int ITEM_POSITION_DEFAULT = -1;
+
+    private DBNotes mDBNotes;
+
+    @BindView(R.id.rv) RecyclerView mRecyclerView;
+    private RecyclerNoteAdapter mRecyclerNoteAdapter;
 
     private View.OnClickListener mOnClickCreateNote = new View.OnClickListener() {
         @Override
@@ -84,13 +88,6 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private AlertDialog mAlertDialog;
-
-    private DBNotes mDBNotes;
-
-    @BindView(R.id.rv) RecyclerView mRecyclerView;
-    private RecyclerNoteAdapter mRecyclerNoteAdapter;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -141,25 +138,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (R.id.item_theme == item.getItemId()) {
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(R.string.pick_theme);
-
-            String[] themeNames = ChangeTheme.Theme.getNames();
-            final List<String> itemsNames = Arrays.asList(themeNames);
-            String themeCurrent = ChangeTheme.loadTheme(this);
-
-            builder.setSingleChoiceItems(themeNames, itemsNames.indexOf(themeCurrent),
-                    new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int which) {
-                    ChangeTheme.changeToTheme(MainActivity.this, itemsNames.get(which));
-                    mAlertDialog.dismiss();
-                }
-            });
-
-            mAlertDialog = builder.create();
-            mAlertDialog.show();
+            new ChangeTheme(this);
         }
 
         return true;
