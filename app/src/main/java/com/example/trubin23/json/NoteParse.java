@@ -1,4 +1,4 @@
-package com.example.trubin23.myfirstapplication;
+package com.example.trubin23.json;
 
 /**
  * Created by trubin23 on 05.12.17.

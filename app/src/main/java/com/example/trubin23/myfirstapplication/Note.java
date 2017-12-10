@@ -36,7 +36,7 @@ public class Note implements Parcelable {
         }
     }
 
-    Note(@NonNull String title, @NonNull String text, @Nullable String date) {
+    public Note(@NonNull String title, @NonNull String text, @Nullable String date) {
         this(DEFAULT_ID, title, text, date);
     }
 

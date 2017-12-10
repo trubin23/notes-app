@@ -7,15 +7,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
-import com.squareup.moshi.Types;
+import com.example.trubin23.json.InitializeData;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,8 +36,6 @@ class DBNotes extends SQLiteOpenHelper {
             COLUMN_NOTE_DATE
     };
 
-    private static final String LOG = "DBNotes";
-
     private final Context mContext;
 
     DBNotes(@NonNull Context context) {
@@ -58,7 +50,7 @@ class DBNotes extends SQLiteOpenHelper {
                 + COLUMN_NOTE_TEXT + " TEXT,"
                 + COLUMN_NOTE_DATE + " TEXT)");
 
-        List<Note> notes = initializeData();
+        List<Note> notes = InitializeData.initializeData(mContext);
         for (Note note : notes){
             addNote(db, note);
         }
@@ -66,40 +58,6 @@ class DBNotes extends SQLiteOpenHelper {
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
-    }
-
-    @NonNull
-    private List<Note> initializeData() {
-        String json = "";
-
-        try {
-            InputStream inputStream = mContext.getResources().openRawResource(R.raw.notes);
-
-            byte[] b = new byte[inputStream.available()];
-            inputStream.read(b);
-            json = new String(b);
-        } catch (IOException e) {
-            Log.e(LOG, "List<Note> initializeData()", e);
-        }
-
-        Moshi moshi = new Moshi.Builder().build();
-
-        Type listOfCardsType = Types.newParameterizedType(List.class, NoteParse.class);
-        JsonAdapter<List<NoteParse>> jsonAdapter = moshi.adapter(listOfCardsType);
-
-        List<Note> notes = new ArrayList<>();
-        try {
-            List<NoteParse> notesParse = jsonAdapter.fromJson(json);
-            if (notesParse != null) {
-                for (NoteParse noteParse : notesParse) {
-                    notes.add(new Note(noteParse.title, noteParse.text, noteParse.date));
-                }
-            }
-        } catch (IOException e) {
-            Log.e(LOG, "List<Note> initializeData()", e);
-        }
-
-        return notes;
     }
 
     @NonNull
