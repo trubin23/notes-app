@@ -17,7 +17,7 @@ public class Note implements Parcelable {
 
     static final long DEFAULT_ID = -1;
 
-    private long id;
+    private long mId;
     private String mTitle;
     private String mText;
     private Date mDate;
@@ -25,7 +25,7 @@ public class Note implements Parcelable {
     private static final SimpleDateFormat mDateFormat = new SimpleDateFormat("dd.MM.yyyy");
 
     Note(long id, @NonNull String title, @NonNull String text, @Nullable String date) {
-        this.id = id;
+        this.mId = id;
         this.mTitle = title;
         this.mText = text;
 
@@ -45,7 +45,7 @@ public class Note implements Parcelable {
     }
 
     private Note(Parcel in) {
-        id = in.readLong();
+        mId = in.readLong();
         mTitle = in.readString();
         mText = in.readString();
         mDate = (Date) in.readSerializable();
@@ -58,14 +58,14 @@ public class Note implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeLong(id);
+        parcel.writeLong(mId);
         parcel.writeString(mTitle);
         parcel.writeString(mText);
         parcel.writeSerializable(mDate);
     }
 
     public long getId() {
-        return id;
+        return mId;
     }
 
     @NonNull

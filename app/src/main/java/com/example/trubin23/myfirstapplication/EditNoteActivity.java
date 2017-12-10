@@ -24,11 +24,11 @@ public class EditNoteActivity extends AppCompatActivity {
     @BindView(R.id.edit_note_text)
     EditText mEditText;
 
-    private int itemPosition = MainActivity.ITEM_POSITION_DEFAULT;
+    private int mItemPosition = MainActivity.ITEM_POSITION_DEFAULT;
 
     private Note mNote;
 
-    MenuItem mMenuItemAccept;
+    private MenuItem mMenuItemAccept;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,10 +52,10 @@ public class EditNoteActivity extends AppCompatActivity {
         });
 
         Intent intent = getIntent();
-        itemPosition = intent.getIntExtra(RecyclerNoteAdapter.ITEM_POSITION,
+        mItemPosition = intent.getIntExtra(MainActivity.ITEM_POSITION,
                 MainActivity.ITEM_POSITION_DEFAULT);
 
-        mNote = intent.getParcelableExtra(RecyclerNoteAdapter.NOTE);
+        mNote = intent.getParcelableExtra(MainActivity.NOTE);
         if (mNote != null) {
             TextView textViewTitle = findViewById(R.id.text_view_title);
 
@@ -103,7 +103,7 @@ public class EditNoteActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (R.id.item_accept == item.getItemId()) {
             Intent intent = new Intent();
-            intent.putExtra(RecyclerNoteAdapter.ITEM_POSITION, itemPosition);
+            intent.putExtra(MainActivity.ITEM_POSITION, mItemPosition);
 
             if (mNote != null) {//change if ?
                 mNote.setText(mEditText.getText().toString());
@@ -112,7 +112,7 @@ public class EditNoteActivity extends AppCompatActivity {
                 mNote = new Note(mEditTitle.getText().toString(),
                         mEditText.getText().toString());
             }
-            intent.putExtra(RecyclerNoteAdapter.NOTE, mNote);
+            intent.putExtra(MainActivity.NOTE, mNote);
 
             setResult(RESULT_OK, intent);
         }

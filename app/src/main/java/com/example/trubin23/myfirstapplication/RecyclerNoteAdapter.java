@@ -20,10 +20,6 @@ import butterknife.ButterKnife;
 
 public class RecyclerNoteAdapter extends RecyclerView.Adapter<RecyclerNoteAdapter.NoteHolder>{
 
-    static final String NOTE = "note";
-    static final String NOTES = "notes";
-    static final String ITEM_POSITION = "item_position";
-
     private List<Note> mNotes;
     private View.OnClickListener mOnClickEditNote;
     private View.OnLongClickListener mOnLongClickDeleteNote;

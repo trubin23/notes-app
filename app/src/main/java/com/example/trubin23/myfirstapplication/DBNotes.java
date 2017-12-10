@@ -35,13 +35,20 @@ class DBNotes extends SQLiteOpenHelper {
     private static final String COLUMN_NOTE_TEXT = "note_text";
     private static final String COLUMN_NOTE_DATE = "note_date";
 
+    private static final String[] COLUMNS = {
+            COLUMN_NOTE_ID,
+            COLUMN_NOTE_TITLE,
+            COLUMN_NOTE_TEXT,
+            COLUMN_NOTE_DATE
+    };
+
     private static final String LOG = "DBNotes";
 
-    private final Context context;
+    private final Context mContext;
 
     DBNotes(@NonNull Context context) {
         super(context, DB_NAME, null, DB_VERSION);
-        this.context = context;
+        this.mContext = context;
     }
 
     public void onCreate(SQLiteDatabase db) {
@@ -66,7 +73,7 @@ class DBNotes extends SQLiteOpenHelper {
         String json = "";
 
         try {
-            InputStream inputStream = context.getResources().openRawResource(R.raw.notes);
+            InputStream inputStream = mContext.getResources().openRawResource(R.raw.notes);
 
             byte[] b = new byte[inputStream.available()];
             inputStream.read(b);
@@ -97,19 +104,12 @@ class DBNotes extends SQLiteOpenHelper {
 
     @NonNull
     List<Note> getAllNote() {
-        String[] columns = {
-                COLUMN_NOTE_ID,
-                COLUMN_NOTE_TITLE,
-                COLUMN_NOTE_TEXT,
-                COLUMN_NOTE_DATE
-        };
-
         List<Note> noteList = new ArrayList<>();
 
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.query(TABLE_NOTE,
-                columns, null, null, null, null, null);
+                COLUMNS, null, null, null, null, null);
 
         if (cursor.moveToFirst()) {
             do {
@@ -130,7 +130,7 @@ class DBNotes extends SQLiteOpenHelper {
     }
 
     @Nullable
-    Note addNote(Note noteInsert){
+    Note addNote(@NonNull Note noteInsert){
         SQLiteDatabase db = this.getWritableDatabase();
 
         Note note = addNote(db, noteInsert);
@@ -157,7 +157,7 @@ class DBNotes extends SQLiteOpenHelper {
         }
     }
 
-    boolean deleteNote(Note note) {
+    boolean deleteNote(@NonNull Note note) {
         SQLiteDatabase db = this.getWritableDatabase();
         // delete user record by id
         int rowsDelete = db.delete(TABLE_NOTE, COLUMN_NOTE_ID + " = ?",
@@ -171,7 +171,7 @@ class DBNotes extends SQLiteOpenHelper {
         }
     }
 
-    boolean updateNote(Note note) {
+    boolean updateNote(@NonNull Note note) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();

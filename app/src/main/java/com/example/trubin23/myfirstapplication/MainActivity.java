@@ -25,15 +25,68 @@ import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
 
+    static final String NOTE = "note";
+    static final String NOTES = "notes";
+    static final String ITEM_POSITION = "item_position";
+
     public static final int ITEM_POSITION_DEFAULT = -1;
 
-    private View.OnClickListener mOnClickCreateNote;
-    private View.OnClickListener mOnClickEditNote;
-    private View.OnLongClickListener mOnLongClickDeleteNote;
+    private View.OnClickListener mOnClickCreateNote = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
+            startActivityForResult(intent, 0);
+        }
+    };
 
-    private AlertDialog alertDialog;
+    private View.OnClickListener mOnClickEditNote = new View.OnClickListener() {
+        @Override
+        public void onClick(View itemView) {
+            int itemPosition = mRecyclerView.getLayoutManager().getPosition(itemView);
 
-    private DBNotes dbNotes;
+            Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
+            intent.putExtra(ITEM_POSITION, itemPosition);
+            intent.putExtra(NOTE, mRecyclerNoteAdapter.getItem(itemPosition));
+            startActivityForResult(intent, 0);
+        }
+    };
+
+    private View.OnLongClickListener mOnLongClickDeleteNote = new View.OnLongClickListener() {
+        @Override
+        public boolean onLongClick(View itemView) {
+            final int itemPosition = mRecyclerView.getLayoutManager().getPosition(itemView);
+
+            final Note note = mRecyclerNoteAdapter.getItem(itemPosition);
+
+            if (note != null) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+                builder.setTitle(note.getTitle());
+                builder.setMessage(R.string.message_about_delete);
+
+                builder.setPositiveButton(getString(android.R.string.ok),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                if (mDBNotes.deleteNote(note)) {
+                                    mRecyclerNoteAdapter.deleteNote(itemPosition);
+                                }
+                            }
+                        });
+
+                builder.setNegativeButton(getString(android.R.string.cancel), null);
+
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
+            }
+
+            return true;
+        }
+    };
+
+    private AlertDialog mAlertDialog;
+
+    private DBNotes mDBNotes;
 
     @BindView(R.id.rv) RecyclerView mRecyclerView;
     private RecyclerNoteAdapter mRecyclerNoteAdapter;
@@ -45,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        dbNotes = new DBNotes(this);
+        mDBNotes = new DBNotes(this);
 
         mRecyclerView.setHasFixedSize(true);
 
@@ -61,12 +114,11 @@ public class MainActivity extends AppCompatActivity {
 
         List<Note> notes = null;
         if (savedInstanceState != null) {
-            notes = savedInstanceState.getParcelableArrayList(RecyclerNoteAdapter.NOTES);
+            notes = savedInstanceState.getParcelableArrayList(NOTES);
         }
         if (notes == null) { // (savedInstanceState!=null) not mean (notes!=null)
-            notes = dbNotes.getAllNote();
+            notes = mDBNotes.getAllNote();
         }
-        initializeOnClickListener();
 
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(
                 mRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
@@ -102,89 +154,33 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int which) {
                     ChangeTheme.changeToTheme(MainActivity.this, itemsNames.get(which));
+                    mAlertDialog.dismiss();
                 }
             });
 
-            alertDialog = builder.create();
-            alertDialog.show();
+            mAlertDialog = builder.create();
+            mAlertDialog.show();
         }
 
         return true;
-    }
-
-    private void initializeOnClickListener() {
-        mOnClickCreateNote = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
-                startActivityForResult(intent, 0);
-            }
-        };
-
-        mOnClickEditNote = new View.OnClickListener() {
-            @Override
-            public void onClick(View itemView) {
-                int itemPosition = mRecyclerView.getLayoutManager().getPosition(itemView);
-
-                Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
-                intent.putExtra(RecyclerNoteAdapter.ITEM_POSITION, itemPosition);
-                intent.putExtra(RecyclerNoteAdapter.NOTE, mRecyclerNoteAdapter.getItem(itemPosition));
-                startActivityForResult(intent, 0);
-            }
-        };
-
-        mOnLongClickDeleteNote = new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View itemView) {
-                final int itemPosition = mRecyclerView.getLayoutManager().getPosition(itemView);
-
-                final Note note = mRecyclerNoteAdapter.getItem(itemPosition);
-
-                if (note != null) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-
-                    builder.setTitle(note.getTitle());
-                    builder.setMessage(R.string.message_about_delete);
-
-                    builder.setPositiveButton(getString(android.R.string.ok),
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    if (dbNotes.deleteNote(note)) {
-                                        mRecyclerNoteAdapter.deleteNote(itemPosition);
-                                    }
-                                }
-                            });
-
-                    builder.setNegativeButton(getString(android.R.string.cancel), null);
-
-                    AlertDialog alertDialog = builder.create();
-                    alertDialog.show();
-                }
-
-                return true;
-            }
-        };
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (resultCode == RESULT_OK) {
             int itemPosition = intent.getIntExtra(
-                    RecyclerNoteAdapter.ITEM_POSITION, ITEM_POSITION_DEFAULT);
+                    ITEM_POSITION, ITEM_POSITION_DEFAULT);
 
-            Note note = intent.getParcelableExtra(RecyclerNoteAdapter.NOTE);
+            Note note = intent.getParcelableExtra(NOTE);
             if (itemPosition != ITEM_POSITION_DEFAULT) {
-                if (dbNotes.updateNote(note)){
+                if (mDBNotes.updateNote(note)){
                     mRecyclerNoteAdapter.updateNote(itemPosition, note);
                 }
             } else {
-                Note noteAdd = dbNotes.addNote(note);
+                Note noteAdd = mDBNotes.addNote(note);
                 if (noteAdd!=null) {
                     mRecyclerNoteAdapter.addNote(noteAdd);
                 }
-                //List<Note> notes = dbNotes.getAllNote();
-                //mRecyclerNoteAdapter.setNotes(notes);
             }
         }
     }
@@ -192,14 +188,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelableArrayList(RecyclerNoteAdapter.NOTES,
+        outState.putParcelableArrayList(NOTES,
                 new ArrayList<Parcelable>(mRecyclerNoteAdapter.getNotes()));
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (alertDialog!=null)
-            alertDialog.dismiss();
     }
 }
