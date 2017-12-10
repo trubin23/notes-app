@@ -102,19 +102,21 @@ public class EditNoteActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (R.id.item_accept == item.getItemId()) {
-            Intent intent = new Intent();
-            intent.putExtra(MainActivity.ITEM_POSITION, mItemPosition);
+
+	        DBNotes dbNotes = ((MyCustomApplication)getApplication()).getDBNotes();
 
             if (mNote != null) {//change if ?
                 mNote.setText(mEditText.getText().toString());
                 mNote.setDate(new Date());
+
+	            dbNotes.updateNote(mNote);
             } else {
                 mNote = new Note(mEditTitle.getText().toString(),
                         mEditText.getText().toString());
+	            dbNotes.addNote(mNote);
             }
-            intent.putExtra(MainActivity.NOTE, mNote);
 
-            setResult(RESULT_OK, intent);
+            setResult(RESULT_OK, null);
         }
 
         finish();

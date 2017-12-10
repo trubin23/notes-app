@@ -30,8 +30,6 @@ public class MainActivity extends AppCompatActivity {
 
     public static final int ITEM_POSITION_DEFAULT = -1;
 
-    private DBNotes mDBNotes;
-
     @BindView(R.id.rv) RecyclerView mRecyclerView;
     private RecyclerNoteAdapter mRecyclerNoteAdapter;
 
@@ -72,7 +70,8 @@ public class MainActivity extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                if (mDBNotes.deleteNote(note)) {
+	                            DBNotes dbNotes = ((MyCustomApplication)getApplication()).getDBNotes();
+                                if (dbNotes.deleteNote(note.getId())) {
                                     mRecyclerNoteAdapter.deleteNote(itemPosition);
                                 }
                             }
@@ -95,8 +94,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        mDBNotes = new DBNotes(this);
-
         mRecyclerView.setHasFixedSize(true);
 
         if (this.getResources().getConfiguration().orientation ==
@@ -114,7 +111,8 @@ public class MainActivity extends AppCompatActivity {
             notes = savedInstanceState.getParcelableArrayList(NOTES);
         }
         if (notes == null) { // (savedInstanceState!=null) not mean (notes!=null)
-            notes = mDBNotes.getAllNote();
+	        DBNotes dbNotes = ((MyCustomApplication)getApplication()).getDBNotes();
+            notes = dbNotes.getAllNote();
         }
 
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(
@@ -147,20 +145,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (resultCode == RESULT_OK) {
-            int itemPosition = intent.getIntExtra(
-                    ITEM_POSITION, ITEM_POSITION_DEFAULT);
+	        DBNotes dbNotes = ((MyCustomApplication)getApplication()).getDBNotes();
 
-            Note note = intent.getParcelableExtra(NOTE);
-            if (itemPosition != ITEM_POSITION_DEFAULT) {
-                if (mDBNotes.updateNote(note)){
-                    mRecyclerNoteAdapter.updateNote(itemPosition, note);
-                }
-            } else {
-                Note noteAdd = mDBNotes.addNote(note);
-                if (noteAdd!=null) {
-                    mRecyclerNoteAdapter.addNote(noteAdd);
-                }
-            }
+	        List<Note> notes = dbNotes.getAllNote();
+
+	        mRecyclerNoteAdapter.setNotes(notes);
         }
     }
 

@@ -37,6 +37,7 @@ class DBNotes extends SQLiteOpenHelper {
     };
 
     static final long DEFAULT_ID = -1;
+
     private final Context mContext;
 
     DBNotes(@NonNull Context context) {
@@ -133,14 +134,14 @@ class DBNotes extends SQLiteOpenHelper {
         }
     }
 
-    boolean deleteNote(@NonNull Note note) {
+    boolean deleteNote(long id) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         boolean result = false; // need 'false' - is redundant ?
         db.beginTransaction();
         try {
             int rowsDelete = db.delete(TABLE_NOTE, COLUMN_NOTE_ID + " = ?",
-                    new String[]{String.valueOf(note.getId())});
+                    new String[]{String.valueOf(id)});
 
             result = rowsDelete > 0;
 
