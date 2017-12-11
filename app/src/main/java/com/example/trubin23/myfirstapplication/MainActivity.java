@@ -17,6 +17,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.example.trubin23.database.NoteDaoImpl;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,8 +73,8 @@ public class MainActivity extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                DatabaseConnector databaseConnector = ((MyCustomApplication)getApplication()).getDBNotes();
-                                databaseConnector.deleteNote(note.getId());
+                                NoteDaoImpl noteDaoImpl = ((MyCustomApplication)getApplication()).getDBNotes();
+                                noteDaoImpl.deleteNote(note.getId());
                                 mRecyclerNoteAdapter.deleteNote(itemPosition);
                             }
                         });
@@ -150,10 +152,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateRecyclerNote(){
-        DatabaseConnector databaseConnector = ((MyCustomApplication)getApplication()).getDBNotes();
+        NoteDaoImpl noteDaoImpl = ((MyCustomApplication)getApplication()).getDBNotes();
 
         AsyncTaskRecyclerNote asyncTask =
-                new AsyncTaskRecyclerNote(mRecyclerNoteAdapter, databaseConnector);
+                new AsyncTaskRecyclerNote(mRecyclerNoteAdapter, noteDaoImpl);
         asyncTask.execute();
     }
 
@@ -167,17 +169,17 @@ public class MainActivity extends AppCompatActivity {
     private static class AsyncTaskRecyclerNote extends AsyncTask<Void, Void, List<Note>>{
 
         private RecyclerNoteAdapter mRecyclerNoteAdapter;
-        private DatabaseConnector mDatabaseConnector;
+        private NoteDaoImpl mNoteDaoImpl;
 
         AsyncTaskRecyclerNote(RecyclerNoteAdapter recyclerNoteAdapter,
-                                     DatabaseConnector databaseConnector) {
+                                     NoteDaoImpl noteDaoImpl) {
             this.mRecyclerNoteAdapter = recyclerNoteAdapter;
-            this.mDatabaseConnector = databaseConnector;
+            this.mNoteDaoImpl = noteDaoImpl;
         }
 
         @Override
         protected List<Note> doInBackground(Void... voids) {
-            return mDatabaseConnector.getAllNote();
+            return mNoteDaoImpl.getAllNote();
         }
 
         @Override

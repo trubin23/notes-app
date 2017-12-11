@@ -1,4 +1,4 @@
-package com.example.trubin23.myfirstapplication;
+package com.example.trubin23.database;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -7,30 +7,26 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 
+import com.example.trubin23.myfirstapplication.Note;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.example.trubin23.myfirstapplication.DatabaseHelper.COLUMNS;
-import static com.example.trubin23.myfirstapplication.DatabaseHelper.COLUMN_NOTE_DATE;
-import static com.example.trubin23.myfirstapplication.DatabaseHelper.COLUMN_NOTE_ID;
-import static com.example.trubin23.myfirstapplication.DatabaseHelper.COLUMN_NOTE_TEXT;
-import static com.example.trubin23.myfirstapplication.DatabaseHelper.COLUMN_NOTE_TITLE;
-import static com.example.trubin23.myfirstapplication.DatabaseHelper.TABLE_NOTE;
 
 /**
  * Created by trubin23 on 11.12.17.
  */
 
-class DatabaseConnector {
+public class NoteDaoImpl implements NoteDao {
 
     private DatabaseHelper mDBOpenHelper;
 
-    DatabaseConnector(Context context) {
+    public NoteDaoImpl(Context context) {
         mDBOpenHelper = new DatabaseHelper(context);
     }
 
     @NonNull
-    List<Note> getAllNote() {
+    @Override
+    public List<Note> getAllNote() {
         List<Note> noteList = new ArrayList<>();
 
         SQLiteDatabase db = mDBOpenHelper.getReadableDatabase();
@@ -62,7 +58,8 @@ class DatabaseConnector {
         return noteList;
     }
 
-    void addNote(@NonNull final Note note) {
+    @Override
+    public void addNote(@NonNull final Note note) {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
@@ -86,7 +83,8 @@ class DatabaseConnector {
         });
     }
 
-    void deleteNote(final long id) {
+    @Override
+    public void deleteNote(final long id) {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
@@ -106,7 +104,8 @@ class DatabaseConnector {
         });
     }
 
-    void updateNote(@NonNull final Note note) {
+    @Override
+    public void updateNote(@NonNull final Note note) {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {

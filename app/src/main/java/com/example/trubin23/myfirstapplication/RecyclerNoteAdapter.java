@@ -8,6 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.trubin23.database.DatabaseHelper;
+
 import java.util.ArrayList;
 import java.util.List;
 

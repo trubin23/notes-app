@@ -12,6 +12,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.example.trubin23.database.NoteDaoImpl;
+
 import java.util.Date;
 
 import butterknife.BindView;
@@ -103,17 +105,17 @@ public class EditNoteActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (R.id.item_accept == item.getItemId()) {
 
-            DatabaseConnector databaseConnector = ((MyCustomApplication)getApplication()).getDBNotes();
+            NoteDaoImpl noteDaoImpl = ((MyCustomApplication)getApplication()).getDBNotes();
 
             if (mNote != null) {//change if ?
                 mNote.setText(mEditText.getText().toString());
                 mNote.setDate(new Date());
 
-	            databaseConnector.updateNote(mNote);
+	            noteDaoImpl.updateNote(mNote);
             } else {
                 mNote = new Note(mEditTitle.getText().toString(),
                         mEditText.getText().toString());
-	            databaseConnector.addNote(mNote);
+	            noteDaoImpl.addNote(mNote);
             }
 
             setResult(RESULT_OK, null);

@@ -5,6 +5,8 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.example.trubin23.database.DatabaseHelper;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -22,7 +24,7 @@ public class Note implements Parcelable {
 
     private static final SimpleDateFormat mDateFormat = new SimpleDateFormat("dd.MM.yyyy");
 
-    Note(long id, @NonNull String title, @NonNull String text, @Nullable String date) {
+    public Note(long id, @NonNull String title, @NonNull String text, @Nullable String date) {
         this.mId = id;
         this.mTitle = title;
         this.mText = text;
@@ -67,17 +69,17 @@ public class Note implements Parcelable {
     }
 
     @NonNull
-    String getTitle() {
+    public String getTitle() {
         return mTitle;
     }
 
     @NonNull
-    String getText() {
+    public String getText() {
         return mText;
     }
 
     @NonNull
-    String getDate() {
+    public String getDate() {
         return mDateFormat.format(mDate);
     }
 
