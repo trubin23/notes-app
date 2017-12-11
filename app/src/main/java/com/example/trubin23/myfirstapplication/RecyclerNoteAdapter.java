@@ -73,7 +73,7 @@ public class RecyclerNoteAdapter extends RecyclerView.Adapter<RecyclerNoteAdapte
 
         if (notes != null) {
             for (Note note : notes) {
-                if (note.getId() != DBNotes.DEFAULT_ID) {
+                if (note.getId() != DatabaseHelper.DEFAULT_ID) {
                     mNotes.add(note);
                 }
             }
@@ -83,7 +83,7 @@ public class RecyclerNoteAdapter extends RecyclerView.Adapter<RecyclerNoteAdapte
     }
 
     boolean addNote(@NonNull Note note){
-        if (note.getId() != DBNotes.DEFAULT_ID) {
+        if (note.getId() != DatabaseHelper.DEFAULT_ID) {
             mNotes.add(note);
             notifyItemInserted(mNotes.size() - 1);
 

@@ -3,6 +3,7 @@ package com.example.trubin23.myfirstapplication;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
@@ -70,10 +71,9 @@ public class MainActivity extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-	                            DBNotes dbNotes = ((MyCustomApplication)getApplication()).getDBNotes();
-                                if (dbNotes.deleteNote(note.getId())) {
-                                    mRecyclerNoteAdapter.deleteNote(itemPosition);
-                                }
+                                DatabaseConnector databaseConnector = ((MyCustomApplication)getApplication()).getDBNotes();
+                                databaseConnector.deleteNote(note.getId());
+                                mRecyclerNoteAdapter.deleteNote(itemPosition);
                             }
                         });
 
@@ -110,10 +110,6 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState != null) {
             notes = savedInstanceState.getParcelableArrayList(NOTES);
         }
-        if (notes == null) { // (savedInstanceState!=null) not mean (notes!=null)
-	        DBNotes dbNotes = ((MyCustomApplication)getApplication()).getDBNotes();
-            notes = dbNotes.getAllNote();
-        }
 
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(
                 mRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
@@ -121,6 +117,10 @@ public class MainActivity extends AppCompatActivity {
 
         mRecyclerNoteAdapter = new RecyclerNoteAdapter(notes, mOnClickEditNote, mOnLongClickDeleteNote);
         mRecyclerView.setAdapter(mRecyclerNoteAdapter);
+
+        if (notes == null) { // (savedInstanceState!=null) not mean (notes!=null)
+            updateRecyclerNote();
+        }
 
         FloatingActionButton buttonCreateNote = findViewById(R.id.button_create_note);
         buttonCreateNote.setOnClickListener(mOnClickCreateNote);
@@ -145,12 +145,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (resultCode == RESULT_OK) {
-	        DBNotes dbNotes = ((MyCustomApplication)getApplication()).getDBNotes();
-
-	        List<Note> notes = dbNotes.getAllNote();
-
-	        mRecyclerNoteAdapter.setNotes(notes);
+            updateRecyclerNote();
         }
+    }
+
+    private void updateRecyclerNote(){
+        DatabaseConnector databaseConnector = ((MyCustomApplication)getApplication()).getDBNotes();
+
+        AsyncTaskRecyclerNote asyncTask =
+                new AsyncTaskRecyclerNote(mRecyclerNoteAdapter, databaseConnector);
+        asyncTask.execute();
     }
 
     @Override
@@ -158,5 +162,29 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList(NOTES,
                 new ArrayList<Parcelable>(mRecyclerNoteAdapter.getNotes()));
+    }
+
+    private static class AsyncTaskRecyclerNote extends AsyncTask<Void, Void, List<Note>>{
+
+        private RecyclerNoteAdapter mRecyclerNoteAdapter;
+        private DatabaseConnector mDatabaseConnector;
+
+        AsyncTaskRecyclerNote(RecyclerNoteAdapter recyclerNoteAdapter,
+                                     DatabaseConnector databaseConnector) {
+            this.mRecyclerNoteAdapter = recyclerNoteAdapter;
+            this.mDatabaseConnector = databaseConnector;
+        }
+
+        @Override
+        protected List<Note> doInBackground(Void... voids) {
+            return mDatabaseConnector.getAllNote();
+        }
+
+        @Override
+        protected void onPostExecute(List<Note> notes) {
+            super.onPostExecute(notes);
+
+            mRecyclerNoteAdapter.setNotes(notes);
+        }
     }
 }

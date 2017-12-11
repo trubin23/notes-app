@@ -8,16 +8,16 @@ import android.app.Application;
 
 public class MyCustomApplication extends Application {
 
-	private DBNotes mDBNotes;
+	private DatabaseConnector mDatabaseConnector;
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
 
-		mDBNotes = new DBNotes(this);
+		mDatabaseConnector = new DatabaseConnector(this);
 	}
 
-	DBNotes getDBNotes(){
-		return mDBNotes;
+	DatabaseConnector getDBNotes(){
+		return mDatabaseConnector;
 	}
 }

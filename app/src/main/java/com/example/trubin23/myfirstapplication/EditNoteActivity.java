@@ -103,17 +103,17 @@ public class EditNoteActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (R.id.item_accept == item.getItemId()) {
 
-	        DBNotes dbNotes = ((MyCustomApplication)getApplication()).getDBNotes();
+            DatabaseConnector databaseConnector = ((MyCustomApplication)getApplication()).getDBNotes();
 
             if (mNote != null) {//change if ?
                 mNote.setText(mEditText.getText().toString());
                 mNote.setDate(new Date());
 
-	            dbNotes.updateNote(mNote);
+	            databaseConnector.updateNote(mNote);
             } else {
                 mNote = new Note(mEditTitle.getText().toString(),
                         mEditText.getText().toString());
-	            dbNotes.addNote(mNote);
+	            databaseConnector.addNote(mNote);
             }
 
             setResult(RESULT_OK, null);

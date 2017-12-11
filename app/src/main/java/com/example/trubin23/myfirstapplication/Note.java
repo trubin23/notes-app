@@ -35,11 +35,11 @@ public class Note implements Parcelable {
     }
 
     public Note(@NonNull String title, @NonNull String text, @Nullable String date) {
-        this(DBNotes.DEFAULT_ID, title, text, date);
+        this(DatabaseHelper.DEFAULT_ID, title, text, date);
     }
 
     Note(@NonNull String title, @NonNull String text) {
-        this(DBNotes.DEFAULT_ID, title, text, null);
+        this(DatabaseHelper.DEFAULT_ID, title, text, null);
     }
 
     private Note(Parcel in) {
