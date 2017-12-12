@@ -22,7 +22,7 @@ import java.util.List;
 
 public class InitializeData {
 
-    private static final String LOG = "DBNotes";
+    private static final String LOG = "InitializeData";
 
     @NonNull
     public static List<Note> initializeData(@NonNull Context context) {
@@ -31,9 +31,10 @@ public class InitializeData {
         try {
             InputStream inputStream = context.getResources().openRawResource(R.raw.notes);
 
-            byte[] b = new byte[inputStream.available()];
-            inputStream.read(b);
-            json = new String(b);
+            byte[] bytes = new byte[inputStream.available()];
+            //noinspection ResultOfMethodCallIgnored
+            inputStream.read(bytes);
+            json = new String(bytes);
         } catch (IOException e) {
             Log.e(LOG, "List<Note> initializeData(@NonNull Context context)", e);
         }
@@ -50,14 +51,14 @@ public class InitializeData {
 
         List<Note> notes = new ArrayList<>();
         try {
-            List<NoteParse> notesParse = jsonAdapter.fromJson(json);
-            if (notesParse != null) {
-                for (NoteParse noteParse : notesParse) {
+            List<NoteParse> noteParseList = jsonAdapter.fromJson(json);
+            if (noteParseList != null) {
+                for (NoteParse noteParse : noteParseList) {
                     notes.add(new Note(noteParse.title, noteParse.text, noteParse.date));
                 }
             }
         } catch (IOException e) {
-            Log.e(LOG, "List<Note> initializeData()", e);
+            Log.e(LOG, "private static List<Note> jsonToListNotes(@NonNull String json)", e);
         }
 
         return notes;

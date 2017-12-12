@@ -11,32 +11,32 @@ import java.util.List;
  */
 
 public interface NoteDao {
-    static final String TABLE_NOTE = "note";
+    final String TABLE_NOTE = "note";
 
-    static final String COLUMN_NOTE_ID = "note_id";
-    static final String COLUMN_NOTE_TITLE = "note_title";
-    static final String COLUMN_NOTE_TEXT = "note_text";
-    static final String COLUMN_NOTE_DATE = "note_date";
+    final String COLUMN_NOTE_ID = "note_id";
+    final String COLUMN_NOTE_TITLE = "note_title";
+    final String COLUMN_NOTE_TEXT = "note_text";
+    final String COLUMN_NOTE_DATE = "note_date";
 
-    static final String[] COLUMNS = {
+    final String[] COLUMNS = {
             COLUMN_NOTE_ID,
             COLUMN_NOTE_TITLE,
             COLUMN_NOTE_TEXT,
             COLUMN_NOTE_DATE
     };
 
-    static final String NOTE_CREATE_TABLE = "CREATE TABLE " + TABLE_NOTE + "("
+    final String NOTE_CREATE_TABLE = "CREATE TABLE " + TABLE_NOTE + "("
             + COLUMN_NOTE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
             + COLUMN_NOTE_TITLE + " TEXT,"
             + COLUMN_NOTE_TEXT + " TEXT,"
             + COLUMN_NOTE_DATE + " TEXT)";
 
     @NonNull
-    public List<Note> getAllNote();
+    List<Note> getAllNote();
 
-    public void addNote(@NonNull final Note note);
+    void addNote(@NonNull final Note note);
 
-    public void deleteNote(final long id);
+    void deleteNote(final long id);
 
-    public void updateNote(@NonNull final Note note);
+    void updateNote(@NonNull final Note note);
 }

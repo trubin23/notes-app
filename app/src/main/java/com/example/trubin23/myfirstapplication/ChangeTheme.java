@@ -20,11 +20,6 @@ import static android.content.Context.MODE_PRIVATE;
 
 class ChangeTheme {
 
-    private final static String TYPE_THEME = "type_theme";
-    private static final String LOG = "ChangeTheme";
-
-    private AlertDialog mAlertDialog;
-
     enum Theme {
         RED(R.style.AppThemeRed),
         GREEN(R.style.AppThemeGreen),
@@ -33,8 +28,8 @@ class ChangeTheme {
         @StyleRes
         int themeId;
 
-        Theme(@StyleRes int appThemeId) {
-            themeId = appThemeId;
+        Theme(@StyleRes int themeId) {
+            this.themeId = themeId;
         }
 
         @NonNull
@@ -44,20 +39,25 @@ class ChangeTheme {
         }
     }
 
-    ChangeTheme(final Activity activity) {
+    private final static String TYPE_THEME = "type_theme";
+    private static final String LOG = "ChangeTheme";
 
+    private AlertDialog mAlertDialog;
+
+    ChangeTheme(final Activity activity) {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(R.string.pick_theme);
 
         final String[] themeNames = ChangeTheme.Theme.getNames();
-        final List<String> itemsNames = Arrays.asList(themeNames);
-        String themeCurrent = loadTheme(activity);
+        final List<String> themeNameList = Arrays.asList(themeNames);
 
-        builder.setSingleChoiceItems(themeNames, itemsNames.indexOf(themeCurrent),
+        String themeName = loadTheme(activity);
+
+        builder.setSingleChoiceItems(themeNames, themeNameList.indexOf(themeName),
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int which) {
-                        changeToTheme(activity, itemsNames.get(which));
+                        changeToTheme(activity, themeNameList.get(which));
                         dismiss();
                     }
                 });

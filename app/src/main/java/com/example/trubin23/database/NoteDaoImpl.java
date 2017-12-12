@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.example.trubin23.myfirstapplication.Note;
 
@@ -18,19 +19,21 @@ import java.util.List;
 
 public class NoteDaoImpl implements NoteDao {
 
-    private DatabaseHelper mDBOpenHelper;
+    private static final String TAG = "NoteDaoImpl";
+
+    private DatabaseHelper mDbOpenHelper;
 
     public NoteDaoImpl(Context context) {
-        mDBOpenHelper = new DatabaseHelper(context);
+        mDbOpenHelper = new DatabaseHelper(context);
     }
 
     @NonNull
     @Override
     public List<Note> getAllNote() {
-        List<Note> noteList = new ArrayList<>();
+        List<Note> notes = new ArrayList<>();
 
-        SQLiteDatabase db = mDBOpenHelper.getReadableDatabase();
-        db.beginTransaction();// transaction for readable ?
+        SQLiteDatabase db = mDbOpenHelper.getReadableDatabase();
+        db.beginTransaction();
         try {
             Cursor cursor = db.query(TABLE_NOTE,
                     COLUMNS, null, null, null, null, null);
@@ -44,18 +47,20 @@ public class NoteDaoImpl implements NoteDao {
 
                     Note note = new Note(id, title, text, date);
 
-                    noteList.add(note);
+                    notes.add(note);
                 } while (cursor.moveToNext());
             }
             cursor.close();
 
             db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e(TAG, "public List<Note> getAllNote()", e);
         } finally {
             db.endTransaction();
             db.close();
         }
 
-        return noteList;
+        return notes;
     }
 
     @Override
@@ -63,7 +68,7 @@ public class NoteDaoImpl implements NoteDao {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                SQLiteDatabase db = mDBOpenHelper.getWritableDatabase();
+                SQLiteDatabase db = mDbOpenHelper.getWritableDatabase();
 
                 db.beginTransaction();
                 try {
@@ -75,6 +80,8 @@ public class NoteDaoImpl implements NoteDao {
                     db.insert(TABLE_NOTE, null, values);
 
                     db.setTransactionSuccessful();
+                } catch (Exception e) {
+                    Log.e(TAG, "public void addNote(@NonNull final Note note)", e);
                 } finally {
                     db.endTransaction();
                     db.close();
@@ -88,7 +95,7 @@ public class NoteDaoImpl implements NoteDao {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                SQLiteDatabase db = mDBOpenHelper.getWritableDatabase();
+                SQLiteDatabase db = mDbOpenHelper.getWritableDatabase();
 
                 db.beginTransaction();
                 try {
@@ -96,6 +103,8 @@ public class NoteDaoImpl implements NoteDao {
                             new String[]{String.valueOf(id)});
 
                     db.setTransactionSuccessful();
+                } catch (Exception e) {
+                    Log.e(TAG, "public void deleteNote(final long id)", e);
                 } finally {
                     db.endTransaction();
                     db.close();
@@ -109,19 +118,22 @@ public class NoteDaoImpl implements NoteDao {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                SQLiteDatabase db = mDBOpenHelper.getWritableDatabase();
+                SQLiteDatabase db = mDbOpenHelper.getWritableDatabase();
+
+                ContentValues values = new ContentValues();
+                values.put(COLUMN_NOTE_TITLE, note.getTitle());
+                values.put(COLUMN_NOTE_TEXT, note.getText());
+                values.put(COLUMN_NOTE_DATE, note.getDate());
 
                 db.beginTransaction();
                 try {
-                    ContentValues values = new ContentValues();
-                    values.put(COLUMN_NOTE_TITLE, note.getTitle());
-                    values.put(COLUMN_NOTE_TEXT, note.getText());
-                    values.put(COLUMN_NOTE_DATE, note.getDate());
 
                     db.update(TABLE_NOTE, values, COLUMN_NOTE_ID + " = ?",
                             new String[]{String.valueOf(note.getId())});
 
                     db.setTransactionSuccessful();
+                } catch (Exception e) {
+                    Log.e(TAG, "public void updateNote(@NonNull final Note note)", e);
                 } finally {
                     db.endTransaction();
                     db.close();

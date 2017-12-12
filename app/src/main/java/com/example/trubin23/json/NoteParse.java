@@ -5,9 +5,9 @@ package com.example.trubin23.json;
  */
 
 public final class NoteParse {
-    public final String title;
-    public final String text;
-    public final String date;
+    final String title;
+    final String text;
+    final String date;
 
 
     public NoteParse(String title, String text, String date) {

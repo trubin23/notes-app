@@ -1,17 +1,12 @@
 package com.example.trubin23.database;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
-import com.example.trubin23.json.InitializeData;
-import com.example.trubin23.myfirstapplication.Note;
-
-import java.util.List;
-
-import static com.example.trubin23.database.NoteDao.*;
+import static com.example.trubin23.database.NoteDao.NOTE_CREATE_TABLE;
 
 /**
  * Created by trubin23 on 07.12.17.
@@ -19,36 +14,26 @@ import static com.example.trubin23.database.NoteDao.*;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
+    private static final String TAG = "DatabaseHelper";
+
     private static final String DB_NAME = "Notes.db";
     private static final int DB_VERSION = 1;
 
     public static final long DEFAULT_ID = -1;
 
-    private final Context mContext;
-
     DatabaseHelper(@NonNull Context context) {
         super(context, DB_NAME, null, DB_VERSION);
-        this.mContext = context;
     }
 
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(NOTE_CREATE_TABLE);
-
-        List<Note> notes = InitializeData.initializeData(mContext);
-        for (Note note : notes) {
-            db.beginTransaction();
-            try {
-                ContentValues values = new ContentValues();
-                values.put(COLUMN_NOTE_TITLE, note.getTitle());
-                values.put(COLUMN_NOTE_TEXT, note.getText());
-                values.put(COLUMN_NOTE_DATE, note.getDate());
-
-                db.insert(TABLE_NOTE, null, values);
-
-                db.setTransactionSuccessful();
-            } finally {
-                db.endTransaction();
-            }
+        db.beginTransaction();
+        try {
+            db.execSQL(NOTE_CREATE_TABLE);
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e(TAG, "public void onCreate(SQLiteDatabase db)", e);
+        } finally {
+            db.endTransaction();
         }
     }
 
