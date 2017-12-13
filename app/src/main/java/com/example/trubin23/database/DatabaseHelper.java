@@ -6,7 +6,11 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import static com.example.trubin23.database.NoteDao.NOTE_CREATE_TABLE;
+import static com.example.trubin23.database.NoteDao.TABLE_NOTE;
+import static com.example.trubin23.database.NoteDao.COLUMN_NOTE_ID;
+import static com.example.trubin23.database.NoteDao.COLUMN_NOTE_TITLE;
+import static com.example.trubin23.database.NoteDao.COLUMN_NOTE_TEXT;
+import static com.example.trubin23.database.NoteDao.COLUMN_NOTE_DATE;
 
 /**
  * Created by trubin23 on 07.12.17.
@@ -26,6 +30,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void onCreate(SQLiteDatabase db) {
+        final String NOTE_CREATE_TABLE = "CREATE TABLE " + TABLE_NOTE + "("
+                + COLUMN_NOTE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + COLUMN_NOTE_TITLE + " TEXT,"
+                + COLUMN_NOTE_TEXT + " TEXT,"
+                + COLUMN_NOTE_DATE + " TEXT)";
+
         db.beginTransaction();
         try {
             db.execSQL(NOTE_CREATE_TABLE);

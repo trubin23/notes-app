@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -19,7 +18,6 @@ import android.view.View;
 
 import com.example.trubin23.database.NoteDaoImpl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -27,11 +25,7 @@ import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
 
-    static final String NOTE = "note";
-    static final String NOTES = "notes";
-    static final String ITEM_POSITION = "item_position";
-
-    public static final int ITEM_POSITION_DEFAULT = -1;
+    static final String NOTE_ID = "note_id";
 
     @BindView(R.id.rv) RecyclerView mRecyclerView;
     private RecyclerNoteAdapter mRecyclerNoteAdapter;
@@ -48,10 +42,11 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onClick(View itemView) {
             int itemPosition = mRecyclerView.getLayoutManager().getPosition(itemView);
+            Note note = mRecyclerNoteAdapter.getItem(itemPosition);
 
             Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
-            intent.putExtra(ITEM_POSITION, itemPosition);
-            intent.putExtra(NOTE, mRecyclerNoteAdapter.getItem(itemPosition));
+            if (note != null)
+                intent.putExtra(NOTE_ID, note.getId());
             startActivityForResult(intent, 0);
         }
     };
@@ -108,21 +103,14 @@ public class MainActivity extends AppCompatActivity {
             mRecyclerView.setLayoutManager(gridLayoutManager);
         }
 
-        List<Note> notes = null;
-        if (savedInstanceState != null) {
-            notes = savedInstanceState.getParcelableArrayList(NOTES);
-        }
-
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(
                 mRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
         mRecyclerView.addItemDecoration(dividerItemDecoration);
 
-        mRecyclerNoteAdapter = new RecyclerNoteAdapter(notes, mOnClickEditNote, mOnLongClickDeleteNote);
+        mRecyclerNoteAdapter = new RecyclerNoteAdapter(mOnClickEditNote, mOnLongClickDeleteNote);
         mRecyclerView.setAdapter(mRecyclerNoteAdapter);
 
-        if (notes == null) { // (savedInstanceState!=null) not mean (notes!=null)
-            updateRecyclerNote();
-        }
+        updateRecyclerNote();
 
         FloatingActionButton buttonCreateNote = findViewById(R.id.button_create_note);
         buttonCreateNote.setOnClickListener(mOnClickCreateNote);
@@ -157,13 +145,6 @@ public class MainActivity extends AppCompatActivity {
         AsyncTaskRecyclerNote asyncTask =
                 new AsyncTaskRecyclerNote(mRecyclerNoteAdapter, noteDaoImpl);
         asyncTask.execute();
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putParcelableArrayList(NOTES,
-                new ArrayList<Parcelable>(mRecyclerNoteAdapter.getNotes()));
     }
 
     private static class AsyncTaskRecyclerNote extends AsyncTask<Void, Void, List<Note>>{

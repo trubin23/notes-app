@@ -26,9 +26,10 @@ public class RecyclerNoteAdapter extends RecyclerView.Adapter<RecyclerNoteAdapte
     private View.OnClickListener mOnClickEditNote;
     private View.OnLongClickListener mOnLongClickDeleteNote;
 
-    RecyclerNoteAdapter(@Nullable List<Note> notes, View.OnClickListener onClickEditNote,
+    RecyclerNoteAdapter(View.OnClickListener onClickEditNote,
                         View.OnLongClickListener onLongClickDeleteNote){
-        setNotes(notes);
+        mNotes = new ArrayList<>();
+
         this.mOnClickEditNote = onClickEditNote;
         this.mOnLongClickDeleteNote = onLongClickDeleteNote;
     }

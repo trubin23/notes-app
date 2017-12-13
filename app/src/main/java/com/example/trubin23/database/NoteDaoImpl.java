@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.example.trubin23.myfirstapplication.Note;
@@ -23,8 +24,40 @@ public class NoteDaoImpl implements NoteDao {
 
     private DatabaseHelper mDbOpenHelper;
 
+    private final String QUERY_NOTE = "SELECT * FROM " + TABLE_NOTE
+            + " WHERE " + COLUMN_NOTE_ID + " = ?";// local ?
+
     public NoteDaoImpl(Context context) {
         mDbOpenHelper = new DatabaseHelper(context);
+    }
+
+    @Nullable
+    @Override
+    public Note getNote(long id) {
+        Note note = null;
+        SQLiteDatabase db = mDbOpenHelper.getReadableDatabase();
+        db.beginTransaction();
+        try {
+            Cursor cursor = db.rawQuery(QUERY_NOTE, new String[]{String.valueOf(id)});
+
+            if (cursor.moveToFirst()) {
+                String title = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_TITLE));
+                String text = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_TEXT));
+                String date = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_DATE));
+
+                note = new Note(id, title, text, date);
+            }
+            cursor.close();
+
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e(TAG, "public List<Note> getAllNote()", e);
+        } finally {
+            db.endTransaction();
+            db.close();
+        }
+
+        return note;
     }
 
     @NonNull

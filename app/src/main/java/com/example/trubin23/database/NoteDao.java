@@ -1,6 +1,7 @@
 package com.example.trubin23.database;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.example.trubin23.myfirstapplication.Note;
 
@@ -25,11 +26,8 @@ public interface NoteDao {
             COLUMN_NOTE_DATE
     };
 
-    final String NOTE_CREATE_TABLE = "CREATE TABLE " + TABLE_NOTE + "("
-            + COLUMN_NOTE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-            + COLUMN_NOTE_TITLE + " TEXT,"
-            + COLUMN_NOTE_TEXT + " TEXT,"
-            + COLUMN_NOTE_DATE + " TEXT)";
+    @Nullable
+    Note getNote(final long id);
 
     @NonNull
     List<Note> getAllNote();

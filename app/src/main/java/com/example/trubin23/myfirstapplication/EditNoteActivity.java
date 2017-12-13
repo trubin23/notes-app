@@ -14,10 +14,10 @@ import android.widget.TextView;
 
 import com.example.trubin23.database.NoteDaoImpl;
 
-import java.util.Date;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static com.example.trubin23.database.DatabaseHelper.DEFAULT_ID;
 
 public class EditNoteActivity extends AppCompatActivity {
 
@@ -26,11 +26,9 @@ public class EditNoteActivity extends AppCompatActivity {
     @BindView(R.id.edit_note_text)
     EditText mEditText;
 
-    private int mItemPosition = MainActivity.ITEM_POSITION_DEFAULT;
-
-    private Note mNote;
-
     private MenuItem mMenuItemAccept;
+
+    private long noteId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +43,6 @@ public class EditNoteActivity extends AppCompatActivity {
                 validNote();
             }
         });
-
         mEditText.addTextChangedListener(new SimpleTextWatcher() {
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -54,26 +51,27 @@ public class EditNoteActivity extends AppCompatActivity {
         });
 
         Intent intent = getIntent();
-        mItemPosition = intent.getIntExtra(MainActivity.ITEM_POSITION,
-                MainActivity.ITEM_POSITION_DEFAULT);
+        noteId = intent.getLongExtra(MainActivity.NOTE_ID, DEFAULT_ID);
 
-        mNote = intent.getParcelableExtra(MainActivity.NOTE);
-        if (mNote != null) {
+        NoteDaoImpl noteDaoImpl = ((MyCustomApplication)getApplication()).getDBNotes();
+        Note note = noteDaoImpl.getNote(noteId);
+
+        if (note != null) {
             TextView textViewTitle = findViewById(R.id.text_view_title);
 
             textViewTitle.setVisibility(View.GONE);
             mEditTitle.setVisibility(View.GONE);
 
-            mEditText.setText(mNote.getText());
+            mEditText.setText(note.getText());
         }
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
 
-            if (mNote != null) {
-                mEditTitle.setText(mNote.getTitle());
-                actionBar.setTitle(mNote.getTitle());
+            if (note != null) {
+                mEditTitle.setText(note.getTitle());
+                actionBar.setTitle(note.getTitle());
             } else {
                 actionBar.setTitle(R.string.new_note);
             }
@@ -107,15 +105,13 @@ public class EditNoteActivity extends AppCompatActivity {
 
             NoteDaoImpl noteDaoImpl = ((MyCustomApplication)getApplication()).getDBNotes();
 
-            if (mNote != null) {//change if ?
-                mNote.setText(mEditText.getText().toString());
-                mNote.setDate(new Date());
+            Note note = new Note(noteId, mEditTitle.getText().toString(),
+                    mEditText.getText().toString(), null);
 
-	            noteDaoImpl.updateNote(mNote);
+            if (noteId != DEFAULT_ID) {
+	            noteDaoImpl.updateNote(note);
             } else {
-                mNote = new Note(mEditTitle.getText().toString(),
-                        mEditText.getText().toString());
-	            noteDaoImpl.addNote(mNote);
+	            noteDaoImpl.addNote(note);
             }
 
             setResult(RESULT_OK, null);
