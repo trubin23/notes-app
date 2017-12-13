@@ -1,16 +1,22 @@
 package com.example.trubin23.database;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import static com.example.trubin23.database.NoteDao.TABLE_NOTE;
-import static com.example.trubin23.database.NoteDao.COLUMN_NOTE_ID;
-import static com.example.trubin23.database.NoteDao.COLUMN_NOTE_TITLE;
-import static com.example.trubin23.database.NoteDao.COLUMN_NOTE_TEXT;
+import com.example.trubin23.json.InitializeData;
+import com.example.trubin23.myfirstapplication.Note;
+
+import java.util.List;
+
 import static com.example.trubin23.database.NoteDao.COLUMN_NOTE_DATE;
+import static com.example.trubin23.database.NoteDao.COLUMN_NOTE_TEXT;
+import static com.example.trubin23.database.NoteDao.COLUMN_NOTE_TITLE;
+import static com.example.trubin23.database.NoteDao.TABLE_NOTE;
+import static com.example.trubin23.database.NoteDaoImpl.NOTE_CREATE_TABLE;
 
 /**
  * Created by trubin23 on 07.12.17.
@@ -25,23 +31,37 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public static final long DEFAULT_ID = -1;
 
-    DatabaseHelper(@NonNull Context context) {
+    private Context mContext;
+
+    public DatabaseHelper(@NonNull Context context) {
         super(context, DB_NAME, null, DB_VERSION);
+        mContext = context;
     }
 
     public void onCreate(SQLiteDatabase db) {
-        final String NOTE_CREATE_TABLE = "CREATE TABLE " + TABLE_NOTE + "("
-                + COLUMN_NOTE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + COLUMN_NOTE_TITLE + " TEXT,"
-                + COLUMN_NOTE_TEXT + " TEXT,"
-                + COLUMN_NOTE_DATE + " TEXT)";
-
         db.beginTransaction();
         try {
             db.execSQL(NOTE_CREATE_TABLE);
             db.setTransactionSuccessful();
         } catch (Exception e) {
-            Log.e(TAG, "public void onCreate(SQLiteDatabase db)", e);
+            Log.e(TAG, "create table", e);
+        } finally {
+            db.endTransaction();
+        }
+
+        List<Note> notes = InitializeData.initializeData(mContext);
+        db.beginTransaction();
+        try {
+            ContentValues values = new ContentValues();
+            for (Note note : notes) {
+                values.put(COLUMN_NOTE_TITLE, note.getTitle());
+                values.put(COLUMN_NOTE_TEXT, note.getText());
+                values.put(COLUMN_NOTE_DATE, note.getDate());
+                db.insert(TABLE_NOTE, null, values);
+            }
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e(TAG, "create table", e);
         } finally {
             db.endTransaction();
         }

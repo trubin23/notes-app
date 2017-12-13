@@ -12,14 +12,14 @@ import java.util.List;
  */
 
 public interface NoteDao {
-    final String TABLE_NOTE = "note";
+    String TABLE_NOTE = "note";
 
-    final String COLUMN_NOTE_ID = "note_id";
-    final String COLUMN_NOTE_TITLE = "note_title";
-    final String COLUMN_NOTE_TEXT = "note_text";
-    final String COLUMN_NOTE_DATE = "note_date";
+    String COLUMN_NOTE_ID = "note_id";
+    String COLUMN_NOTE_TITLE = "note_title";
+    String COLUMN_NOTE_TEXT = "note_text";
+    String COLUMN_NOTE_DATE = "note_date";
 
-    final String[] COLUMNS = {
+    String[] COLUMNS = {
             COLUMN_NOTE_ID,
             COLUMN_NOTE_TITLE,
             COLUMN_NOTE_TEXT,
