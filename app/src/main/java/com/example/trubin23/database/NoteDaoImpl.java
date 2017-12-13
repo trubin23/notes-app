@@ -22,10 +22,10 @@ public class NoteDaoImpl implements NoteDao {
 
     private static final String TAG = "NoteDaoImpl";
 
-    private DatabaseHelper mDbOpenHelper;
+    private static final String QUERY_NOTE = "SELECT * FROM " + TABLE_NOTE
+            + " WHERE " + COLUMN_NOTE_ID + " = ?";
 
-    private final String QUERY_NOTE = "SELECT * FROM " + TABLE_NOTE
-            + " WHERE " + COLUMN_NOTE_ID + " = ?";// local ?
+    private DatabaseHelper mDbOpenHelper;
 
     public NoteDaoImpl(Context context) {
         mDbOpenHelper = new DatabaseHelper(context);

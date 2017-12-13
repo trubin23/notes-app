@@ -68,6 +68,7 @@ class ChangeTheme {
 
     private void dismiss() {
         mAlertDialog.dismiss();
+        mAlertDialog = null;//Why need null ?
     }
 
     private void changeToTheme(@NonNull Activity activity, @NonNull String themeName) {

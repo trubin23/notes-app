@@ -20,36 +20,53 @@ import butterknife.ButterKnife;
  * Created by trubin23 on 29.11.17.
  */
 
-public class RecyclerNoteAdapter extends RecyclerView.Adapter<RecyclerNoteAdapter.NoteHolder>{
+public class RecyclerNoteAdapter extends RecyclerView.Adapter<RecyclerNoteAdapter.NoteHolder> {
 
     private List<Note> mNotes;
-    private View.OnClickListener mOnClickEditNote;
-    private View.OnLongClickListener mOnLongClickDeleteNote;
+    private NoteItemActionHandler mActionHandler;
 
-    RecyclerNoteAdapter(View.OnClickListener onClickEditNote,
-                        View.OnLongClickListener onLongClickDeleteNote){
+    RecyclerNoteAdapter(NoteItemActionHandler actionHandler) {
         mNotes = new ArrayList<>();
-
-        this.mOnClickEditNote = onClickEditNote;
-        this.mOnLongClickDeleteNote = onLongClickDeleteNote;
+        this.mActionHandler = actionHandler;
     }
 
     @Override
     public NoteHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item, parent, false);
-        return new NoteHolder(v);
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item, parent, false);
+        return new NoteHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(NoteHolder holder, int position) {
-        Note note = mNotes.get(position);
+    public void onBindViewHolder(final NoteHolder holder, int position) {
+        final Note note = mNotes.get(position);
 
         holder.noteTitle.setText(note.getTitle());
         holder.noteText.setText(note.getText());
         holder.noteDate.setText(note.getDate());
 
-        holder.itemView.setOnClickListener(mOnClickEditNote);
-        holder.itemView.setOnLongClickListener(mOnLongClickDeleteNote);
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(mActionHandler != null) {
+                    mActionHandler.onEdit(note);
+                }
+            }
+        });
+
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                if(mActionHandler != null) {
+                    final int itemPosition = holder.getAdapterPosition();
+                    mActionHandler.onDelete(note, itemPosition);
+
+                    return true;
+                } else{
+                    return false;
+                }
+            }
+        });
     }
 
     @Override
@@ -58,17 +75,18 @@ public class RecyclerNoteAdapter extends RecyclerView.Adapter<RecyclerNoteAdapte
     }
 
     @Nullable
-    Note getItem(int position){
+    Note getItem(int position) {
         return mNotes.get(position);
     }
 
     @NonNull
-    List<Note> getNotes(){
+    List<Note> getNotes() {
         return mNotes;
     }
 
     /**
      * Sets a new list of notes in the RecyclerView
+     *
      * @param notes note.getId() must not be equal to Note.DEFAULT_ID
      */
     void setNotes(@Nullable List<Note> notes) {
@@ -85,7 +103,7 @@ public class RecyclerNoteAdapter extends RecyclerView.Adapter<RecyclerNoteAdapte
         notifyDataSetChanged();
     }
 
-    boolean addNote(@NonNull Note note){
+    boolean addNote(@NonNull Note note) {
         if (note.getId() != DatabaseHelper.DEFAULT_ID) {
             mNotes.add(note);
             notifyItemInserted(mNotes.size() - 1);
@@ -96,7 +114,7 @@ public class RecyclerNoteAdapter extends RecyclerView.Adapter<RecyclerNoteAdapte
         }
     }
 
-    void updateNote(int position, @NonNull Note note){
+    void updateNote(int position, @NonNull Note note) {
         mNotes.set(position, note);
 
         notifyItemChanged(position);

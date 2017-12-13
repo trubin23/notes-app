@@ -12,7 +12,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.example.trubin23.database.NoteDaoImpl;
+import com.example.trubin23.database.NoteDao;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -53,8 +53,8 @@ public class EditNoteActivity extends AppCompatActivity {
         Intent intent = getIntent();
         noteId = intent.getLongExtra(MainActivity.NOTE_ID, DEFAULT_ID);
 
-        NoteDaoImpl noteDaoImpl = ((MyCustomApplication)getApplication()).getDbNotes();
-        Note note = noteDaoImpl.getNote(noteId);
+        NoteDao noteDao = ((MyCustomApplication)getApplication()).getDbNotes();
+        Note note = noteDao.getNote(noteId);
 
         if (note != null) {
             TextView textViewTitle = findViewById(R.id.text_view_title);
@@ -103,15 +103,15 @@ public class EditNoteActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (R.id.item_accept == item.getItemId()) {
 
-            NoteDaoImpl noteDaoImpl = ((MyCustomApplication)getApplication()).getDbNotes();
+            NoteDao noteDao = ((MyCustomApplication)getApplication()).getDbNotes();
 
             Note note = new Note(noteId, mEditTitle.getText().toString(),
                     mEditText.getText().toString(), null);
 
             if (noteId != DEFAULT_ID) {
-	            noteDaoImpl.updateNote(note);
+	            noteDao.updateNote(note);
             } else {
-	            noteDaoImpl.addNote(note);
+	            noteDao.addNote(note);
             }
 
             setResult(RESULT_OK, null);

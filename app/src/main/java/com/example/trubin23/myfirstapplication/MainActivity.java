@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
@@ -15,7 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.example.trubin23.database.NoteDaoImpl;
+import com.example.trubin23.database.NoteDao;
 
 import java.util.List;
 
@@ -23,59 +24,13 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NoteItemActionHandler {
 
     static final String NOTE_ID = "note_id";
+    public static final int REQUEST_CODE_EDIT_NOTE = 0;
 
     @BindView(R.id.rv) RecyclerView mRecyclerView;
     private RecyclerNoteAdapter mRecyclerNoteAdapter;
-
-    private View.OnClickListener mOnClickEditNote = new View.OnClickListener() {
-        @Override
-        public void onClick(View itemView) {
-            int itemPosition = mRecyclerView.getLayoutManager().getPosition(itemView);
-            Note note = mRecyclerNoteAdapter.getItem(itemPosition);
-
-            Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
-            if (note != null)
-                intent.putExtra(NOTE_ID, note.getId());
-            startActivityForResult(intent, 0);
-        }
-    };
-
-    private View.OnLongClickListener mOnLongClickDeleteNote = new View.OnLongClickListener() {
-        @Override
-        public boolean onLongClick(View itemView) {
-
-            final int itemPosition = mRecyclerView.getLayoutManager().getPosition(itemView);
-
-            final Note note = mRecyclerNoteAdapter.getItem(itemPosition);
-
-            if (note != null) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-
-                builder.setTitle(note.getTitle());
-                builder.setMessage(R.string.message_about_delete);
-
-                builder.setPositiveButton(getString(android.R.string.ok),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                NoteDaoImpl noteDaoImpl = ((MyCustomApplication)getApplication()).getDbNotes();
-                                noteDaoImpl.deleteNote(note.getId());
-                                mRecyclerNoteAdapter.deleteNote(itemPosition);
-                            }
-                        });
-
-                builder.setNegativeButton(getString(android.R.string.cancel), null);
-
-                AlertDialog alertDialog = builder.create();
-                alertDialog.show();
-            }
-
-            return true;
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
                 mRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
         mRecyclerView.addItemDecoration(dividerItemDecoration);
 
-        mRecyclerNoteAdapter = new RecyclerNoteAdapter(mOnClickEditNote, mOnLongClickDeleteNote);
+        mRecyclerNoteAdapter = new RecyclerNoteAdapter(this);
         mRecyclerView.setAdapter(mRecyclerNoteAdapter);
 
         updateRecyclerNote();
@@ -136,27 +91,57 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateRecyclerNote(){
-        NoteDaoImpl noteDaoImpl = ((MyCustomApplication)getApplication()).getDbNotes();
+        NoteDao noteDao = ((MyCustomApplication)getApplication()).getDbNotes();
 
         AsyncTaskRecyclerNote asyncTask =
-                new AsyncTaskRecyclerNote(mRecyclerNoteAdapter, noteDaoImpl);
+                new AsyncTaskRecyclerNote(mRecyclerNoteAdapter, noteDao);
         asyncTask.execute();
+    }
+
+    @Override
+    public void onEdit(@NonNull Note note) {
+        Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
+        intent.putExtra(NOTE_ID, note.getId());
+        startActivityForResult(intent, REQUEST_CODE_EDIT_NOTE);
+    }
+
+    @Override
+    public void onDelete(@NonNull final Note note, final int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+        builder.setTitle(note.getTitle());
+        builder.setMessage(R.string.message_about_delete);
+
+        builder.setPositiveButton(getString(android.R.string.ok),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        NoteDao noteDao = ((MyCustomApplication)getApplication()).getDbNotes();
+                        noteDao.deleteNote(note.getId());
+                        mRecyclerNoteAdapter.deleteNote(position);
+                    }
+                });
+
+        builder.setNegativeButton(getString(android.R.string.cancel), null);
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
     }
 
     private static class AsyncTaskRecyclerNote extends AsyncTask<Void, Void, List<Note>>{
 
         private RecyclerNoteAdapter mRecyclerNoteAdapter;
-        private NoteDaoImpl mNoteDaoImpl;
+        private NoteDao mNoteDao;
 
-        AsyncTaskRecyclerNote(RecyclerNoteAdapter recyclerNoteAdapter,
-                                     NoteDaoImpl noteDaoImpl) {
+        AsyncTaskRecyclerNote(@NonNull RecyclerNoteAdapter recyclerNoteAdapter,
+                                     @NonNull NoteDao noteDao) {
             this.mRecyclerNoteAdapter = recyclerNoteAdapter;
-            this.mNoteDaoImpl = noteDaoImpl;
+            this.mNoteDao = noteDao;
         }
 
         @Override
         protected List<Note> doInBackground(Void... voids) {
-            return mNoteDaoImpl.getAllNote();
+            return mNoteDao.getAllNote();
         }
 
         @Override
