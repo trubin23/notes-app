@@ -33,7 +33,7 @@ public class MyCustomApplication extends Application {
 		}
 	}
 
-	NoteDaoImpl getDBNotes(){
+	NoteDaoImpl getDbNotes(){
 		return mNoteDaoImpl;
 	}
 }

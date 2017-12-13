@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
@@ -22,6 +21,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,14 +29,6 @@ public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.rv) RecyclerView mRecyclerView;
     private RecyclerNoteAdapter mRecyclerNoteAdapter;
-
-    private View.OnClickListener mOnClickCreateNote = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
-            startActivityForResult(intent, 0);
-        }
-    };
 
     private View.OnClickListener mOnClickEditNote = new View.OnClickListener() {
         @Override
@@ -54,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private View.OnLongClickListener mOnLongClickDeleteNote = new View.OnLongClickListener() {
         @Override
         public boolean onLongClick(View itemView) {
+
             final int itemPosition = mRecyclerView.getLayoutManager().getPosition(itemView);
 
             final Note note = mRecyclerNoteAdapter.getItem(itemPosition);
@@ -68,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                NoteDaoImpl noteDaoImpl = ((MyCustomApplication)getApplication()).getDBNotes();
+                                NoteDaoImpl noteDaoImpl = ((MyCustomApplication)getApplication()).getDbNotes();
                                 noteDaoImpl.deleteNote(note.getId());
                                 mRecyclerNoteAdapter.deleteNote(itemPosition);
                             }
@@ -111,9 +104,6 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setAdapter(mRecyclerNoteAdapter);
 
         updateRecyclerNote();
-
-        FloatingActionButton buttonCreateNote = findViewById(R.id.button_create_note);
-        buttonCreateNote.setOnClickListener(mOnClickCreateNote);
     }
 
     @Override
@@ -139,8 +129,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @OnClick(R.id.button_create_note)
+    public void onClickCreateNote(View view) {
+        Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
+        startActivityForResult(intent, 0);
+    }
+
     private void updateRecyclerNote(){
-        NoteDaoImpl noteDaoImpl = ((MyCustomApplication)getApplication()).getDBNotes();
+        NoteDaoImpl noteDaoImpl = ((MyCustomApplication)getApplication()).getDbNotes();
 
         AsyncTaskRecyclerNote asyncTask =
                 new AsyncTaskRecyclerNote(mRecyclerNoteAdapter, noteDaoImpl);
