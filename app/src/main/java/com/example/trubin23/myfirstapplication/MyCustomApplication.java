@@ -1,6 +1,7 @@
 package com.example.trubin23.myfirstapplication;
 
 import android.app.Application;
+import android.support.annotation.NonNull;
 
 import com.example.trubin23.database.DatabaseHelper;
 import com.example.trubin23.database.NoteDao;
@@ -23,6 +24,7 @@ public class MyCustomApplication extends Application {
 		mNoteDao = new NoteDaoImpl(databaseHelper);
 	}
 
+	@NonNull
 	NoteDao getDbNotes(){
 		return mNoteDao;
 	}

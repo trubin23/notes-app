@@ -28,7 +28,7 @@ public class NoteDaoImpl implements NoteDao {
 
     private DatabaseHelper mDbOpenHelper;
 
-    public NoteDaoImpl(DatabaseHelper dbOpenHelper) {
+    public NoteDaoImpl(@NonNull DatabaseHelper dbOpenHelper) {
         mDbOpenHelper = dbOpenHelper;
     }
 

@@ -27,7 +27,7 @@ public class RecyclerNoteAdapter extends RecyclerView.Adapter<RecyclerNoteAdapte
 
     RecyclerNoteAdapter(NoteItemActionHandler actionHandler) {
         mNotes = new ArrayList<>();
-        this.mActionHandler = actionHandler;
+        mActionHandler = actionHandler;
     }
 
     @Override

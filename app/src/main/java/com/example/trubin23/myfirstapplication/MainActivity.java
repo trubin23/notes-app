@@ -139,13 +139,14 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
             this.mNoteDao = noteDao;
         }
 
+        @NonNull
         @Override
         protected List<Note> doInBackground(Void... voids) {
             return mNoteDao.getAllNote();
         }
 
         @Override
-        protected void onPostExecute(List<Note> notes) {
+        protected void onPostExecute(@NonNull List<Note> notes) {
             super.onPostExecute(notes);
 
             mRecyclerNoteAdapter.setNotes(notes);

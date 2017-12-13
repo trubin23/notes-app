@@ -28,7 +28,7 @@ public class EditNoteActivity extends AppCompatActivity {
 
     private MenuItem mMenuItemAccept;
 
-    private long noteId;
+    private long mNoteId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,10 +51,10 @@ public class EditNoteActivity extends AppCompatActivity {
         });
 
         Intent intent = getIntent();
-        noteId = intent.getLongExtra(MainActivity.NOTE_ID, DEFAULT_ID);
+        mNoteId = intent.getLongExtra(MainActivity.NOTE_ID, DEFAULT_ID);
 
         NoteDao noteDao = ((MyCustomApplication)getApplication()).getDbNotes();
-        Note note = noteDao.getNote(noteId);
+        Note note = noteDao.getNote(mNoteId);
 
         if (note != null) {
             TextView textViewTitle = findViewById(R.id.text_view_title);
@@ -105,10 +105,10 @@ public class EditNoteActivity extends AppCompatActivity {
 
             NoteDao noteDao = ((MyCustomApplication)getApplication()).getDbNotes();
 
-            Note note = new Note(noteId, mEditTitle.getText().toString(),
+            Note note = new Note(mNoteId, mEditTitle.getText().toString(),
                     mEditText.getText().toString(), null);
 
-            if (noteId != DEFAULT_ID) {
+            if (mNoteId != DEFAULT_ID) {
 	            noteDao.updateNote(note);
             } else {
 	            noteDao.addNote(note);
