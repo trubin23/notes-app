@@ -1,6 +1,7 @@
 package com.example.trubin23.myfirstapplication;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -19,7 +20,7 @@ import butterknife.ButterKnife;
 
 import static com.example.trubin23.database.DatabaseHelper.DEFAULT_ID;
 
-public class EditNoteActivity extends AppCompatActivity {
+public class EditNoteActivity extends AppCompatActivity implements AsyncResponse {
 
     @BindView(R.id.edit_note_title)
     EditText mEditTitle;
@@ -54,28 +55,10 @@ public class EditNoteActivity extends AppCompatActivity {
         mNoteId = intent.getLongExtra(MainActivity.NOTE_ID, DEFAULT_ID);
 
         NoteDao noteDao = ((MyCustomApplication)getApplication()).getNoteDao();
-        Note note = noteDao.getNote(mNoteId);
 
-        if (note != null) {
-            TextView textViewTitle = findViewById(R.id.text_view_title);
-
-            textViewTitle.setVisibility(View.GONE);
-            mEditTitle.setVisibility(View.GONE);
-
-            mEditText.setText(note.getText());
-        }
-
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-
-            if (note != null) {
-                mEditTitle.setText(note.getTitle());
-                actionBar.setTitle(note.getTitle());
-            } else {
-                actionBar.setTitle(R.string.new_note);
-            }
-        }
+        AsyncTaskGetNote asyncTaskGetNote =
+                new AsyncTaskGetNote(noteDao, mNoteId, this);
+        asyncTaskGetNote.execute();
     }
 
     private void validNote() {
@@ -117,7 +100,56 @@ public class EditNoteActivity extends AppCompatActivity {
         return true;
     }
 
-    static class SimpleTextWatcher implements TextWatcher {
+    @Override
+    public void updateViews(Note note) {
+        if (note != null) {
+            TextView textViewTitle = findViewById(R.id.text_view_title);
+
+            textViewTitle.setVisibility(View.GONE);
+            mEditTitle.setVisibility(View.GONE);
+
+            mEditText.setText(note.getText());
+        }
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+
+            if (note != null) {
+                mEditTitle.setText(note.getTitle());
+                actionBar.setTitle(note.getTitle());
+            } else {
+                actionBar.setTitle(R.string.new_note);
+            }
+        }
+    }
+
+    private static class AsyncTaskGetNote extends AsyncTask<Void, Void, Note>{
+
+        private NoteDao mNoteDao;
+        private long mNoteId;
+        private AsyncResponse mAsyncResponse;
+
+        AsyncTaskGetNote(NoteDao noteDao, long noteId, AsyncResponse asyncResponse) {
+            mNoteDao = noteDao;
+            mNoteId = noteId;
+            mAsyncResponse = asyncResponse;
+        }
+
+        @Override
+        protected Note doInBackground(Void... voids) {
+            return mNoteDao.getNote(mNoteId);
+        }
+
+        @Override
+        protected void onPostExecute(Note note) {
+            super.onPostExecute(note);
+
+            mAsyncResponse.updateViews(note);
+        }
+    }
+
+    private static class SimpleTextWatcher implements TextWatcher {
         @Override
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -134,3 +166,7 @@ public class EditNoteActivity extends AppCompatActivity {
         }
     }
 }
+
+
+
+
