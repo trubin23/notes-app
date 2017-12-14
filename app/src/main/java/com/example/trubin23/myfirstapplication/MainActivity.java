@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ChangeTheme.onActivityCreateSetTheme(this);
+        ThemeChanger.onActivityCreateSetTheme(this);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
@@ -70,15 +70,15 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.choice_theme, menu);
+        getMenuInflater().inflate(R.menu.theme_choicer, menu);
 
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (R.id.item_theme == item.getItemId()) {
-            new ChangeTheme(this);
+        if (R.id.theme_choicer == item.getItemId()) {
+            new ThemeChanger(this).showDialog();
         }
 
         return true;

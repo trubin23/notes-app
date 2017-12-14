@@ -21,7 +21,7 @@
 
 
     {
-    "title": "Buttons: Floating Action Button",
+    "title": "Float Action Button",
     "text": "A floating action button is used for a promoted action. Shaped like a circled icon floating above the UI, it changes color upon focus and lifts upon selection. When pressed, it may contain more related actions.",
     "date": "04.04.2004"
     },

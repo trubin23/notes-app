@@ -44,7 +44,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL(NOTE_CREATE_TABLE);
             db.setTransactionSuccessful();
         } catch (Exception e) {
-            Log.e(TAG, "create table", e);
+            Log.e(TAG, "create table " + TABLE_NOTE, e);
         } finally {
             db.endTransaction();
         }
@@ -61,7 +61,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
             db.setTransactionSuccessful();
         } catch (Exception e) {
-            Log.e(TAG, "create table", e);
+            Log.e(TAG, "filling table " + TABLE_NOTE + " in first run", e);
         } finally {
             db.endTransaction();
         }

@@ -17,7 +17,7 @@ import java.util.List;
 
 public class NoteDaoImpl implements NoteDao {
 
-    static String NOTE_CREATE_TABLE = "CREATE TABLE " + TABLE_NOTE + "("
+    static final String NOTE_CREATE_TABLE = "CREATE TABLE " + TABLE_NOTE + "("
             + COLUMN_NOTE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
             + COLUMN_NOTE_TITLE + " TEXT,"
             + COLUMN_NOTE_TEXT + " TEXT,"

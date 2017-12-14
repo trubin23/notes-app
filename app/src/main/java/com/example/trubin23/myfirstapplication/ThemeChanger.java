@@ -18,7 +18,7 @@ import static android.content.Context.MODE_PRIVATE;
  * Created by trubin23 on 05.12.17.
  */
 
-class ChangeTheme {
+class ThemeChanger {
 
     enum Theme {
         RED(R.style.AppThemeRed),
@@ -40,15 +40,15 @@ class ChangeTheme {
     }
 
     private final static String TYPE_THEME = "type_theme";
-    private static final String LOG = "ChangeTheme";
+    private static final String LOG = "ThemeChanger";
 
     private AlertDialog mAlertDialog;
 
-    ChangeTheme(final Activity activity) {
+    ThemeChanger(final Activity activity) {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(R.string.pick_theme);
 
-        final String[] themeNames = ChangeTheme.Theme.getNames();
+        final String[] themeNames = ThemeChanger.Theme.getNames();
         final List<String> themeNameList = Arrays.asList(themeNames);
 
         String themeName = loadTheme(activity);
@@ -63,7 +63,10 @@ class ChangeTheme {
                 });
 
         mAlertDialog = builder.create();
-        mAlertDialog.show();
+    }
+
+    void showDialog(){
+	    mAlertDialog.show();
     }
 
     private void dismiss() {

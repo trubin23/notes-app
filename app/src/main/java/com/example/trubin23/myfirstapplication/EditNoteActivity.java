@@ -22,19 +22,19 @@ import static com.example.trubin23.database.DatabaseHelper.DEFAULT_ID;
 
 public class EditNoteActivity extends AppCompatActivity implements AsyncResponse {
 
-    @BindView(R.id.edit_note_title)
+    @BindView(R.id.edit_title)
     EditText mEditTitle;
-    @BindView(R.id.edit_note_text)
+    @BindView(R.id.edit_text)
     EditText mEditText;
 
-    private MenuItem mMenuItemAccept;
+    private MenuItem mAcceptMenuItem;
 
     private long mNoteId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ChangeTheme.onActivityCreateSetTheme(this);
+        ThemeChanger.onActivityCreateSetTheme(this);
         setContentView(R.layout.activity_edit_note);
         ButterKnife.bind(this);
 
@@ -62,12 +62,12 @@ public class EditNoteActivity extends AppCompatActivity implements AsyncResponse
     }
 
     private void validNote() {
-        if (mMenuItemAccept != null) {
+        if (mAcceptMenuItem != null) {
             if (mEditTitle.getText().toString().trim().isEmpty() ||
                     mEditText.getText().toString().trim().isEmpty()) {
-                mMenuItemAccept.setVisible(false);//.setEnabled(false);
+                mAcceptMenuItem.setVisible(false);//.setEnabled(false);
             } else {
-                mMenuItemAccept.setVisible(true);//.setEnabled(true);
+                mAcceptMenuItem.setVisible(true);//.setEnabled(true);
             }
         }
     }
@@ -75,7 +75,7 @@ public class EditNoteActivity extends AppCompatActivity implements AsyncResponse
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.edit_note, menu);
-        mMenuItemAccept = menu.findItem(R.id.item_accept);
+        mAcceptMenuItem = menu.findItem(R.id.action_accept);
 
         validNote();
 
@@ -84,7 +84,7 @@ public class EditNoteActivity extends AppCompatActivity implements AsyncResponse
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (R.id.item_accept == item.getItemId()) {
+        if (R.id.action_accept == item.getItemId()) {
 
             Note note = new Note(mNoteId, mEditTitle.getText().toString(),
                     mEditText.getText().toString(), null);
@@ -103,9 +103,9 @@ public class EditNoteActivity extends AppCompatActivity implements AsyncResponse
     @Override
     public void updateViews(Note note) {
         if (note != null) {
-            TextView textViewTitle = findViewById(R.id.text_view_title);
+            TextView infoTitle = findViewById(R.id.info_title);
 
-            textViewTitle.setVisibility(View.GONE);
+            infoTitle.setVisibility(View.GONE);
             mEditTitle.setVisibility(View.GONE);
 
             mEditText.setText(note.getText());
