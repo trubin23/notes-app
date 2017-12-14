@@ -53,7 +53,7 @@ public class EditNoteActivity extends AppCompatActivity {
         Intent intent = getIntent();
         mNoteId = intent.getLongExtra(MainActivity.NOTE_ID, DEFAULT_ID);
 
-        NoteDao noteDao = ((MyCustomApplication)getApplication()).getDbNotes();
+        NoteDao noteDao = ((MyCustomApplication)getApplication()).getNoteDao();
         Note note = noteDao.getNote(mNoteId);
 
         if (note != null) {
@@ -103,18 +103,13 @@ public class EditNoteActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (R.id.item_accept == item.getItemId()) {
 
-            NoteDao noteDao = ((MyCustomApplication)getApplication()).getDbNotes();
-
             Note note = new Note(mNoteId, mEditTitle.getText().toString(),
                     mEditText.getText().toString(), null);
 
-            if (mNoteId != DEFAULT_ID) {
-	            noteDao.updateNote(note);
-            } else {
-	            noteDao.addNote(note);
-            }
+            Intent intent = new Intent();
+            intent.putExtra(MainActivity.NOTE, note);
 
-            setResult(RESULT_OK, null);
+            setResult(RESULT_OK, intent);
         }
 
         finish();

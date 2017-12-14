@@ -6,12 +6,14 @@ import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,8 +28,13 @@ import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity implements NoteItemActionHandler {
 
+    private static final String TAG = "MainActivity";
+
     static final String NOTE_ID = "note_id";
-    public static final int REQUEST_CODE_EDIT_NOTE = 0;
+    static final String NOTE = "note";
+
+    public static final int REQUEST_CODE_CREATE_NOTE = 0;
+    public static final int REQUEST_CODE_EDIT_NOTE = 1;
 
     @BindView(R.id.rv) RecyclerView mRecyclerView;
     private RecyclerNoteAdapter mRecyclerNoteAdapter;
@@ -58,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
         mRecyclerNoteAdapter = new RecyclerNoteAdapter(this);
         mRecyclerView.setAdapter(mRecyclerNoteAdapter);
 
-        updateRecyclerNote();
+        recyclerNoteChange(null);
     }
 
     @Override
@@ -79,22 +86,56 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (resultCode == RESULT_OK) {
-            updateRecyclerNote();
+        if (resultCode != RESULT_OK) {
+            return;
         }
+
+        final NoteDao noteDao = ((MyCustomApplication)getApplication()).getNoteDao();
+        final Note note = intent.getParcelableExtra(NOTE);
+
+        Runnable runnable = null;
+        switch (requestCode){
+            case REQUEST_CODE_CREATE_NOTE:
+                runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        noteDao.addNote(note);
+                    }
+                };
+                break;
+            case REQUEST_CODE_EDIT_NOTE:
+                runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        noteDao.updateNote(note);
+                    }
+                };
+                break;
+            default:
+                Log.w(TAG, "unknown value requestCode in method onActivityResult");
+        }
+        recyclerNoteChange(runnable);
     }
 
     @OnClick(R.id.button_create_note)
     public void onClickCreateNote(View view) {
         Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
-        startActivityForResult(intent, 0);
+        startActivityForResult(intent, REQUEST_CODE_CREATE_NOTE);
     }
 
-    private void updateRecyclerNote(){
-        NoteDao noteDao = ((MyCustomApplication)getApplication()).getDbNotes();
+    void recyclerNoteChange(@Nullable Runnable runnable){
+        if (runnable == null){
+            runnable = new Runnable() {
+                @Override
+                public void run() {
+                }
+            };
+        }
+
+        NoteDao noteDao = ((MyCustomApplication)getApplication()).getNoteDao();
 
         AsyncTaskRecyclerNote asyncTask =
-                new AsyncTaskRecyclerNote(mRecyclerNoteAdapter, noteDao);
+                new AsyncTaskRecyclerNote(mRecyclerNoteAdapter, noteDao, runnable);
         asyncTask.execute();
     }
 
@@ -116,9 +157,15 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        NoteDao noteDao = ((MyCustomApplication)getApplication()).getDbNotes();
-                        noteDao.deleteNote(note.getId());
-                        mRecyclerNoteAdapter.deleteNote(position);
+                        Runnable runnable = new Runnable() {
+                            private final NoteDao noteDao =
+                                    ((MyCustomApplication)getApplication()).getNoteDao();
+                            @Override
+                            public void run() {
+                                noteDao.deleteNote(note.getId());
+                            }
+                        };
+                        recyclerNoteChange(runnable);
                     }
                 });
 
@@ -132,16 +179,19 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
 
         private RecyclerNoteAdapter mRecyclerNoteAdapter;
         private NoteDao mNoteDao;
+        private Runnable mRunnable;
 
         AsyncTaskRecyclerNote(@NonNull RecyclerNoteAdapter recyclerNoteAdapter,
-                                     @NonNull NoteDao noteDao) {
-            this.mRecyclerNoteAdapter = recyclerNoteAdapter;
-            this.mNoteDao = noteDao;
+                                     @NonNull NoteDao noteDao, @NonNull Runnable runnable) {
+            mRecyclerNoteAdapter = recyclerNoteAdapter;
+            mNoteDao = noteDao;
+            mRunnable = runnable;
         }
 
         @NonNull
         @Override
         protected List<Note> doInBackground(Void... voids) {
+            mRunnable.run();
             return mNoteDao.getAllNote();
         }
 
