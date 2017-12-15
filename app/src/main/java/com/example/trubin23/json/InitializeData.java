@@ -54,7 +54,7 @@ public class InitializeData {
             List<NoteParse> noteParseList = jsonAdapter.fromJson(json);
             if (noteParseList != null) {
                 for (NoteParse noteParse : noteParseList) {
-                    notes.add(new Note(noteParse.mTitle, noteParse.mText, noteParse.mDate));
+                    notes.add(new Note(noteParse.title, noteParse.text, noteParse.date));
                 }
             }
         } catch (IOException e) {
