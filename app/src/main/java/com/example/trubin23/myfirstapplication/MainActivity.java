@@ -1,12 +1,16 @@
 package com.example.trubin23.myfirstapplication;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
@@ -18,6 +22,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.example.trubin23.database.AsyncTaskDeleteNote;
+import com.example.trubin23.database.AsyncTaskRefreshNotes;
 import com.example.trubin23.database.NoteDao;
 
 import java.util.List;
@@ -36,8 +42,13 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
     public static final int REQUEST_CODE_CREATE_NOTE = 0;
     public static final int REQUEST_CODE_EDIT_NOTE = 1;
 
+    public static final String ACTION_REFRESH_NOTES = "action-refresh-notes";
+    public static final String NOTES = "notes";
+
     @BindView(R.id.rv) RecyclerView mRecyclerView;
     private RecyclerNoteAdapter mRecyclerNoteAdapter;
+
+    private NotesReceiver mNotesReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +76,9 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
         mRecyclerNoteAdapter = new RecyclerNoteAdapter(this);
         mRecyclerView.setAdapter(mRecyclerNoteAdapter);
 
-        recyclerNoteChange(null);
+        mNotesReceiver = new NotesReceiver();
+
+        //recyclerNoteChange(null);
     }
 
     @Override
@@ -114,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
             default:
                 Log.w(TAG, "unknown value requestCode in method onActivityResult");
         }
-        recyclerNoteChange(runnable);
+        //recyclerNoteChange(runnable);
     }
 
     @OnClick(R.id.button_create_note)
@@ -157,16 +170,25 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Runnable runnable = new Runnable() {
-                            private final NoteDao noteDao =
-                                    ((MyCustomApplication)getApplication()).getNoteDao();
+                        //Runnable runnable = new Runnable() {
+                        //    private final NoteDao noteDao =
+                        //            ((MyCustomApplication)getApplication()).getNoteDao();
+                        //
+                        //    @Override
+                        //    public void run() {
+                        //        noteDao.deleteNote(note.getId());
+                        //    }
+                        //};
+                        //recyclerNoteChange(runnable);
 
-                            @Override
-                            public void run() {
-                                noteDao.deleteNote(note.getId());
-                            }
-                        };
-                        recyclerNoteChange(runnable);
+
+                        LocalBroadcastManager broadcastManager =
+                                LocalBroadcastManager.getInstance(MainActivity.this);
+                        NoteDao noteDao = ((MyCustomApplication)getApplication()).getNoteDao();
+
+                        AsyncTaskDeleteNote deleteNote =
+                                new AsyncTaskDeleteNote(broadcastManager, noteDao, note.getId());
+                        deleteNote.execute();
                     }
                 });
 
@@ -175,6 +197,36 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
     }
+
+    @Override
+    protected void onPause() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(
+                mNotesReceiver);
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                mNotesReceiver, new IntentFilter(ACTION_REFRESH_NOTES));
+
+        super.onResume();
+
+        LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
+        NoteDao noteDao = ((MyCustomApplication)getApplication()).getNoteDao();
+
+        AsyncTaskRefreshNotes refreshNotes =
+                new AsyncTaskRefreshNotes(broadcastManager, noteDao);
+        refreshNotes.execute();
+    }
+
+    private class NotesReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            List<Note> notes = intent.getParcelableArrayListExtra(NOTES);
+            mRecyclerNoteAdapter.setNotes(notes);
+        }
+    };
 
     private static class AsyncTaskRecyclerNote extends AsyncTask<Void, Void, List<Note>>{
 

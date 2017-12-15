@@ -52,8 +52,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         List<Note> notes = InitializeData.initializeData(mContext);
         db.beginTransaction();
         try {
-            ContentValues values = new ContentValues();
             for (Note note : notes) {
+                ContentValues values = new ContentValues();
                 values.put(COLUMN_NOTE_TITLE, note.getTitle());
                 values.put(COLUMN_NOTE_TEXT, note.getText());
                 values.put(COLUMN_NOTE_DATE, note.getDate());

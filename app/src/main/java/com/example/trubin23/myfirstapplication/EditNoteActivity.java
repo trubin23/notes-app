@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -16,6 +17,8 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.trubin23.database.AsyncTaskAddNote;
+import com.example.trubin23.database.AsyncTaskUpdateNote;
 import com.example.trubin23.database.NoteDao;
 
 import butterknife.BindView;
@@ -76,6 +79,7 @@ public class EditNoteActivity extends AppCompatActivity implements AsyncResponse
             mInfoTitle.setVisibility(View.GONE);
             mEditTitle.setVisibility(View.GONE);
             mProgressBar.setVisibility(View.VISIBLE);
+            mEditText.setEnabled(false);
 
             NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
 
@@ -116,6 +120,19 @@ public class EditNoteActivity extends AppCompatActivity implements AsyncResponse
 
             Note note = new Note(mNoteId, mEditTitle.getText().toString(),
                     mEditText.getText().toString(), null);
+
+            LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
+            NoteDao noteDao = ((MyCustomApplication)getApplication()).getNoteDao();
+
+            if (mNoteId == DEFAULT_ID){
+                AsyncTaskAddNote addNote =
+                        new AsyncTaskAddNote(broadcastManager, noteDao, note);
+                addNote.execute();
+            } else {
+                AsyncTaskUpdateNote updateNote =
+                        new AsyncTaskUpdateNote(broadcastManager, noteDao, note);
+                updateNote.execute();
+            }
 
             Intent intent = new Intent();
             intent.putExtra(MainActivity.NOTE, note);
