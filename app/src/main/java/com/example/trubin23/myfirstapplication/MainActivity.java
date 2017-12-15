@@ -117,8 +117,8 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
         recyclerNoteChange(runnable);
     }
 
-    @OnClick(R.id.button_create_note)//annotation @Nullable ?
-    public void onClickCreateNote(@Nullable View view) {
+    @OnClick(R.id.button_create_note)
+    public void onClickCreateNote(View view) {
         Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
         startActivityForResult(intent, REQUEST_CODE_CREATE_NOTE);
     }

@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.example.trubin23.myfirstapplication.Note;
 
@@ -16,6 +17,8 @@ import java.util.List;
  */
 
 public class NoteDaoImpl implements NoteDao {
+
+    private static final String TAG = "NoteDaoImpl";
 
     static final String NOTE_CREATE_TABLE = "CREATE TABLE " + TABLE_NOTE + "("
             + COLUMN_NOTE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -37,17 +40,26 @@ public class NoteDaoImpl implements NoteDao {
     public Note getNote(long id) {
         Note note = null;
         SQLiteDatabase db = mDbOpenHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery(QUERY_NOTE, new String[]{String.valueOf(id)});
+        db.beginTransaction();
+        try {
+            Cursor cursor = db.rawQuery(QUERY_NOTE, new String[]{String.valueOf(id)});
 
-        if (cursor.moveToFirst()) {
-            String title = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_TITLE));
-            String text = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_TEXT));
-            String date = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_DATE));
+            if (cursor.moveToFirst()) {
+                String title = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_TITLE));
+                String text = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_TEXT));
+                String date = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_DATE));
 
-            note = new Note(id, title, text, date);
+                note = new Note(id, title, text, date);
+            }
+            cursor.close();
+
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e(TAG, "public Note getNote(long id)", e);
+        } finally {
+            db.endTransaction();
+            db.close();
         }
-        cursor.close();
-        db.close();
 
         return note;
     }
@@ -58,23 +70,32 @@ public class NoteDaoImpl implements NoteDao {
         List<Note> notes = new ArrayList<>();
 
         SQLiteDatabase db = mDbOpenHelper.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_NOTE,
-                COLUMNS, null, null, null, null, null);
+        db.beginTransaction();
+        try {
+            Cursor cursor = db.query(TABLE_NOTE,
+                    COLUMNS, null, null, null, null, null);
 
-        if (cursor.moveToFirst()) {
-            do {
-                int id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_ID)));
-                String title = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_TITLE));
-                String text = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_TEXT));
-                String date = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_DATE));
+            if (cursor.moveToFirst()) {
+                do {
+                    int id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_ID)));
+                    String title = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_TITLE));
+                    String text = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_TEXT));
+                    String date = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_DATE));
 
-                Note note = new Note(id, title, text, date);
+                    Note note = new Note(id, title, text, date);
 
-                notes.add(note);
-            } while (cursor.moveToNext());
+                    notes.add(note);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e(TAG, "public List<Note> getAllNote()", e);
+        } finally {
+            db.endTransaction();
+            db.close();
         }
-        cursor.close();
-        db.close();
 
         return notes;
     }
@@ -87,20 +108,35 @@ public class NoteDaoImpl implements NoteDao {
         values.put(COLUMN_NOTE_DATE, note.getDate());
 
         SQLiteDatabase db = mDbOpenHelper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            db.insert(TABLE_NOTE, null, values);
 
-        db.insert(TABLE_NOTE, null, values);
-
-        db.close();
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e(TAG, "public void addNote(@NonNull final Note note)", e);
+        } finally {
+            db.endTransaction();
+            db.close();
+        }
     }
 
     @Override
     public void deleteNote(final long id) {
         SQLiteDatabase db = mDbOpenHelper.getWritableDatabase();
 
-        db.delete(TABLE_NOTE, COLUMN_NOTE_ID + " = ?",
-                new String[]{String.valueOf(id)});
+        db.beginTransaction();
+        try {
+            db.delete(TABLE_NOTE, COLUMN_NOTE_ID + " = ?",
+                    new String[]{String.valueOf(id)});
 
-        db.close();
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e(TAG, "public void deleteNote(final long id)", e);
+        } finally {
+            db.endTransaction();
+            db.close();
+        }
     }
 
     @Override
@@ -111,10 +147,17 @@ public class NoteDaoImpl implements NoteDao {
         values.put(COLUMN_NOTE_DATE, note.getDate());
 
         SQLiteDatabase db = mDbOpenHelper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            db.update(TABLE_NOTE, values, COLUMN_NOTE_ID + " = ?",
+                    new String[]{String.valueOf(note.getId())});
 
-        db.update(TABLE_NOTE, values, COLUMN_NOTE_ID + " = ?",
-                new String[]{String.valueOf(note.getId())});
-
-        db.close();
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e(TAG, "public void updateNote(@NonNull final Note note)", e);
+        } finally {
+            db.endTransaction();
+            db.close();
+        }
     }
 }
