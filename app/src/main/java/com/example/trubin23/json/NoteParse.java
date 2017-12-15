@@ -1,17 +1,19 @@
 package com.example.trubin23.json;
 
+import com.squareup.moshi.Json;
+
 /**
  * Created by trubin23 on 05.12.17.
  */
 
 public final class NoteParse {
-    final String title;
-    final String text;
-    final String date;
+    @Json(name = "title") final String mTitle;
+    @Json(name = "text") final String mText;
+    @Json(name = "date") final String mDate;
 
     public NoteParse(String title, String text, String date) {
-        this.title = title;
-        this.text = text;
-        this.date = date;
+        mTitle = title;
+        mText = text;
+        mDate = date;
     }
 }
