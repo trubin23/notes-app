@@ -25,7 +25,7 @@ public class RecyclerNoteAdapter extends RecyclerView.Adapter<RecyclerNoteAdapte
     private List<Note> mNotes;
     private NoteItemActionHandler mActionHandler;
 
-    RecyclerNoteAdapter(NoteItemActionHandler actionHandler) {
+    RecyclerNoteAdapter(@Nullable NoteItemActionHandler actionHandler) {
         mNotes = new ArrayList<>();
         mActionHandler = actionHandler;
     }
@@ -116,7 +116,6 @@ public class RecyclerNoteAdapter extends RecyclerView.Adapter<RecyclerNoteAdapte
 
     void updateNote(int position, @NonNull Note note) {
         mNotes.set(position, note);
-
         notifyItemChanged(position);
     }
 
@@ -135,7 +134,7 @@ public class RecyclerNoteAdapter extends RecyclerView.Adapter<RecyclerNoteAdapte
         @BindView(R.id.note_date)
         TextView noteDate;
 
-        NoteHolder(View itemView) {
+        NoteHolder(@NonNull View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }

@@ -22,17 +22,17 @@ public class Note implements Parcelable {
     private String mText;
     private Date mDate;
 
-    private static final SimpleDateFormat mDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
 
     public Note(long id, @NonNull String title, @NonNull String text, @Nullable String date) {
-        this.mId = id;
-        this.mTitle = title;
-        this.mText = text;
+        mId = id;
+        mTitle = title;
+        mText = text;
 
         try {
-            this.mDate = mDateFormat.parse(date);
+            mDate = DATE_FORMAT.parse(date);
         } catch (ParseException | NullPointerException e) {
-            this.mDate =  new Date();
+            mDate =  new Date();
         }
     }
 
@@ -40,15 +40,11 @@ public class Note implements Parcelable {
         this(DatabaseHelper.DEFAULT_ID, title, text, date);
     }
 
-    Note(@NonNull String title, @NonNull String text) {
-        this(DatabaseHelper.DEFAULT_ID, title, text, null);
-    }
-
-    private Note(Parcel in) {
-        mId = in.readLong();
-        mTitle = in.readString();
-        mText = in.readString();
-        mDate = (Date) in.readSerializable();
+    private Note(@NonNull Parcel parcel) {
+        mId = parcel.readLong();
+        mTitle = parcel.readString();
+        mText = parcel.readString();
+        mDate = (Date) parcel.readSerializable();
     }
 
     @Override
@@ -57,7 +53,7 @@ public class Note implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel parcel, int i) {
+    public void writeToParcel(@NonNull Parcel parcel, int i) {
         parcel.writeLong(mId);
         parcel.writeString(mTitle);
         parcel.writeString(mText);
@@ -80,20 +76,16 @@ public class Note implements Parcelable {
 
     @NonNull
     public String getDate() {
-        return mDateFormat.format(mDate);
+        return DATE_FORMAT.format(mDate);
     }
 
     void setText(@NonNull String text) {
-        this.mText = text;
-    }
-
-    void setDate(@NonNull Date date) {
-        this.mDate = date;
+        mText = text;
     }
 
     public static final Creator<Note> CREATOR = new Creator<Note>() {
         @Override
-        public Note createFromParcel(Parcel in) {
+        public Note createFromParcel(@NonNull Parcel in) {
             return new Note(in);
         }
 

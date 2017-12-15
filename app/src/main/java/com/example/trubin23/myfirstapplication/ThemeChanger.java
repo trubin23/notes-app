@@ -26,10 +26,10 @@ class ThemeChanger {
         BLUE(R.style.AppThemeBlue);
 
         @StyleRes
-        int themeId;
+        int mThemeId;
 
         Theme(@StyleRes int themeId) {
-            this.themeId = themeId;
+            mThemeId = themeId;
         }
 
         @NonNull
@@ -44,7 +44,7 @@ class ThemeChanger {
 
     private AlertDialog mAlertDialog;
 
-    ThemeChanger(final Activity activity) {
+    ThemeChanger(@NonNull final Activity activity) {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(R.string.pick_theme);
 
@@ -66,7 +66,7 @@ class ThemeChanger {
     }
 
     void showDialog(){
-	    mAlertDialog.show();
+        mAlertDialog.show();
     }
 
     private void dismiss() {
@@ -90,7 +90,7 @@ class ThemeChanger {
             Log.e(LOG, "static void onActivityCreateSetTheme(@NonNull Activity activity)", e);
         }
 
-        activity.setTheme(theme.themeId);
+        activity.setTheme(theme.mThemeId);
     }
 
     private void saveTheme(@NonNull Activity activity, @NonNull String themeName) {
@@ -105,7 +105,7 @@ class ThemeChanger {
     private static String loadTheme(@NonNull Activity activity) {
         SharedPreferences sPref = activity.
                 getSharedPreferences(activity.getPackageName(), MODE_PRIVATE);
-        //actually preference type ?
+
         return sPref.getString(TYPE_THEME, Theme.RED.toString());
     }
 }

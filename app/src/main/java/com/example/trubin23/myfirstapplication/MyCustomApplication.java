@@ -13,19 +13,19 @@ import com.example.trubin23.database.NoteDaoImpl;
 
 public class MyCustomApplication extends Application {
 
-	private NoteDao mNoteDao;
+    private NoteDao mNoteDao;
 
-	@Override
-	public void onCreate() {
-		super.onCreate();
+    @Override
+    public void onCreate() {
+        super.onCreate();
 
-		DatabaseHelper databaseHelper = new DatabaseHelper(this);
+        DatabaseHelper databaseHelper = new DatabaseHelper(this);
 
-		mNoteDao = new NoteDaoImpl(databaseHelper);
-	}
+        mNoteDao = new NoteDaoImpl(databaseHelper);
+    }
 
-	@NonNull
-	NoteDao getNoteDao(){
-		return mNoteDao;
-	}
+    @NonNull
+    NoteDao getNoteDao(){
+        return mNoteDao;
+    }
 }

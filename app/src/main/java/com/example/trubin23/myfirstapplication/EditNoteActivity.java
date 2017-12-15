@@ -3,6 +3,8 @@ package com.example.trubin23.myfirstapplication;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -101,7 +103,7 @@ public class EditNoteActivity extends AppCompatActivity implements AsyncResponse
     }
 
     @Override
-    public void updateViews(Note note) {
+    public void updateViews(@Nullable Note note) {
         if (note != null) {
             TextView infoTitle = findViewById(R.id.info_title);
 
@@ -130,19 +132,21 @@ public class EditNoteActivity extends AppCompatActivity implements AsyncResponse
         private long mNoteId;
         private AsyncResponse mAsyncResponse;
 
-        AsyncTaskGetNote(NoteDao noteDao, long noteId, AsyncResponse asyncResponse) {
+        AsyncTaskGetNote(@NonNull NoteDao noteDao, long noteId,
+                         @NonNull AsyncResponse asyncResponse) {
             mNoteDao = noteDao;
             mNoteId = noteId;
             mAsyncResponse = asyncResponse;
         }
 
+        @Nullable
         @Override
         protected Note doInBackground(Void... voids) {
             return mNoteDao.getNote(mNoteId);
         }
 
         @Override
-        protected void onPostExecute(Note note) {
+        protected void onPostExecute(@Nullable Note note) {
             super.onPostExecute(note);
 
             mAsyncResponse.updateViews(note);

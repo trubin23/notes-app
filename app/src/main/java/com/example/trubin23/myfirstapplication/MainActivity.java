@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
 
         mRecyclerView.setHasFixedSize(true);
 
-        if (this.getResources().getConfiguration().orientation ==
+        if (getResources().getConfiguration().orientation ==
                 Configuration.ORIENTATION_PORTRAIT) {
             LinearLayoutManager llm = new LinearLayoutManager(this);
             mRecyclerView.setLayoutManager(llm);
@@ -117,8 +117,8 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
         recyclerNoteChange(runnable);
     }
 
-    @OnClick(R.id.button_create_note)
-    public void onClickCreateNote(View view) {
+    @OnClick(R.id.button_create_note)//annotation @Nullable ?
+    public void onClickCreateNote(@Nullable View view) {
         Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
         startActivityForResult(intent, REQUEST_CODE_CREATE_NOTE);
     }
@@ -160,6 +160,7 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
                         Runnable runnable = new Runnable() {
                             private final NoteDao noteDao =
                                     ((MyCustomApplication)getApplication()).getNoteDao();
+
                             @Override
                             public void run() {
                                 noteDao.deleteNote(note.getId());
