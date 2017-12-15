@@ -6,4 +6,5 @@
     <string name="pick_theme">Choice color theme:</string>
     <string name="title_note">Title note:</string>
     <string name="text_note">Text note:</string>
+    <string name="load_note">Load note...</string>
 </resources>

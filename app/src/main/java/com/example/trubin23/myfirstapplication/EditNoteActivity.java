@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.trubin23.database.NoteDao;
@@ -24,10 +25,14 @@ import static com.example.trubin23.database.DatabaseHelper.DEFAULT_ID;
 
 public class EditNoteActivity extends AppCompatActivity implements AsyncResponse {
 
+    @BindView(R.id.info_title)
+    TextView mInfoTitle;
     @BindView(R.id.edit_title)
     EditText mEditTitle;
     @BindView(R.id.edit_text)
     EditText mEditText;
+    @BindView(R.id.indeterminate_bar)
+    ProgressBar mProgressBar;
 
     private MenuItem mAcceptMenuItem;
 
@@ -56,11 +61,28 @@ public class EditNoteActivity extends AppCompatActivity implements AsyncResponse
         Intent intent = getIntent();
         mNoteId = intent.getLongExtra(MainActivity.NOTE_ID, DEFAULT_ID);
 
-        NoteDao noteDao = ((MyCustomApplication)getApplication()).getNoteDao();
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
 
-        AsyncTaskGetNote asyncTaskGetNote =
-                new AsyncTaskGetNote(noteDao, mNoteId, this);
-        asyncTaskGetNote.execute();
+            if (mNoteId != DEFAULT_ID) {
+                actionBar.setTitle(R.string.load_note);
+            } else {
+                actionBar.setTitle(R.string.new_note);
+            }
+        }
+
+        if (mNoteId != DEFAULT_ID) {
+            mInfoTitle.setVisibility(View.GONE);
+            mEditTitle.setVisibility(View.GONE);
+            mProgressBar.setVisibility(View.VISIBLE);
+
+            NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
+
+            AsyncTaskGetNote asyncTaskGetNote =
+                    new AsyncTaskGetNote(noteDao, mNoteId, this);
+            asyncTaskGetNote.execute();
+        }
     }
 
     private void validNote() {
@@ -104,29 +126,22 @@ public class EditNoteActivity extends AppCompatActivity implements AsyncResponse
 
     @Override
     public void updateViews(@Nullable Note note) {
-        if (note != null) {
-            TextView infoTitle = findViewById(R.id.info_title);
-
-            infoTitle.setVisibility(View.GONE);
-            mEditTitle.setVisibility(View.GONE);
-
-            mEditText.setText(note.getText());
+        if (note == null) {
+            return;
         }
+
+        mEditTitle.setText(note.getTitle());
+        mEditText.setText(note.getText());
+        mEditText.setEnabled(true);
+        mProgressBar.setVisibility(View.GONE);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-
-            if (note != null) {
-                mEditTitle.setText(note.getTitle());
-                actionBar.setTitle(note.getTitle());
-            } else {
-                actionBar.setTitle(R.string.new_note);
-            }
+            actionBar.setTitle(note.getTitle());
         }
     }
 
-    private static class AsyncTaskGetNote extends AsyncTask<Void, Void, Note>{
+    private static class AsyncTaskGetNote extends AsyncTask<Void, Void, Note> {
 
         private NoteDao mNoteDao;
         private long mNoteId;
@@ -142,6 +157,11 @@ public class EditNoteActivity extends AppCompatActivity implements AsyncResponse
         @Nullable
         @Override
         protected Note doInBackground(Void... voids) {
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             return mNoteDao.getNote(mNoteId);
         }
 
