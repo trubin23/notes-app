@@ -89,9 +89,13 @@ public class EditNoteActivity extends AppCompatActivity implements AsyncResponse
         if (mAcceptMenuItem != null) {
             if (mEditTitle.getText().toString().trim().isEmpty() ||
                     mEditText.getText().toString().trim().isEmpty()) {
-                mAcceptMenuItem.setVisible(false);//.setEnabled(false);
+                mAcceptMenuItem.setEnabled(false);
+                mAcceptMenuItem.getIcon().setTint(getResources().getColor(
+                        R.color.light_transparent));
             } else {
-                mAcceptMenuItem.setVisible(true);//.setEnabled(true);
+                mAcceptMenuItem.setEnabled(true);
+                mAcceptMenuItem.getIcon().setTint(getResources().getColor(
+                        android.R.color.white));
             }
         }
     }

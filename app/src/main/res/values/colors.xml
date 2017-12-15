@@ -11,4 +11,7 @@
     <color name="colorBluePrimary">#0000BF</color>
     <color name="colorBluePrimaryDark">#00007F</color>
     <color name="colorBlueAccent">#7F7F00</color>
+
+    <color name="white">@android:color/white</color>
+    <color name="light_transparent">#7FFF</color>
 </resources>
