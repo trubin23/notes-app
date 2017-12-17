@@ -7,5 +7,5 @@ import android.support.annotation.Nullable;
  */
 
 interface AsyncResponse {
-    void updateViews(@Nullable Note note);
+    void setNote(@Nullable Note note);
 }

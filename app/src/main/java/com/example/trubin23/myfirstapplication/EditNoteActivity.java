@@ -28,6 +28,8 @@ import static com.example.trubin23.database.DatabaseHelper.DEFAULT_ID;
 
 public class EditNoteActivity extends AppCompatActivity implements AsyncResponse {
 
+    private static final String ACTION_BAR_TITLE = "action_bar_title";
+
     @BindView(R.id.info_title)
     TextView mInfoTitle;
     @BindView(R.id.edit_title)
@@ -68,39 +70,59 @@ public class EditNoteActivity extends AppCompatActivity implements AsyncResponse
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
 
-            if (mNoteId != DEFAULT_ID) {
-                actionBar.setTitle(R.string.load_note);
+            if (savedInstanceState==null) {
+                if (mNoteId == DEFAULT_ID) {
+                    actionBar.setTitle(R.string.new_note);
+                } else {
+                    actionBar.setTitle(R.string.load_note);
+                }
             } else {
-                actionBar.setTitle(R.string.new_note);
+                actionBar.setTitle(savedInstanceState.getCharSequence(ACTION_BAR_TITLE));
             }
         }
 
-        if (mNoteId != DEFAULT_ID) {
-            mInfoTitle.setVisibility(View.GONE);
-            mEditTitle.setVisibility(View.GONE);
-            mProgressBar.setVisibility(View.VISIBLE);
-            mEditText.setEnabled(false);
+        //if (savedInstanceState==null && mNoteId != DEFAULT_ID){
+            loadNote();
+        //}
+    }
 
-            NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
-
-            AsyncTaskGetNote asyncTaskGetNote =
-                    new AsyncTaskGetNote(noteDao, mNoteId, this);
-            asyncTaskGetNote.execute();
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            outState.putCharSequence(ACTION_BAR_TITLE, actionBar.getTitle());
         }
+
+        super.onSaveInstanceState(outState);
+    }
+
+    private void loadNote(){
+        mInfoTitle.setVisibility(View.GONE);
+        mEditTitle.setVisibility(View.GONE);
+        mProgressBar.setVisibility(View.VISIBLE);
+        mEditText.setEnabled(false);
+
+        NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
+
+        AsyncTaskGetNote asyncTaskGetNote =
+                new AsyncTaskGetNote(noteDao, mNoteId, this);
+        asyncTaskGetNote.execute();
     }
 
     private void validNote() {
-        if (mAcceptMenuItem != null) {
-            if (mEditTitle.getText().toString().trim().isEmpty() ||
-                    mEditText.getText().toString().trim().isEmpty()) {
-                mAcceptMenuItem.setEnabled(false);
-                mAcceptMenuItem.getIcon().setTint(getResources().getColor(
-                        R.color.light_transparent));
-            } else {
-                mAcceptMenuItem.setEnabled(true);
-                mAcceptMenuItem.getIcon().setTint(getResources().getColor(
-                        android.R.color.white));
-            }
+        if (mAcceptMenuItem == null) {
+            return;
+        }
+
+        if (mEditTitle.getText().toString().trim().isEmpty() ||
+                mEditText.getText().toString().trim().isEmpty()) {
+            mAcceptMenuItem.setEnabled(false);
+            mAcceptMenuItem.getIcon().setTint(getResources().getColor(
+                    R.color.light_transparent));
+        } else {
+            mAcceptMenuItem.setEnabled(true);
+            mAcceptMenuItem.getIcon().setTint(getResources().getColor(
+                    R.color.white));
         }
     }
 
@@ -116,8 +138,7 @@ public class EditNoteActivity extends AppCompatActivity implements AsyncResponse
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (R.id.action_accept == item.getItemId()) {
-
+        if (R.id.action_accept != item.getItemId()) {
             Note note = new Note(mNoteId, mEditTitle.getText().toString(),
                     mEditText.getText().toString(), null);
 
@@ -133,11 +154,6 @@ public class EditNoteActivity extends AppCompatActivity implements AsyncResponse
                         new AsyncTaskUpdateNote(broadcastManager, noteDao, note);
                 updateNote.execute();
             }
-
-            Intent intent = new Intent();
-            intent.putExtra(MainActivity.NOTE, note);
-
-            setResult(RESULT_OK, intent);
         }
 
         finish();
@@ -146,7 +162,7 @@ public class EditNoteActivity extends AppCompatActivity implements AsyncResponse
     }
 
     @Override
-    public void updateViews(@Nullable Note note) {
+    public void setNote(@Nullable Note note) {
         if (note == null) {
             return;
         }
@@ -179,7 +195,7 @@ public class EditNoteActivity extends AppCompatActivity implements AsyncResponse
         @Override
         protected Note doInBackground(Void... voids) {
             try {
-                Thread.sleep(5000);
+                Thread.sleep(7000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -190,7 +206,7 @@ public class EditNoteActivity extends AppCompatActivity implements AsyncResponse
         protected void onPostExecute(@Nullable Note note) {
             super.onPostExecute(note);
 
-            mAsyncResponse.updateViews(note);
+            mAsyncResponse.setNote(note);
         }
     }
 
@@ -211,7 +227,3 @@ public class EditNoteActivity extends AppCompatActivity implements AsyncResponse
         }
     }
 }
-
-
-
-
