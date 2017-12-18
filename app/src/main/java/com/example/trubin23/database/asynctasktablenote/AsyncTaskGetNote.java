@@ -14,32 +14,31 @@ import java.util.List;
  * Created by Andrey on 18.12.2017.
  */
 
+/**
+ * @deprecated Use {@link com.example.trubin23.myfirstapplication.LoadNoteService} instead.
+ */
+
+@Deprecated
 public class AsyncTaskGetNote extends AsyncTaskTableNote {
 
-	private long mId;
+    private long mId;
 
-	public AsyncTaskGetNote(@NonNull LocalBroadcastManager broadcastManager,
-	                        @NonNull NoteDao noteDao, long id) {
-		super(broadcastManager, noteDao);
-		mId = id;
-	}
+    public AsyncTaskGetNote(@NonNull LocalBroadcastManager broadcastManager,
+                            @NonNull NoteDao noteDao, long id) {
+        super(broadcastManager, noteDao);
+        mId = id;
+    }
 
-	@Override
-	protected Void doInBackground(Void... voids) {
-		try {
-			Thread.sleep(7000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+    @Override
+    protected Void doInBackground(Void... voids) {
+        Note note = mNoteDao.getNote(mId);
+        List<Note> notes = new ArrayList<>();
+        notes.add(note);
 
-		Note note = mNoteDao.getNote(mId);
-		List<Note> notes = new ArrayList<>();
-		notes.add(note);
+        Intent intent = new Intent(EditNoteActivity.ACTION_REFRESH_NOTE);
+        intent.putParcelableArrayListExtra(EditNoteActivity.NOTE, new ArrayList<>(notes));
+        mBroadcastManager.sendBroadcast(intent);
 
-		Intent intent = new Intent(EditNoteActivity.ACTION_REFRESH_NOTE);
-		intent.putParcelableArrayListExtra(EditNoteActivity.NOTE, new ArrayList<>(notes));
-		mBroadcastManager.sendBroadcast(intent);
-
-		return null;
-	}
+        return null;
+    }
 }

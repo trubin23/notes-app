@@ -29,14 +29,14 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static com.example.trubin23.myfirstapplication.Note.NOTE_ID;
+
 public class MainActivity extends AppCompatActivity implements NoteItemActionHandler {
-
-    private static final String TAG = "MainActivity";
-
-    static final String NOTE_ID = "note_id";
 
     public static final String ACTION_REFRESH_NOTES = "action-refresh-notes";
     public static final String NOTES = "notes";
+
+    private static final int EDIT_NOTE_REQUEST_CODE = 1;
 
     @BindView(R.id.rv) RecyclerView mRecyclerView;
     private RecyclerNoteAdapter mRecyclerNoteAdapter;
@@ -91,14 +91,14 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
     @OnClick(R.id.button_create_note)
     public void onClickCreateNote(View view) {
         Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, EDIT_NOTE_REQUEST_CODE);
     }
 
     @Override
     public void onEdit(@NonNull Note note) {
         Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
         intent.putExtra(NOTE_ID, note.getId());
-        startActivity(intent);
+        startActivityForResult(intent, EDIT_NOTE_REQUEST_CODE);
     }
 
     @Override
@@ -126,6 +126,14 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
 
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == EDIT_NOTE_REQUEST_CODE){
+            Intent intent = new Intent(this, LoadNoteService.class);
+            stopService(intent);
+        }
     }
 
     @Override

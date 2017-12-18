@@ -1,9 +1,10 @@
 package com.example.trubin23.myfirstapplication;
 
-import android.content.*;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.StyleRes;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -16,27 +17,25 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.trubin23.database.NoteDao;
 import com.example.trubin23.database.asynctasktablenote.AsyncTaskAddNote;
-import com.example.trubin23.database.asynctasktablenote.AsyncTaskGetNote;
 import com.example.trubin23.database.asynctasktablenote.AsyncTaskUpdateNote;
-import com.example.trubin23.database.*;
+
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import java.util.Arrays;
-import java.util.List;
-
 import static com.example.trubin23.database.DatabaseHelper.DEFAULT_ID;
+import static com.example.trubin23.myfirstapplication.Note.NOTE_ID;
 
 public class EditNoteActivity extends AppCompatActivity {
 
-	public static final String ACTION_REFRESH_NOTE = "action-refresh-note";
-	public static final String NOTE = "note";
+    public static final String ACTION_REFRESH_NOTE = "action-refresh-note";
+    public static final String NOTE = "note";
 
     private static final String ACTION_BAR_TITLE = "action_bar_title";
-
-	private static final String LOAD_NOTE_STATE = "load_note_state";
+    private static final String LOAD_NOTE_STATE = "load_note_state";
 
     @BindView(R.id.info_title)
     TextView mInfoTitle;
@@ -50,15 +49,15 @@ public class EditNoteActivity extends AppCompatActivity {
     private MenuItem mAcceptMenuItem;
     private long mNoteId;
 
-	private NoteReceiver mNoteReceiver;
+    private NoteReceiver mNoteReceiver;
 
-	private LoadNote mLoadNote;
+    private LoadNote mLoadNote;
 
-	private enum LoadNote {
-		START,
-		PROCESS,
-		FINISH;
-	}
+    private enum LoadNote {
+        START,
+        PROCESS,
+        FINISH;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +80,7 @@ public class EditNoteActivity extends AppCompatActivity {
         });
 
         Intent intent = getIntent();
-        mNoteId = intent.getLongExtra(MainActivity.NOTE_ID, DEFAULT_ID);
+        mNoteId = intent.getLongExtra(NOTE_ID, DEFAULT_ID);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -98,14 +97,14 @@ public class EditNoteActivity extends AppCompatActivity {
             }
         }
 
-	    if (savedInstanceState==null) {
-		    mLoadNote = LoadNote.START;
-	    } else {
-		    mLoadNote = LoadNote.valueOf(
-		    		savedInstanceState.getString(LOAD_NOTE_STATE));
-	    }
+        if (savedInstanceState==null) {
+            mLoadNote = LoadNote.START;
+        } else {
+            mLoadNote = LoadNote.valueOf(
+                    savedInstanceState.getString(LOAD_NOTE_STATE));
+        }
 
-	    mNoteReceiver = new NoteReceiver();
+        mNoteReceiver = new NoteReceiver();
     }
 
     @Override
@@ -115,7 +114,7 @@ public class EditNoteActivity extends AppCompatActivity {
             outState.putCharSequence(ACTION_BAR_TITLE, actionBar.getTitle());
         }
 
-	    outState.putString(LOAD_NOTE_STATE, mLoadNote.toString());
+        outState.putString(LOAD_NOTE_STATE, mLoadNote.toString());
 
         super.onSaveInstanceState(outState);
     }
@@ -172,72 +171,70 @@ public class EditNoteActivity extends AppCompatActivity {
         return true;
     }
 
-	@Override
-	protected void onPause() {
-		LocalBroadcastManager.getInstance(this).unregisterReceiver(mNoteReceiver);
-		super.onPause();
-	}
+    @Override
+    protected void onPause() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mNoteReceiver);
+        super.onPause();
+    }
 
-	@Override
-	protected void onResume() {
-		LocalBroadcastManager.getInstance(this).registerReceiver(
-				mNoteReceiver, new IntentFilter(ACTION_REFRESH_NOTE));
+    @Override
+    protected void onResume() {
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                mNoteReceiver, new IntentFilter(ACTION_REFRESH_NOTE));
 
-		if (mNoteId != DEFAULT_ID) {
-			mInfoTitle.setVisibility(View.GONE);
-			mEditTitle.setVisibility(View.GONE);
+        if (mNoteId != DEFAULT_ID) {
+            mInfoTitle.setVisibility(View.GONE);
+            mEditTitle.setVisibility(View.GONE);
 
-			if (mLoadNote != LoadNote.FINISH) {
-				mProgressBar.setVisibility(View.VISIBLE);
-				mEditText.setEnabled(false);
-			}
+            if (mLoadNote != LoadNote.FINISH) {
+                mProgressBar.setVisibility(View.VISIBLE);
+                mEditText.setEnabled(false);
+            }
 
-			if(mLoadNote == LoadNote.START) {
-				LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
-				NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
+            if(mLoadNote == LoadNote.START) {
+                Intent intent = new Intent(this, LoadNoteService.class);
+                intent.putExtra(NOTE_ID, mNoteId);
 
-				AsyncTaskGetNote asyncTaskGetNote =
-						new AsyncTaskGetNote(broadcastManager, noteDao, mNoteId);
-				asyncTaskGetNote.execute();
+                startService(intent);
 
-				mLoadNote = LoadNote.PROCESS;
-			}
-		}
+                mLoadNote = LoadNote.PROCESS;
+            }
+        }
 
-		super.onResume();
-	}
+        super.onResume();
+    }
 
-	private class NoteReceiver extends BroadcastReceiver {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			List<Note> notes = intent.getParcelableArrayListExtra(NOTE);
+    private class NoteReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            List<Note> notes = intent.getParcelableArrayListExtra(NOTE);
 
-			if (notes == null) {
-				return;
-			}
+            if (notes == null) {
+                return;
+            }
 
-			if (notes.isEmpty()) {
-				return;
-			}
+            if (notes.isEmpty()) {
+                return;
+            }
 
-			Note note = notes.get(0);
-			if (note == null) {
-				return;
-			}
+            Note note = notes.get(0);
+            if (note == null) {
+                return;
+            }
 
-			mLoadNote = LoadNote.FINISH;
+            mLoadNote = LoadNote.FINISH;
 
-			mEditTitle.setText(note.getTitle());
-			mEditText.setText(note.getText());
-			mEditText.setEnabled(true);
-			mProgressBar.setVisibility(View.GONE);
+            mEditTitle.setText(note.getTitle());
+            mEditText.setText(note.getText());
+            mEditText.setEnabled(true);
+            mProgressBar.setVisibility(View.GONE);
 
-			ActionBar actionBar = getSupportActionBar();
-			if (actionBar != null) {
-				actionBar.setTitle(note.getTitle());
-			}
-		}
-	};
+            ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setTitle(note.getTitle());
+            }
+        }
+    };
 
     private static class SimpleTextWatcher implements TextWatcher {
         @Override

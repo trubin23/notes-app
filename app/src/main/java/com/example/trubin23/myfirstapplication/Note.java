@@ -17,6 +17,8 @@ import java.util.Date;
 
 public class Note implements Parcelable {
 
+    static final String NOTE_ID = "note_id";
+
     private long mId;
     private String mTitle;
     private String mText;
