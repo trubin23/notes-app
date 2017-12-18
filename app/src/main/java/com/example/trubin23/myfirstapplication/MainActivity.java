@@ -5,9 +5,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -19,16 +22,20 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.example.trubin23.database.NoteDao;
 import com.example.trubin23.database.asynctasktablenote.AsyncTaskDeleteNote;
 import com.example.trubin23.database.asynctasktablenote.AsyncTaskRefreshNotes;
-import com.example.trubin23.database.NoteDao;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static android.Manifest.permission.ACCESS_NETWORK_STATE;
+import static android.Manifest.permission.INTERNET;
+import static android.support.v4.content.PermissionChecker.PERMISSION_GRANTED;
 import static com.example.trubin23.myfirstapplication.Note.NOTE_ID;
 
 public class MainActivity extends AppCompatActivity implements NoteItemActionHandler {
@@ -37,8 +44,10 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
     public static final String NOTES = "notes";
 
     private static final int EDIT_NOTE_REQUEST_CODE = 1;
+    private static final int MY_PERMISSIONS_REQUEST = 1;
 
-    @BindView(R.id.rv) RecyclerView mRecyclerView;
+    @BindView(R.id.rv)
+    RecyclerView mRecyclerView;
     private RecyclerNoteAdapter mRecyclerNoteAdapter;
 
     private NotesReceiver mNotesReceiver;
@@ -70,6 +79,43 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
         mRecyclerView.setAdapter(mRecyclerNoteAdapter);
 
         mNotesReceiver = new NotesReceiver();
+
+        String[] permissions = {INTERNET, ACCESS_NETWORK_STATE};
+
+        onRequestPermissions(permissions);
+    }
+
+    private void onRequestPermissions(String... permissions) {
+        List<String> requestPermissions = new ArrayList<>();
+
+        for (String permission : permissions) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PERMISSION_GRANTED) {
+                //if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission))
+                requestPermissions.add(permission);
+            }
+        }
+
+        if (!requestPermissions.isEmpty()) {
+            ActivityCompat.requestPermissions(this,
+                    requestPermissions.toArray(new String[0]), MY_PERMISSIONS_REQUEST);
+        }
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode != MY_PERMISSIONS_REQUEST) {
+            return;
+        }
+
+        List<String> requestPermission = new ArrayList<>();
+        for (int i = 0; i < grantResults.length; i++) {
+            if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                requestPermission.add(permissions[i]);
+            }
+        }
+
+        onRequestPermissions(requestPermission.toArray(new String[0]));
     }
 
     @Override
@@ -114,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
                     public void onClick(DialogInterface dialogInterface, int i) {
                         LocalBroadcastManager broadcastManager =
                                 LocalBroadcastManager.getInstance(MainActivity.this);
-                        NoteDao noteDao = ((MyCustomApplication)getApplication()).getNoteDao();
+                        NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
 
                         AsyncTaskDeleteNote deleteNote =
                                 new AsyncTaskDeleteNote(broadcastManager, noteDao, note.getId());
@@ -130,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == EDIT_NOTE_REQUEST_CODE){
+        if (requestCode == EDIT_NOTE_REQUEST_CODE) {
             Intent intent = new Intent(this, LoadNoteService.class);
             stopService(intent);
         }
@@ -149,7 +195,7 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
                 mNotesReceiver, new IntentFilter(ACTION_REFRESH_NOTES));
 
         LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
-        NoteDao noteDao = ((MyCustomApplication)getApplication()).getNoteDao();
+        NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
 
         AsyncTaskRefreshNotes refreshNotes =
                 new AsyncTaskRefreshNotes(broadcastManager, noteDao);
@@ -164,5 +210,7 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
             List<Note> notes = intent.getParcelableArrayListExtra(NOTES);
             mRecyclerNoteAdapter.setNotes(notes);
         }
-    };
+    }
+
+    ;
 }
