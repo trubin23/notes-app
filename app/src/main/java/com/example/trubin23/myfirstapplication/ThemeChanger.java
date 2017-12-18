@@ -20,7 +20,7 @@ import static android.content.Context.MODE_PRIVATE;
 
 class ThemeChanger {
 
-    enum Theme {
+    private enum Theme {
         RED(R.style.AppThemeRed),
         GREEN(R.style.AppThemeGreen),
         BLUE(R.style.AppThemeBlue);

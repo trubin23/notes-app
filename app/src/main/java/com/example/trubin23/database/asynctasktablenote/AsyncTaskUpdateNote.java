@@ -1,9 +1,10 @@
-package com.example.trubin23.database;
+package com.example.trubin23.database.asynctasktablenote;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 
+import com.example.trubin23.database.NoteDao;
 import com.example.trubin23.myfirstapplication.MainActivity;
 import com.example.trubin23.myfirstapplication.Note;
 
@@ -14,24 +15,23 @@ import java.util.List;
  * Created by trubin23 on 15.12.17.
  */
 
-public class AsyncTaskDeleteNote extends AsyncTaskTableNote {
+public class AsyncTaskUpdateNote extends AsyncTaskTableNote {
 
-    private long mId;
+    private Note mNote;
 
-    public AsyncTaskDeleteNote(LocalBroadcastManager broadcastManager,
-                               NoteDao noteDao, long id) {
+    public AsyncTaskUpdateNote(@NonNull LocalBroadcastManager broadcastManager,
+                               @NonNull NoteDao noteDao, @NonNull Note note) {
         super(broadcastManager, noteDao);
-        mId = id;
+        mNote = note;
     }
 
-    @NonNull
     @Override
     protected Void doInBackground(Void... voids) {
-        mNoteDao.deleteNote(mId);
+        mNoteDao.updateNote(mNote);
         List<Note> notes = mNoteDao.getAllNote();
 
         Intent intent = new Intent(MainActivity.ACTION_REFRESH_NOTES);
-        intent.putParcelableArrayListExtra(MainActivity.NOTES, new ArrayList<Note>(notes));
+        intent.putParcelableArrayListExtra(MainActivity.NOTES, new ArrayList<>(notes));
         mBroadcastManager.sendBroadcast(intent);
 
         return null;

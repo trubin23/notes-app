@@ -19,8 +19,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.example.trubin23.database.AsyncTaskDeleteNote;
-import com.example.trubin23.database.AsyncTaskRefreshNotes;
+import com.example.trubin23.database.asynctasktablenote.AsyncTaskDeleteNote;
+import com.example.trubin23.database.asynctasktablenote.AsyncTaskRefreshNotes;
 import com.example.trubin23.database.NoteDao;
 
 import java.util.List;
