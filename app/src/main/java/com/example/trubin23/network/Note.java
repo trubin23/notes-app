@@ -12,12 +12,12 @@ public class Note {
     private String uid;
     @Json(name = "title")
     private String title;
-    @Json(name = "color")
-    private String color;
-    @Json(name = "destroy_date")
-    private Integer destroyDate;
     @Json(name = "content")
     private String content;
+    @Json(name = "color")
+    private String color = "#ffffff";
+    @Json(name = "destroy_date")
+    private Integer destroyDate = Integer.MAX_VALUE;
 
     public String getUid() {
         return uid;
@@ -35,6 +35,14 @@ public class Note {
         this.title = title;
     }
 
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
     public String getColor() {
         return color;
     }
@@ -49,14 +57,6 @@ public class Note {
 
     public void setDestroyDate(Integer destroyDate) {
         this.destroyDate = destroyDate;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
     }
 
 }

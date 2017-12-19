@@ -20,14 +20,14 @@ public interface SOService {
     @GET("/notes")
     @Headers({
             "Content-Type: application/json; charset=utf-8",
-            "Authorization: Bearer 1234567890"
+            "Authorization: Bearer Leonardo"
     })
     Call<List<Note>> getNotes();
 
     @GET("/notes/{uid}")
     @Headers({
             "Content-Type: application/json; charset=utf-8",
-            "Authorization: Bearer 1234567890"
+            "Authorization: Bearer Leonardo"
     })
     Call<Note> getNote(@Path("uid") String uid);
 
@@ -35,21 +35,21 @@ public interface SOService {
     @POST("/notes")
     @Headers({
             "Content-Type: application/json; charset=utf-8",
-            "Authorization: Bearer 1234567890"
+            "Authorization: Bearer Leonardo"
     })
     Call<Note> addNote(@Body Note note);
 
     @PUT("/notes/{uid}")
     @Headers({
             "Content-Type: application/json; charset=utf-8",
-            "Authorization: Bearer 1234567890"
+            "Authorization: Bearer Leonardo"
     })
     Call<Note> updateNote(@Path("uid") String uid, @Body Note note);
 
     @DELETE("/notes/{uid}")
     @Headers({
             "Content-Type: application/json; charset=utf-8",
-            "Authorization: Bearer 1234567890"
+            "Authorization: Bearer Leonardo"
     })
     Call<Note> deleteNote(@Path("uid") String uid);
 }
