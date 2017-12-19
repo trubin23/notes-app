@@ -1,15 +1,10 @@
 package com.example.trubin23.myfirstapplication;
 
-import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.example.trubin23.database.DatabaseHelper;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import com.squareup.moshi.Json;
 
 /**
  * Created by trubin23 on 29.11.17.
@@ -17,53 +12,35 @@ import java.util.Date;
 
 public class Note implements Parcelable {
 
-    static final String NOTE_ID = "note_id";
+    static final String NOTE_UID = "note_uid";
 
-    private long mId;
+    @Json(name = "uid")
+    private String mUid;
+    @Json(name = "title")
     private String mTitle;
-    private String mText;
-    private Date mDate;
+    @Json(name = "content")
+    private String mContent;
+    @Json(name = "color")
+    private String mColor = "#ffffff";
+    @Json(name = "destroy_date")
+    private Integer mDestroyDate = Integer.MAX_VALUE;
 
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
-
-    public Note(long id, @NonNull String title, @NonNull String text, @Nullable String date) {
-        mId = id;
+    public Note(@NonNull String uid, @NonNull String title, @NonNull String content,
+                @Nullable String color, @Nullable Integer destroyDate) {
+        mUid = uid;
         mTitle = title;
-        mText = text;
-
-        try {
-            mDate = DATE_FORMAT.parse(date);
-        } catch (ParseException | NullPointerException e) {
-            mDate =  new Date();
-        }
+        mContent = content;
+        mColor = color;
+        mDestroyDate = destroyDate;
     }
 
-    public Note(@NonNull String title, @NonNull String text, @Nullable String date) {
-        this(DatabaseHelper.DEFAULT_ID, title, text, date);
+    @NonNull
+    public String getUid() {
+        return mUid;
     }
 
-    private Note(@NonNull Parcel parcel) {
-        mId = parcel.readLong();
-        mTitle = parcel.readString();
-        mText = parcel.readString();
-        mDate = (Date) parcel.readSerializable();
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(@NonNull Parcel parcel, int i) {
-        parcel.writeLong(mId);
-        parcel.writeString(mTitle);
-        parcel.writeString(mText);
-        parcel.writeSerializable(mDate);
-    }
-
-    public long getId() {
-        return mId;
+    public void setUid(@NonNull String uid) {
+        mUid = uid;
     }
 
     @NonNull
@@ -71,29 +48,34 @@ public class Note implements Parcelable {
         return mTitle;
     }
 
-    @NonNull
-    public String getText() {
-        return mText;
+    public void setTitle(@NonNull String title) {
+        mTitle = title;
     }
 
     @NonNull
-    public String getDate() {
-        return DATE_FORMAT.format(mDate);
+    public String getContent() {
+        return mContent;
     }
 
-    void setText(@NonNull String text) {
-        mText = text;
+    public void setContent(@NonNull String content) {
+        mContent = content;
     }
 
-    public static final Creator<Note> CREATOR = new Creator<Note>() {
-        @Override
-        public Note createFromParcel(@NonNull Parcel in) {
-            return new Note(in);
-        }
+    @Nullable
+    public String getColor() {
+        return mColor;
+    }
 
-        @Override
-        public Note[] newArray(int size) {
-            return new Note[size];
-        }
-    };
+    public void setColor(@Nullable String color) {
+        mColor = color;
+    }
+
+    @Nullable
+    public Integer getDestroyDate() {
+        return mDestroyDate;
+    }
+
+    public void setDestroyDate(@Nullable Integer destroyDate) {
+        mDestroyDate = destroyDate;
+    }
 }

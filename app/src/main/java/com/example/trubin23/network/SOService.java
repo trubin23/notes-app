@@ -1,5 +1,7 @@
 package com.example.trubin23.network;
 
+import com.example.trubin23.myfirstapplication.Note;
+
 import java.util.List;
 
 import retrofit2.Call;

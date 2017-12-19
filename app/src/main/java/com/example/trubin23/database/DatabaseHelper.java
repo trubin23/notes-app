@@ -12,9 +12,11 @@ import com.example.trubin23.myfirstapplication.Note;
 
 import java.util.List;
 
-import static com.example.trubin23.database.NoteDao.COLUMN_NOTE_DATE;
-import static com.example.trubin23.database.NoteDao.COLUMN_NOTE_TEXT;
+import static com.example.trubin23.database.NoteDao.COLUMN_NOTE_COLOR;
+import static com.example.trubin23.database.NoteDao.COLUMN_NOTE_DESTROY_DATE;
+import static com.example.trubin23.database.NoteDao.COLUMN_NOTE_CONTENT;
 import static com.example.trubin23.database.NoteDao.COLUMN_NOTE_TITLE;
+import static com.example.trubin23.database.NoteDao.COLUMN_NOTE_UID;
 import static com.example.trubin23.database.NoteDao.TABLE_NOTE;
 import static com.example.trubin23.database.NoteDaoImpl.NOTE_CREATE_TABLE;
 
@@ -29,7 +31,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DB_NAME = "Notes.db";
     private static final int DB_VERSION = 1;
 
-    public static final long DEFAULT_ID = -1;
+    public static final String DEFAULT_ID = "00000000-0000-0000-0000-000000000000";
 
     private Context mContext;
 
@@ -54,9 +56,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         try {
             for (Note note : notes) {
                 ContentValues values = new ContentValues();
+                values.put(COLUMN_NOTE_UID, note.getUid());
                 values.put(COLUMN_NOTE_TITLE, note.getTitle());
-                values.put(COLUMN_NOTE_TEXT, note.getText());
-                values.put(COLUMN_NOTE_DATE, note.getDate());
+                values.put(COLUMN_NOTE_CONTENT, note.getContent());
+                values.put(COLUMN_NOTE_COLOR, note.getColor());
+                values.put(COLUMN_NOTE_DESTROY_DATE, note.getDestroyDate());
                 db.insert(TABLE_NOTE, null, values);
             }
             db.setTransactionSuccessful();

@@ -17,18 +17,18 @@ import java.util.List;
 
 public class AsyncTaskDeleteNote extends AsyncTaskTableNote {
 
-    private long mId;
+    private String mUid;
 
     public AsyncTaskDeleteNote(@NonNull LocalBroadcastManager broadcastManager,
-                               @NonNull NoteDao noteDao, long id) {
+                               @NonNull NoteDao noteDao, @NonNull String id) {
         super(broadcastManager, noteDao);
-        mId = id;
+        mUid = id;
     }
 
     @NonNull
     @Override
     protected Void doInBackground(Void... voids) {
-        mNoteDao.deleteNote(mId);
+        mNoteDao.deleteNote(mUid);
         List<Note> notes = mNoteDao.getAllNote();
 
         Intent intent = new Intent(MainActivity.ACTION_REFRESH_NOTES);

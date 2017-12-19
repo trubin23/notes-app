@@ -36,7 +36,7 @@ import butterknife.OnClick;
 import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 import static android.Manifest.permission.INTERNET;
 import static android.support.v4.content.PermissionChecker.PERMISSION_GRANTED;
-import static com.example.trubin23.myfirstapplication.Note.NOTE_ID;
+import static com.example.trubin23.myfirstapplication.Note.NOTE_UID;
 
 public class MainActivity extends AppCompatActivity implements NoteItemActionHandler {
 
@@ -144,7 +144,7 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
     @Override
     public void onEdit(@NonNull Note note) {
         Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
-        intent.putExtra(NOTE_ID, note.getId());
+        intent.putExtra(NOTE_UID, note.getId());
         startActivityForResult(intent, EDIT_NOTE_REQUEST_CODE);
     }
 

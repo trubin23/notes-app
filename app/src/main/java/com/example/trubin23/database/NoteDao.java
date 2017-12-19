@@ -14,27 +14,29 @@ import java.util.List;
 public interface NoteDao {
     String TABLE_NOTE = "note";
 
-    String COLUMN_NOTE_ID = "note_id";
+    String COLUMN_NOTE_UID = "note_uid";
     String COLUMN_NOTE_TITLE = "note_title";
-    String COLUMN_NOTE_TEXT = "note_text";
-    String COLUMN_NOTE_DATE = "note_date";
+    String COLUMN_NOTE_CONTENT = "note_content";
+    String COLUMN_NOTE_COLOR = "note_color";
+    String COLUMN_NOTE_DESTROY_DATE = "note_destroy_date";
 
     String[] COLUMNS = {
-            COLUMN_NOTE_ID,
+            COLUMN_NOTE_UID,
             COLUMN_NOTE_TITLE,
-            COLUMN_NOTE_TEXT,
-            COLUMN_NOTE_DATE
+            COLUMN_NOTE_CONTENT,
+            COLUMN_NOTE_COLOR,
+            COLUMN_NOTE_DESTROY_DATE
     };
 
     @Nullable
-    Note getNote(final long id);
+    Note getNote(@NonNull final String uid);
 
     @NonNull
     List<Note> getAllNote();
 
     void addNote(@NonNull final Note note);
 
-    void deleteNote(final long id);
+    void deleteNote(@NonNull final String uid);
 
     void updateNote(@NonNull final Note note);
 }

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.trubin23.database.DatabaseHelper.DEFAULT_ID;
-import static com.example.trubin23.myfirstapplication.Note.NOTE_ID;
+import static com.example.trubin23.myfirstapplication.Note.NOTE_UID;
 
 /**
  * Created by trubin23 on 18.12.17.
@@ -31,7 +31,7 @@ public class LoadNoteService extends IntentService {
             return;
         }
 
-        long noteId = intent.getLongExtra(NOTE_ID, DEFAULT_ID);
+        long noteId = intent.getLongExtra(NOTE_UID, DEFAULT_ID);
 
         LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
         NoteDao noteDao = ((MyCustomApplication)getApplication()).getNoteDao();

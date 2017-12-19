@@ -27,7 +27,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.example.trubin23.database.DatabaseHelper.DEFAULT_ID;
-import static com.example.trubin23.myfirstapplication.Note.NOTE_ID;
+import static com.example.trubin23.myfirstapplication.Note.NOTE_UID;
 
 public class EditNoteActivity extends AppCompatActivity {
 
@@ -80,7 +80,7 @@ public class EditNoteActivity extends AppCompatActivity {
         });
 
         Intent intent = getIntent();
-        mNoteId = intent.getLongExtra(NOTE_ID, DEFAULT_ID);
+        mNoteId = intent.getLongExtra(NOTE_UID, DEFAULT_ID);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -193,7 +193,7 @@ public class EditNoteActivity extends AppCompatActivity {
 
             if(mLoadNote == LoadNote.START) {
                 Intent intent = new Intent(this, LoadNoteService.class);
-                intent.putExtra(NOTE_ID, mNoteId);
+                intent.putExtra(NOTE_UID, mNoteId);
 
                 startService(intent);
 
