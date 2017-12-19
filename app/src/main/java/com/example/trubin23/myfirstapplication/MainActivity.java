@@ -103,7 +103,8 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         if (requestCode != MY_PERMISSIONS_REQUEST) {
             return;
         }

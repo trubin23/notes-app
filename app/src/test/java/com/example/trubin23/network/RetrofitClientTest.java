@@ -1,0 +1,184 @@
+package com.example.trubin23.network;
+
+import org.junit.Test;
+
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+/**
+ * Created by trubin23 on 19.12.17.
+ */
+public class RetrofitClientTest {
+
+    @Test
+    public void getNotes() {
+        final CountDownLatch signal = new CountDownLatch(1);
+
+        RetrofitClient.getNotes(new Callback<List<Note>>() {
+            @Override
+            public void onResponse(Call<List<Note>> call, Response<List<Note>> response) {
+
+                if (response.isSuccessful()) {
+                    List<Note> notes = response.body();
+                    signal.countDown();
+                } else {
+                    int statusCode = response.code();
+                    signal.countDown();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Note>> call, Throwable t) {
+                signal.countDown();
+            }
+        });
+
+        try {
+            signal.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void getNote() {
+        final CountDownLatch signal = new CountDownLatch(1);
+
+        RetrofitClient.getNote("10a9d8f8-e2e0-4b94-8699-1efd9ae84eeb", new Callback<Note>() {
+            @Override
+            public void onResponse(Call<Note> call, Response<Note> response) {
+
+                if (response.isSuccessful()) {
+                    Note note = response.body();
+                    signal.countDown();
+                } else {
+                    int statusCode = response.code();
+                    signal.countDown();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Note> call, Throwable t) {
+                signal.countDown();
+            }
+        });
+
+        try {
+            signal.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void addNote() {
+        final CountDownLatch signal = new CountDownLatch(1);
+
+        Note note = new Note();
+        note.setUid("d0a9d8f8-0002-4b94-8699-1efd9ae84eeb");
+        note.setTitle("title 0002");
+        note.setContent("content 0002");
+        note.setColor("#000200");
+        note.setDestroyDate(10002);
+
+        RetrofitClient.addNote(note, new Callback<Note>() {
+            @Override
+            public void onResponse(Call<Note> call, Response<Note> response) {
+
+                if (response.isSuccessful()) {
+                    Note responseNote = response.body();
+                    signal.countDown();
+                } else {
+                    int statusCode = response.code();
+                    signal.countDown();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Note> call, Throwable t) {
+                signal.countDown();
+            }
+        });
+
+        try {
+            signal.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void updateNote() {
+        final CountDownLatch signal = new CountDownLatch(1);
+
+        String uidUpdate = "d0a9d8f8-0002-4b94-8699-1efd9ae84eeb";
+
+        Note note = new Note();
+        note.setUid(uidUpdate);
+        note.setTitle("title 0104");
+        note.setContent("content 0104");
+        note.setColor("#010400");
+        note.setDestroyDate(10104);
+
+        RetrofitClient.updateNote(uidUpdate, note, new Callback<Note>() {
+            @Override
+            public void onResponse(Call<Note> call, Response<Note> response) {
+
+                if (response.isSuccessful()) {
+                    Note responseNote = response.body();
+                    signal.countDown();
+                } else {
+                    int statusCode = response.code();
+                    signal.countDown();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Note> call, Throwable t) {
+                signal.countDown();
+            }
+        });
+
+        try {
+            signal.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void deleteNote() {
+        final CountDownLatch signal = new CountDownLatch(1);
+
+        String uidUpdate = "10a9d8f8-e2e0-4b94-8699-1efd9ae84eeb";
+
+        RetrofitClient.deleteNote(uidUpdate, new Callback<Note>() {
+            @Override
+            public void onResponse(Call<Note> call, Response<Note> response) {
+
+                if (response.isSuccessful()) {
+                    Note responseNote = response.body();
+                    signal.countDown();
+                } else {
+                    int statusCode = response.code();
+                    signal.countDown();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Note> call, Throwable t) {
+                signal.countDown();
+            }
+        });
+
+        try {
+            signal.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
