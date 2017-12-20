@@ -8,7 +8,6 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
-import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
@@ -20,38 +19,17 @@ import retrofit2.http.Path;
 public interface SOService {
 
     @GET("/notes")
-    @Headers({
-            "Content-Type: application/json; charset=utf-8",
-            "Authorization: Bearer Leonardo"
-    })
     Call<List<Note>> getNotes();
 
     @GET("/notes/{uid}")
-    @Headers({
-            "Content-Type: application/json; charset=utf-8",
-            "Authorization: Bearer Leonardo"
-    })
     Call<Note> getNote(@Path("uid") String uid);
 
-
     @POST("/notes")
-    @Headers({
-            "Content-Type: application/json; charset=utf-8",
-            "Authorization: Bearer Leonardo"
-    })
     Call<Note> addNote(@Body Note note);
 
     @PUT("/notes/{uid}")
-    @Headers({
-            "Content-Type: application/json; charset=utf-8",
-            "Authorization: Bearer Leonardo"
-    })
     Call<Note> updateNote(@Path("uid") String uid, @Body Note note);
 
     @DELETE("/notes/{uid}")
-    @Headers({
-            "Content-Type: application/json; charset=utf-8",
-            "Authorization: Bearer Leonardo"
-    })
     Call<Note> deleteNote(@Path("uid") String uid);
 }

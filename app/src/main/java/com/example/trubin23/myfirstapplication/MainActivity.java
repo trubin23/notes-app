@@ -23,7 +23,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.example.trubin23.database.NoteDao;
-import com.example.trubin23.database.asynctasktablenote.AsyncTaskAddNote;
+import com.example.trubin23.database.asynctasktablenote.AsyncTaskAddNotes;
 import com.example.trubin23.database.asynctasktablenote.AsyncTaskDeleteNote;
 import com.example.trubin23.network.RestError;
 import com.example.trubin23.network.RetrofitClient;
@@ -211,11 +211,9 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
                     NoteDao noteDao = ((MyCustomApplication)getApplication()).getNoteDao();
 
                     if (notes != null) {
-                        for (Note note : notes) {
-                            AsyncTaskAddNote addNote =
-                                    new AsyncTaskAddNote(broadcastManager, noteDao, note);
-                            addNote.execute();
-                        }
+                        AsyncTaskAddNotes addNotes =
+                                new AsyncTaskAddNotes(broadcastManager, noteDao, notes);
+                        addNotes.execute();
                     }
                 } else {
                     RestError restError = RetrofitClient.convertRestError(response.errorBody());

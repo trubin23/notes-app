@@ -10,6 +10,10 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.List;
 
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import okhttp3.ResponseBody;
 import retrofit2.Callback;
 import retrofit2.Converter;
@@ -25,25 +29,39 @@ public class RetrofitClient {
     private static final String TAG = "RetrofitClient";
     private static final String BASE_URL = "http://notes.mrdekk.ru";
 
-    private static Retrofit mRetrofit = null;
+    private static SOService mSOService = null;
     private static Converter<ResponseBody, RestError> mConverter = null;
 
     @NonNull
-    private static Retrofit getClient(@NonNull String baseUrl) {
-        if (mRetrofit ==null) {
-            mRetrofit = new Retrofit.Builder()
-                    .baseUrl(baseUrl)
+    private static SOService getSOService() {
+        if (mSOService == null) {
+            OkHttpClient httpClient = new OkHttpClient().newBuilder().addInterceptor(
+                    new Interceptor() {
+                        @Override
+                        public Response intercept(Chain chain) throws IOException {
+                            Request request = chain.request();
+                            Request newRequest = request.newBuilder()
+                                    .addHeader("Content-Type", "application/json; charset=utf-8")
+                                    .addHeader("Authorization", "Bearer Leonardo")
+                                    .build();
+
+                            return chain.proceed(newRequest);
+                        }
+                    }
+            ).build();
+
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(BASE_URL)
+                    .client(httpClient)
                     .addConverterFactory(MoshiConverterFactory.create())
                     .build();
 
-            mConverter = mRetrofit
+            mSOService = retrofit.create(SOService.class);
+
+            mConverter = retrofit
                     .responseBodyConverter(RestError.class, new Annotation[0]);
         }
-        return mRetrofit;
-    }
-
-    private static SOService getSOService() {
-        return RetrofitClient.getClient(BASE_URL).create(SOService.class);
+        return mSOService;
     }
 
     @Nullable
