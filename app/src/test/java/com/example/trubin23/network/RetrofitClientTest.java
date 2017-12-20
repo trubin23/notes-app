@@ -1,5 +1,7 @@
 package com.example.trubin23.network;
 
+import com.example.trubin23.myfirstapplication.Note;
+
 import org.junit.Test;
 
 import java.util.List;
@@ -23,7 +25,6 @@ public class RetrofitClientTest {
         RetrofitClient.getNotes(new Callback<List<Note>>() {
             @Override
             public void onResponse(Call<List<Note>> call, Response<List<Note>> response) {
-
                 if (response.isSuccessful()) {
                     List<Note> notes = response.body();
                     signal.countDown();
@@ -53,7 +54,6 @@ public class RetrofitClientTest {
         RetrofitClient.getNote(mTempUid, new Callback<Note>() {
             @Override
             public void onResponse(Call<Note> call, Response<Note> response) {
-
                 if (response.isSuccessful()) {
                     Note note = response.body();
                     signal.countDown();
@@ -80,17 +80,14 @@ public class RetrofitClientTest {
     public void addNote() {
         final CountDownLatch signal = new CountDownLatch(1);
 
-        Note note = new Note();
-        note.setUid(mTempUid);
-        note.setTitle("title 0006");
-        note.setContent("content 0006");
+        Note note = new Note(mTempUid, "title 0006",
+                "content 0006", null, null);
         //note.setColor("#000200");
         //note.setDestroyDate(10002);
 
         RetrofitClient.addNote(note, new Callback<Note>() {
             @Override
             public void onResponse(Call<Note> call, Response<Note> response) {
-
                 if (response.isSuccessful()) {
                     Note responseNote = response.body();
                     signal.countDown();
@@ -117,17 +114,12 @@ public class RetrofitClientTest {
     public void updateNote() {
         final CountDownLatch signal = new CountDownLatch(1);
 
-        Note note = new Note();
-        note.setUid(mTempUid);
-        note.setTitle("title 0104");
-        note.setContent("content 0104");
-        note.setColor("#010400");
-        note.setDestroyDate(10104);
+        Note note = new Note(mTempUid, "title 0104", "content 0104",
+                "#010400", 10104);
 
         RetrofitClient.updateNote(mTempUid, note, new Callback<Note>() {
             @Override
             public void onResponse(Call<Note> call, Response<Note> response) {
-
                 if (response.isSuccessful()) {
                     Note responseNote = response.body();
                     signal.countDown();
@@ -157,7 +149,6 @@ public class RetrofitClientTest {
         RetrofitClient.deleteNote(mTempUid, new Callback<Note>() {
             @Override
             public void onResponse(Call<Note> call, Response<Note> response) {
-
                 if (response.isSuccessful()) {
                     Note responseNote = response.body();
                     signal.countDown();

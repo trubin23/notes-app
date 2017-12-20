@@ -28,7 +28,8 @@ public class RetrofitClient {
     private static Retrofit mRetrofit = null;
     private static Converter<ResponseBody, RestError> mConverter = null;
 
-    private static Retrofit getClient(String baseUrl) {
+    @NonNull
+    private static Retrofit getClient(@NonNull String baseUrl) {
         if (mRetrofit ==null) {
             mRetrofit = new Retrofit.Builder()
                     .baseUrl(baseUrl)
@@ -65,23 +66,23 @@ public class RetrofitClient {
         mService.getNotes().enqueue(callback);
     }
 
-    public static void getNote(@NonNull String uid, @NonNull Callback<Note> callback){
+    static void getNote(@NonNull String uid, @NonNull Callback<Note> callback){
         SOService mService = getSOService();
         mService.getNote(uid).enqueue(callback);
     }
 
-    public static void addNote(@NonNull Note note, @NonNull Callback<Note> callback){
+    static void addNote(@NonNull Note note, @NonNull Callback<Note> callback){
         SOService mService = getSOService();
         mService.addNote(note).enqueue(callback);
     }
 
-    public static void updateNote(@NonNull String uid,
+    static void updateNote(@NonNull String uid,
                                   @NonNull Note note, @NonNull Callback<Note> callback){
         SOService mService = getSOService();
         mService.updateNote(uid, note).enqueue(callback);
     }
 
-    public static void deleteNote(@NonNull String uid, @NonNull Callback<Note> callback){
+    static void deleteNote(@NonNull String uid, @NonNull Callback<Note> callback){
         SOService mService = getSOService();
         mService.deleteNote(uid).enqueue(callback);
     }

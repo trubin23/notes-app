@@ -46,21 +46,18 @@ public class InitializeData {
     private static List<Note> jsonToListNotes(@NonNull String json) {
         Moshi moshi = new Moshi.Builder().build();
 
-        Type listOfCardsType = Types.newParameterizedType(List.class, NoteParse.class);
-        JsonAdapter<List<NoteParse>> jsonAdapter = moshi.adapter(listOfCardsType);
+        Type listOfCardsType = Types.newParameterizedType(List.class, Note.class);
+        JsonAdapter<List<Note>> jsonAdapter = moshi.adapter(listOfCardsType);
 
-        List<Note> notes = new ArrayList<>();
         try {
-            List<NoteParse> noteParseList = jsonAdapter.fromJson(json);
-            if (noteParseList != null) {
-                for (NoteParse noteParse : noteParseList) {
-                    notes.add(new Note(noteParse.mTitle, noteParse.mText, noteParse.mDate));
-                }
+            List<Note> noteList = jsonAdapter.fromJson(json);
+            if (noteList != null) {
+                return noteList;
             }
         } catch (IOException e) {
             Log.e(LOG, "private static List<Note> jsonToListNotes(@NonNull String json)", e);
         }
 
-        return notes;
+        return new ArrayList<>();
     }
 }

@@ -31,12 +31,15 @@ public class LoadNoteService extends IntentService {
             return;
         }
 
-        long noteId = intent.getLongExtra(NOTE_UID, DEFAULT_ID);
+        String noteUid = intent.getStringExtra(NOTE_UID);
+        if (noteUid == null){
+            noteUid = DEFAULT_ID;
+        }
 
         LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
         NoteDao noteDao = ((MyCustomApplication)getApplication()).getNoteDao();
 
-        Note note = noteDao.getNote(noteId);
+        Note note = noteDao.getNote(noteUid);
 
         List<Note> notes = new ArrayList<>();
         notes.add(note);

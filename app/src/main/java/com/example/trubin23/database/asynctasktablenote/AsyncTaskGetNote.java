@@ -21,17 +21,17 @@ import java.util.List;
 @Deprecated
 public class AsyncTaskGetNote extends AsyncTaskTableNote {
 
-    private long mId;
+    private String mUid;
 
     public AsyncTaskGetNote(@NonNull LocalBroadcastManager broadcastManager,
-                            @NonNull NoteDao noteDao, long id) {
+                            @NonNull NoteDao noteDao, @NonNull String uid) {
         super(broadcastManager, noteDao);
-        mId = id;
+        mUid = uid;
     }
 
     @Override
     protected Void doInBackground(Void... voids) {
-        Note note = mNoteDao.getNote(mId);
+        Note note = mNoteDao.getNote(mUid);
         List<Note> notes = new ArrayList<>();
         notes.add(note);
 

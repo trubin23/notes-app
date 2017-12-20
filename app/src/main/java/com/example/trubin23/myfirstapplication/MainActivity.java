@@ -23,8 +23,10 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.example.trubin23.database.NoteDao;
+import com.example.trubin23.database.asynctasktablenote.AsyncTaskAddNote;
 import com.example.trubin23.database.asynctasktablenote.AsyncTaskDeleteNote;
-import com.example.trubin23.database.asynctasktablenote.AsyncTaskRefreshNotes;
+import com.example.trubin23.network.RestError;
+import com.example.trubin23.network.RetrofitClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +34,9 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 import static android.Manifest.permission.INTERNET;
@@ -144,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
     @Override
     public void onEdit(@NonNull Note note) {
         Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
-        intent.putExtra(NOTE_UID, note.getId());
+        intent.putExtra(NOTE_UID, note.getUid());
         startActivityForResult(intent, EDIT_NOTE_REQUEST_CODE);
     }
 
@@ -164,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
                         NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
 
                         AsyncTaskDeleteNote deleteNote =
-                                new AsyncTaskDeleteNote(broadcastManager, noteDao, note.getId());
+                                new AsyncTaskDeleteNote(broadcastManager, noteDao, note.getUid());
                         deleteNote.execute();
                     }
                 });
@@ -195,12 +200,34 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 mNotesReceiver, new IntentFilter(ACTION_REFRESH_NOTES));
 
-        LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
-        NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
+        RetrofitClient.getNotes(new Callback<List<Note>>() {
+            @Override
+            public void onResponse(Call<List<Note>> call, Response<List<Note>> response) {
+                if (response.isSuccessful()) {
+                    List<Note> notes = response.body();
 
-        AsyncTaskRefreshNotes refreshNotes =
-                new AsyncTaskRefreshNotes(broadcastManager, noteDao);
-        refreshNotes.execute();
+                    LocalBroadcastManager broadcastManager =
+                            LocalBroadcastManager.getInstance(getApplicationContext());
+                    NoteDao noteDao = ((MyCustomApplication)getApplication()).getNoteDao();
+
+                    if (notes != null) {
+                        for (Note note : notes) {
+                            AsyncTaskAddNote addNote =
+                                    new AsyncTaskAddNote(broadcastManager, noteDao, note);
+                            addNote.execute();
+                        }
+                    }
+                } else {
+                    RestError restError = RetrofitClient.convertRestError(response.errorBody());
+                    //error processing
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Note>> call, Throwable t) {
+                //message about error
+            }
+        });
 
         super.onResume();
     }
@@ -211,7 +238,5 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
             List<Note> notes = intent.getParcelableArrayListExtra(NOTES);
             mRecyclerNoteAdapter.setNotes(notes);
         }
-    }
-
-    ;
+    };
 }

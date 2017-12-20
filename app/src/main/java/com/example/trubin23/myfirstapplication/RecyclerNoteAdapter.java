@@ -11,7 +11,9 @@ import android.widget.TextView;
 import com.example.trubin23.database.DatabaseHelper;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -42,13 +44,14 @@ public class RecyclerNoteAdapter extends RecyclerView.Adapter<RecyclerNoteAdapte
         final Note note = mNotes.get(position);
 
         holder.noteTitle.setText(note.getTitle());
-        holder.noteText.setText(note.getText());
-        holder.noteDate.setText(note.getDate());
+        holder.noteText.setText(note.getContent());
+        Date destroyDate = new Date((long) note.getDestroyDate() * 1000);
+        holder.noteDate.setText(destroyDate.toString());
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(mActionHandler != null) {
+                if (mActionHandler != null) {
                     mActionHandler.onEdit(note);
                 }
             }
@@ -57,12 +60,12 @@ public class RecyclerNoteAdapter extends RecyclerView.Adapter<RecyclerNoteAdapte
         holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                if(mActionHandler != null) {
+                if (mActionHandler != null) {
                     final int itemPosition = holder.getAdapterPosition();
                     mActionHandler.onDelete(note, itemPosition);
 
                     return true;
-                } else{
+                } else {
                     return false;
                 }
             }
@@ -87,14 +90,14 @@ public class RecyclerNoteAdapter extends RecyclerView.Adapter<RecyclerNoteAdapte
     /**
      * Sets a new list of notes in the RecyclerView
      *
-     * @param notes note.getId() must not be equal to Note.DEFAULT_ID
+     * @param notes note.getUid() must not be equal to DatabaseHelper.DEFAULT_ID
      */
     void setNotes(@Nullable List<Note> notes) {
         mNotes = new ArrayList<>();
 
         if (notes != null) {
             for (Note note : notes) {
-                if (note.getId() != DatabaseHelper.DEFAULT_ID) {
+                if (!Objects.equals(note.getUid(), DatabaseHelper.DEFAULT_ID)) {
                     mNotes.add(note);
                 }
             }
@@ -104,7 +107,7 @@ public class RecyclerNoteAdapter extends RecyclerView.Adapter<RecyclerNoteAdapte
     }
 
     boolean addNote(@NonNull Note note) {
-        if (note.getId() != DatabaseHelper.DEFAULT_ID) {
+        if (!Objects.equals(note.getUid(), DatabaseHelper.DEFAULT_ID)) {
             mNotes.add(note);
             notifyItemInserted(mNotes.size() - 1);
 

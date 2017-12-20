@@ -1,5 +1,6 @@
 package com.example.trubin23.myfirstapplication;
 
+import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,6 +15,9 @@ public class Note implements Parcelable {
 
     static final String NOTE_UID = "note_uid";
 
+    private static final String DEFAULT_COLOR = "#ffffff";
+    private static final Integer DEFAULT_DESTROY_DATE = Integer.MAX_VALUE;
+
     @Json(name = "uid")
     private String mUid;
     @Json(name = "title")
@@ -21,17 +25,33 @@ public class Note implements Parcelable {
     @Json(name = "content")
     private String mContent;
     @Json(name = "color")
-    private String mColor = "#ffffff";
+    private String mColor = DEFAULT_COLOR;
     @Json(name = "destroy_date")
-    private Integer mDestroyDate = Integer.MAX_VALUE;
+    private Integer mDestroyDate = DEFAULT_DESTROY_DATE;
 
     public Note(@NonNull String uid, @NonNull String title, @NonNull String content,
                 @Nullable String color, @Nullable Integer destroyDate) {
         mUid = uid;
         mTitle = title;
         mContent = content;
-        mColor = color;
-        mDestroyDate = destroyDate;
+        if (color != null) {
+            mColor = color;
+        }
+        if (destroyDate != null) {
+            mDestroyDate = destroyDate;
+        }
+    }
+
+    @SuppressWarnings("unused") // Moshi uses this!
+    private Note(){
+    }
+
+    public Note(@NonNull Parcel in) {
+        mUid = in.readString();
+        mTitle = in.readString();
+        mContent = in.readString();
+        mColor = in.readString();
+        mDestroyDate = in.readInt();
     }
 
     @NonNull
@@ -61,21 +81,55 @@ public class Note implements Parcelable {
         mContent = content;
     }
 
-    @Nullable
+    @NonNull
     public String getColor() {
         return mColor;
     }
 
     public void setColor(@Nullable String color) {
-        mColor = color;
+        if (color != null) {
+            mColor = color;
+        } else {
+            mColor = DEFAULT_COLOR;
+        }
     }
 
-    @Nullable
+    @NonNull
     public Integer getDestroyDate() {
         return mDestroyDate;
     }
 
     public void setDestroyDate(@Nullable Integer destroyDate) {
-        mDestroyDate = destroyDate;
+        if (destroyDate != null) {
+            mDestroyDate = destroyDate;
+        } else {
+            mDestroyDate = DEFAULT_DESTROY_DATE;
+        }
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel parcel, int flags) {
+        parcel.writeString(mUid);
+        parcel.writeString(mTitle);
+        parcel.writeString(mContent);
+        parcel.writeString(mColor);
+        parcel.writeInt(mDestroyDate);
+    }
+
+    public static final Creator<Note> CREATOR = new Creator<Note>() {
+        @Override
+        public Note createFromParcel(@NonNull Parcel in) {
+            return new Note(in);
+        }
+
+        @Override
+        public Note[] newArray(int size) {
+            return new Note[size];
+        }
+    };
 }

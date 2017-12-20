@@ -22,6 +22,7 @@ import com.example.trubin23.database.asynctasktablenote.AsyncTaskAddNote;
 import com.example.trubin23.database.asynctasktablenote.AsyncTaskUpdateNote;
 
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -47,7 +48,7 @@ public class EditNoteActivity extends AppCompatActivity {
     ProgressBar mProgressBar;
 
     private MenuItem mAcceptMenuItem;
-    private long mNoteId;
+    private String mNoteUid;
 
     private NoteReceiver mNoteReceiver;
 
@@ -80,14 +81,17 @@ public class EditNoteActivity extends AppCompatActivity {
         });
 
         Intent intent = getIntent();
-        mNoteId = intent.getLongExtra(NOTE_UID, DEFAULT_ID);
+        mNoteUid = intent.getStringExtra(NOTE_UID);
+        if (mNoteUid == null){
+            mNoteUid = DEFAULT_ID;
+        }
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
 
             if (savedInstanceState==null) {
-                if (mNoteId == DEFAULT_ID) {
+                if (mNoteUid == DEFAULT_ID) {
                     actionBar.setTitle(R.string.new_note);
                 } else {
                     actionBar.setTitle(R.string.load_note);
@@ -149,13 +153,13 @@ public class EditNoteActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (R.id.action_accept == item.getItemId()) {
-            Note note = new Note(mNoteId, mEditTitle.getText().toString(),
-                    mEditText.getText().toString(), null);
+            Note note = new Note(mNoteUid, mEditTitle.getText().toString(),
+                    mEditText.getText().toString(), null, null);
 
             LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
             NoteDao noteDao = ((MyCustomApplication)getApplication()).getNoteDao();
 
-            if (mNoteId == DEFAULT_ID){
+            if (Objects.equals(mNoteUid, DEFAULT_ID)){
                 AsyncTaskAddNote addNote =
                         new AsyncTaskAddNote(broadcastManager, noteDao, note);
                 addNote.execute();
@@ -182,7 +186,7 @@ public class EditNoteActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 mNoteReceiver, new IntentFilter(ACTION_REFRESH_NOTE));
 
-        if (mNoteId != DEFAULT_ID) {
+        if (mNoteUid != DEFAULT_ID) {
             mInfoTitle.setVisibility(View.GONE);
             mEditTitle.setVisibility(View.GONE);
 
@@ -193,7 +197,7 @@ public class EditNoteActivity extends AppCompatActivity {
 
             if(mLoadNote == LoadNote.START) {
                 Intent intent = new Intent(this, LoadNoteService.class);
-                intent.putExtra(NOTE_UID, mNoteId);
+                intent.putExtra(NOTE_UID, mNoteUid);
 
                 startService(intent);
 
@@ -225,7 +229,7 @@ public class EditNoteActivity extends AppCompatActivity {
             mLoadNote = LoadNote.FINISH;
 
             mEditTitle.setText(note.getTitle());
-            mEditText.setText(note.getText());
+            mEditText.setText(note.getContent());
             mEditText.setEnabled(true);
             mProgressBar.setVisibility(View.GONE);
 
