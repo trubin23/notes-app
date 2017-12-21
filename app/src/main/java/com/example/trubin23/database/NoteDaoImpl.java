@@ -43,11 +43,11 @@ public class NoteDaoImpl implements NoteDao {
         SQLiteDatabase db = mDbOpenHelper.getReadableDatabase();
         db.beginTransaction();
         try {
-            try {
-                Thread.sleep(7000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                Thread.sleep(7000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
             Cursor cursor = db.rawQuery(QUERY_NOTE, new String[]{uid});
 
             if (cursor.moveToFirst()) {
@@ -136,7 +136,6 @@ public class NoteDaoImpl implements NoteDao {
     @Override
     public void deleteNote(@NonNull final String uid) {
         SQLiteDatabase db = mDbOpenHelper.getWritableDatabase();
-
         db.beginTransaction();
         try {
             db.delete(TABLE_NOTE, COLUMN_NOTE_UID + " = ?",

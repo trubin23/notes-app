@@ -8,14 +8,13 @@ import com.example.trubin23.database.NoteDao;
 import com.example.trubin23.myfirstapplication.MainActivity;
 import com.example.trubin23.myfirstapplication.Note;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by trubin23 on 20.12.17.
  */
 
-public class AsyncTaskAddNotes extends AsyncTaskTableNote {
+public class AsyncTaskAddNotes extends AsyncTaskBase {
 
     private List<Note> mNotes;
 
@@ -30,10 +29,8 @@ public class AsyncTaskAddNotes extends AsyncTaskTableNote {
         for (Note note : mNotes) {
             mNoteDao.addNote(note);
         }
-        List<Note> notes = mNoteDao.getAllNote();
 
-        Intent intent = new Intent(MainActivity.ACTION_REFRESH_NOTES);
-        intent.putParcelableArrayListExtra(MainActivity.NOTES, new ArrayList<>(notes));
+        Intent intent = new Intent(MainActivity.ACTION_CHANGED_DB);
         mBroadcastManager.sendBroadcast(intent);
 
         return null;

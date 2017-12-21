@@ -9,13 +9,13 @@ import com.example.trubin23.database.NoteDao;
  * Created by trubin23 on 15.12.17.
  */
 
-abstract class AsyncTaskTableNote extends AsyncTask<Void, Void, Void> {
+abstract class AsyncTaskBase extends AsyncTask<Void, Void, Void> {
 
     LocalBroadcastManager mBroadcastManager;
     NoteDao mNoteDao;
 
-    AsyncTaskTableNote(@NonNull LocalBroadcastManager broadcastManager,
-                       @NonNull NoteDao noteDao){
+    AsyncTaskBase(@NonNull LocalBroadcastManager broadcastManager,
+                  @NonNull NoteDao noteDao){
         mBroadcastManager = broadcastManager;
         mNoteDao = noteDao;
     }

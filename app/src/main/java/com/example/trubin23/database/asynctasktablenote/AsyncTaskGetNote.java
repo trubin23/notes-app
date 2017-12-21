@@ -3,12 +3,10 @@ package com.example.trubin23.database.asynctasktablenote;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
+
 import com.example.trubin23.database.NoteDao;
 import com.example.trubin23.myfirstapplication.EditNoteActivity;
 import com.example.trubin23.myfirstapplication.Note;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Andrey on 18.12.2017.
@@ -19,7 +17,7 @@ import java.util.List;
  */
 
 @Deprecated
-public class AsyncTaskGetNote extends AsyncTaskTableNote {
+public class AsyncTaskGetNote extends AsyncTaskBase {
 
     private String mUid;
 
@@ -32,11 +30,9 @@ public class AsyncTaskGetNote extends AsyncTaskTableNote {
     @Override
     protected Void doInBackground(Void... voids) {
         Note note = mNoteDao.getNote(mUid);
-        List<Note> notes = new ArrayList<>();
-        notes.add(note);
 
-        Intent intent = new Intent(EditNoteActivity.ACTION_REFRESH_NOTE);
-        intent.putParcelableArrayListExtra(EditNoteActivity.NOTE, new ArrayList<>(notes));
+        Intent intent = new Intent(EditNoteActivity.ACTION_GET_EDIT_NOTE);
+        intent.putExtra(EditNoteActivity.NOTE, note);
         mBroadcastManager.sendBroadcast(intent);
 
         return null;
