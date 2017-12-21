@@ -11,6 +11,7 @@ import com.example.trubin23.database.NoteDao;
 import com.example.trubin23.database.asynctasktablenote.AsyncTaskAddNote;
 import com.example.trubin23.database.asynctasktablenote.AsyncTaskAddNotes;
 import com.example.trubin23.database.asynctasktablenote.AsyncTaskDeleteNote;
+import com.example.trubin23.database.asynctasktablenote.AsyncTaskRefreshNotes;
 import com.example.trubin23.database.asynctasktablenote.AsyncTaskUpdateNote;
 import com.example.trubin23.network.RestError;
 import com.example.trubin23.network.RetrofitClient;
@@ -27,15 +28,14 @@ import retrofit2.Response;
 
 class SyncWithServer {
 
-    enum ResponseState{
+    enum ResponseState {
         Success,
         UnknownResponseBody,
         ErrorCode,
         NetworkError
     }
 
-    static void notesSync(@NonNull final Context appContext,
-                          @NonNull final NoteDao noteDao){
+    static void notesSync(@NonNull final Context appContext, @NonNull final NoteDao noteDao) {
         RetrofitClient.getNotes(new Callback<List<Note>>() {
             final String eventName = appContext.getResources().getString(R.string.notes_sync);
 
@@ -43,13 +43,12 @@ class SyncWithServer {
             public void onResponse(Call<List<Note>> call, Response<List<Note>> response) {
                 ResponseState responseState = ResponseState.Success;
 
+                LocalBroadcastManager broadcastManager =
+                        LocalBroadcastManager.getInstance(appContext);
+
                 if (response.isSuccessful()) {
                     List<Note> notes = response.body();
-
                     if (notes != null) {
-                        LocalBroadcastManager broadcastManager =
-                                LocalBroadcastManager.getInstance(appContext);
-
                         AsyncTaskAddNotes addNotes =
                                 new AsyncTaskAddNotes(broadcastManager, noteDao, notes);
                         addNotes.execute();
@@ -59,6 +58,12 @@ class SyncWithServer {
                 } else {
                     RestError restError = RetrofitClient.convertRestError(response.errorBody());
                     responseState = ResponseState.ErrorCode;
+                }
+
+                if (responseState != ResponseState.Success) {
+                    AsyncTaskRefreshNotes refreshNotes =
+                            new AsyncTaskRefreshNotes(broadcastManager, noteDao);
+                    refreshNotes.execute();
                 }
 
                 toastShow(appContext, eventName, responseState, response.code());
@@ -109,7 +114,7 @@ class SyncWithServer {
     }
 
     static void updateNote(@NonNull final Context appContext,
-                        @NonNull final NoteDao noteDao, @NonNull final Note note) {
+                           @NonNull final NoteDao noteDao, @NonNull final Note note) {
         RetrofitClient.updateNote(note, new Callback<Note>() {
             final String eventName = appContext.getResources().getString(R.string.note_updated);
 
@@ -187,16 +192,16 @@ class SyncWithServer {
                                   @Nullable Integer responseCode) {
         Resources res = appContext.getResources();
 
-        switch (responseState){
+        switch (responseState) {
             case Success:
                 Toast.makeText(appContext,
-                        eventName + "\n"+ res.getString(R.string.success),
+                        eventName + "\n" + res.getString(R.string.success),
                         Toast.LENGTH_SHORT).show();
                 break;
 
             case UnknownResponseBody:
                 Toast.makeText(appContext,
-                        eventName + "\n"+ res.getString(R.string.unknown_response_body),
+                        eventName + "\n" + res.getString(R.string.unknown_response_body),
                         Toast.LENGTH_SHORT).show();
                 break;
 

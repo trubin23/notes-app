@@ -15,7 +15,7 @@ import java.util.List;
  * Created by trubin23 on 15.12.17.
  */
 
-public class AsyncTaskRefreshNotes extends AsyncTaskTableNote {
+public class AsyncTaskRefreshNotes extends AsyncTaskBase {
 
     public AsyncTaskRefreshNotes(@NonNull LocalBroadcastManager broadcastManager,
                                  @NonNull NoteDao noteDao) {

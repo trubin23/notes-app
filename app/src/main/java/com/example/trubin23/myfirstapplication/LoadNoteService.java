@@ -7,10 +7,6 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import com.example.trubin23.database.NoteDao;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.example.trubin23.database.DatabaseHelper.DEFAULT_ID;
 import static com.example.trubin23.myfirstapplication.Note.NOTE_UID;
 
 /**
@@ -33,7 +29,7 @@ public class LoadNoteService extends IntentService {
 
         String noteUid = intent.getStringExtra(NOTE_UID);
         if (noteUid == null){
-            noteUid = DEFAULT_ID;
+            return;
         }
 
         LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
@@ -41,11 +37,8 @@ public class LoadNoteService extends IntentService {
 
         Note note = noteDao.getNote(noteUid);
 
-        List<Note> notes = new ArrayList<>();
-        notes.add(note);
-
-        Intent intentResult = new Intent(EditNoteActivity.ACTION_REFRESH_NOTE);
-        intentResult.putParcelableArrayListExtra(EditNoteActivity.NOTE, new ArrayList<>(notes));
+        Intent intentResult = new Intent(EditNoteActivity.ACTION_GET_EDIT_NOTE);
+        intentResult.putExtra(EditNoteActivity.NOTE, note);
         broadcastManager.sendBroadcast(intentResult);
     }
 }

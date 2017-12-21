@@ -40,6 +40,7 @@ import static com.example.trubin23.myfirstapplication.Note.NOTE_UID;
 public class MainActivity extends AppCompatActivity implements NoteItemActionHandler {
 
     public static final String ACTION_REFRESH_NOTES = "action-refresh-notes";
+    public static final String ACTION_CHANGED_DB = "action-changed_db";
     public static final String NOTES = "notes";
 
     private static final int EDIT_NOTE_REQUEST_CODE = 1;
@@ -49,7 +50,8 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
     RecyclerView mRecyclerView;
     private RecyclerNoteAdapter mRecyclerNoteAdapter;
 
-    private NotesReceiver mNotesReceiver;
+    private ChangedDbReceiver mChangedDbReceiver;
+    private RefreshNotesReceiver mRefreshNotesReceiver;
 
     private boolean mFirstStart;
 
@@ -81,7 +83,8 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
         mRecyclerNoteAdapter = new RecyclerNoteAdapter(this);
         mRecyclerView.setAdapter(mRecyclerNoteAdapter);
 
-        mNotesReceiver = new NotesReceiver();
+        mChangedDbReceiver = new ChangedDbReceiver();
+        mRefreshNotesReceiver = new RefreshNotesReceiver();
 
         String[] permissions = {INTERNET, ACCESS_NETWORK_STATE};
 
@@ -183,17 +186,21 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
 
     @Override
     protected void onResume() {
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-                mNotesReceiver, new IntentFilter(ACTION_REFRESH_NOTES));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mChangedDbReceiver,
+                new IntentFilter(ACTION_CHANGED_DB));
 
-        NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
+        LocalBroadcastManager.getInstance(this).registerReceiver(mRefreshNotesReceiver,
+                new IntentFilter(ACTION_REFRESH_NOTES));
+
 
         if (mFirstStart) {
             mFirstStart = false;
 
+            NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
             SyncWithServer.notesSync(getApplicationContext(), noteDao);
         } else {
             LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
+            NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
 
             AsyncTaskRefreshNotes refreshNotes =
                     new AsyncTaskRefreshNotes(broadcastManager, noteDao);
@@ -205,18 +212,29 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
 
     @Override
     protected void onPause() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(
-                mNotesReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mChangedDbReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mRefreshNotesReceiver);
         super.onPause();
     }
 
-    private class NotesReceiver extends BroadcastReceiver {
+    private class ChangedDbReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            LocalBroadcastManager broadcastManager =
+                    LocalBroadcastManager.getInstance(getApplicationContext());
+            NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
+
+            AsyncTaskRefreshNotes refreshNotes =
+                    new AsyncTaskRefreshNotes(broadcastManager, noteDao);
+            refreshNotes.execute();
+        }
+    };
+
+    private class RefreshNotesReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             List<Note> notes = intent.getParcelableArrayListExtra(NOTES);
             mRecyclerNoteAdapter.setNotes(notes);
         }
-    }
-
-    ;
+    };
 }

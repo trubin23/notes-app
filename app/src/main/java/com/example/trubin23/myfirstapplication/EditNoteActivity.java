@@ -19,7 +19,6 @@ import android.widget.TextView;
 
 import com.example.trubin23.database.NoteDao;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -31,7 +30,7 @@ import static com.example.trubin23.myfirstapplication.Note.NOTE_UID;
 
 public class EditNoteActivity extends AppCompatActivity {
 
-    public static final String ACTION_REFRESH_NOTE = "action-refresh-note";
+    public static final String ACTION_GET_EDIT_NOTE = "action-get-edit-note";
     public static final String NOTE = "note";
 
     private static final String ACTION_BAR_TITLE = "action_bar_title";
@@ -56,7 +55,7 @@ public class EditNoteActivity extends AppCompatActivity {
     private enum LoadNote {
         START,
         PROCESS,
-        FINISH;
+        FINISH
     }
 
     @Override
@@ -90,7 +89,7 @@ public class EditNoteActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
 
             if (savedInstanceState==null) {
-                if (mNoteUid == DEFAULT_ID) {
+                if (Objects.equals(mNoteUid, DEFAULT_ID)) {
                     actionBar.setTitle(R.string.new_note);
                 } else {
                     actionBar.setTitle(R.string.load_note);
@@ -182,7 +181,7 @@ public class EditNoteActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         LocalBroadcastManager.getInstance(this).registerReceiver(
-                mNoteReceiver, new IntentFilter(ACTION_REFRESH_NOTE));
+                mNoteReceiver, new IntentFilter(ACTION_GET_EDIT_NOTE));
 
         if (!Objects.equals(mNoteUid, DEFAULT_ID)) {
             mInfoTitle.setVisibility(View.GONE);
@@ -209,13 +208,7 @@ public class EditNoteActivity extends AppCompatActivity {
     private class NoteReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            List<Note> notes = intent.getParcelableArrayListExtra(NOTE);
-
-            if (notes == null || notes.isEmpty()) {
-                return;
-            }
-
-            Note note = notes.get(0);
+            Note note = intent.getParcelableExtra(NOTE);
             if (note == null) {
                 return;
             }
@@ -232,7 +225,7 @@ public class EditNoteActivity extends AppCompatActivity {
                 actionBar.setTitle(note.getTitle());
             }
         }
-    };
+    }
 
     private static class SimpleTextWatcher implements TextWatcher {
         @Override
