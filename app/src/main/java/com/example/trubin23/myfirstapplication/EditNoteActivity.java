@@ -18,11 +18,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.trubin23.database.NoteDao;
-import com.example.trubin23.database.asynctasktablenote.AsyncTaskAddNote;
-import com.example.trubin23.database.asynctasktablenote.AsyncTaskUpdateNote;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -153,20 +152,19 @@ public class EditNoteActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (R.id.action_accept == item.getItemId()) {
-            Note note = new Note(mNoteUid, mEditTitle.getText().toString(),
+            String noteUid = mNoteUid;
+            if (Objects.equals(mNoteUid, DEFAULT_ID)){
+                noteUid = UUID.randomUUID().toString();
+            }
+            Note note = new Note(noteUid, mEditTitle.getText().toString(),
                     mEditText.getText().toString(), null, null);
 
-            LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
             NoteDao noteDao = ((MyCustomApplication)getApplication()).getNoteDao();
 
             if (Objects.equals(mNoteUid, DEFAULT_ID)){
-                AsyncTaskAddNote addNote =
-                        new AsyncTaskAddNote(broadcastManager, noteDao, note);
-                addNote.execute();
+                SyncWithServer.addNote(getApplicationContext(), noteDao, note);
             } else {
-                AsyncTaskUpdateNote updateNote =
-                        new AsyncTaskUpdateNote(broadcastManager, noteDao, note);
-                updateNote.execute();
+                SyncWithServer.updateNote(getApplicationContext(), noteDao, note);
             }
         }
 
@@ -186,7 +184,7 @@ public class EditNoteActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 mNoteReceiver, new IntentFilter(ACTION_REFRESH_NOTE));
 
-        if (mNoteUid != DEFAULT_ID) {
+        if (!Objects.equals(mNoteUid, DEFAULT_ID)) {
             mInfoTitle.setVisibility(View.GONE);
             mEditTitle.setVisibility(View.GONE);
 
@@ -213,11 +211,7 @@ public class EditNoteActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             List<Note> notes = intent.getParcelableArrayListExtra(NOTE);
 
-            if (notes == null) {
-                return;
-            }
-
-            if (notes.isEmpty()) {
+            if (notes == null || notes.isEmpty()) {
                 return;
             }
 

@@ -89,18 +89,17 @@ public class RetrofitClient {
         mService.getNote(uid).enqueue(callback);
     }
 
-    static void addNote(@NonNull Note note, @NonNull Callback<Note> callback){
+    public static void addNote(@NonNull Note note, @NonNull Callback<Note> callback){
         SOService mService = getSOService();
         mService.addNote(note).enqueue(callback);
     }
 
-    static void updateNote(@NonNull String uid,
-                                  @NonNull Note note, @NonNull Callback<Note> callback){
+    public static void updateNote(@NonNull Note note, @NonNull Callback<Note> callback){
         SOService mService = getSOService();
-        mService.updateNote(uid, note).enqueue(callback);
+        mService.updateNote(note.getUid(), note).enqueue(callback);
     }
 
-    static void deleteNote(@NonNull String uid, @NonNull Callback<Note> callback){
+    public static void deleteNote(@NonNull String uid, @NonNull Callback<Note> callback){
         SOService mService = getSOService();
         mService.deleteNote(uid).enqueue(callback);
     }

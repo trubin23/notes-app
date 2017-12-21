@@ -117,7 +117,7 @@ public class RetrofitClientTest {
         Note note = new Note(mTempUid, "title 0104", "content 0104",
                 "#010400", 10104);
 
-        RetrofitClient.updateNote(mTempUid, note, new Callback<Note>() {
+        RetrofitClient.updateNote(note, new Callback<Note>() {
             @Override
             public void onResponse(Call<Note> call, Response<Note> response) {
                 if (response.isSuccessful()) {

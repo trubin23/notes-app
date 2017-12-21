@@ -1,22 +1,11 @@
 package com.example.trubin23.database;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.example.trubin23.json.InitializeData;
-import com.example.trubin23.myfirstapplication.Note;
-
-import java.util.List;
-
-import static com.example.trubin23.database.NoteDao.COLUMN_NOTE_COLOR;
-import static com.example.trubin23.database.NoteDao.COLUMN_NOTE_DESTROY_DATE;
-import static com.example.trubin23.database.NoteDao.COLUMN_NOTE_CONTENT;
-import static com.example.trubin23.database.NoteDao.COLUMN_NOTE_TITLE;
-import static com.example.trubin23.database.NoteDao.COLUMN_NOTE_UID;
 import static com.example.trubin23.database.NoteDao.TABLE_NOTE;
 import static com.example.trubin23.database.NoteDaoImpl.NOTE_CREATE_TABLE;
 
@@ -33,11 +22,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public static final String DEFAULT_ID = "00000000-0000-0000-0000-000000000000";
 
-    private Context mContext;
-
     public DatabaseHelper(@NonNull Context context) {
         super(context, DB_NAME, null, DB_VERSION);
-        mContext = context;
     }
 
     public void onCreate(SQLiteDatabase db) {
@@ -47,25 +33,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.setTransactionSuccessful();
         } catch (Exception e) {
             Log.e(TAG, "create table " + TABLE_NOTE, e);
-        } finally {
-            db.endTransaction();
-        }
-
-        List<Note> notes = InitializeData.initializeData(mContext);
-        db.beginTransaction();
-        try {
-            for (Note note : notes) {
-                ContentValues values = new ContentValues();
-                values.put(COLUMN_NOTE_UID, note.getUid());
-                values.put(COLUMN_NOTE_TITLE, note.getTitle());
-                values.put(COLUMN_NOTE_CONTENT, note.getContent());
-                values.put(COLUMN_NOTE_COLOR, note.getColor());
-                values.put(COLUMN_NOTE_DESTROY_DATE, note.getDestroyDate());
-                db.insert(TABLE_NOTE, null, values);
-            }
-            db.setTransactionSuccessful();
-        } catch (Exception e) {
-            Log.e(TAG, "filling table " + TABLE_NOTE + " in first run", e);
         } finally {
             db.endTransaction();
         }
