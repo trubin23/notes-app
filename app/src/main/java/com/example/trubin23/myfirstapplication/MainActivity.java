@@ -12,6 +12,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
@@ -37,7 +38,8 @@ import static android.Manifest.permission.INTERNET;
 import static android.support.v4.content.PermissionChecker.PERMISSION_GRANTED;
 import static com.example.trubin23.myfirstapplication.Note.NOTE_UID;
 
-public class MainActivity extends AppCompatActivity implements NoteItemActionHandler {
+public class MainActivity extends AppCompatActivity
+        implements NoteItemActionHandler, SwipeRefreshLayout.OnRefreshListener {
 
     public static final String ACTION_REFRESH_NOTES = "action-refresh-notes";
     public static final String ACTION_CHANGED_DB = "action-changed_db";
@@ -46,6 +48,8 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
     private static final int EDIT_NOTE_REQUEST_CODE = 1;
     private static final int MY_PERMISSIONS_REQUEST = 1;
 
+    @BindView(R.id.swipe_refresh)
+    SwipeRefreshLayout mSwipeRefreshLayout;
     @BindView(R.id.rv)
     RecyclerView mRecyclerView;
     private RecyclerNoteAdapter mRecyclerNoteAdapter;
@@ -85,6 +89,8 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
 
         mChangedDbReceiver = new ChangedDbReceiver();
         mRefreshNotesReceiver = new RefreshNotesReceiver();
+
+        mSwipeRefreshLayout.setOnRefreshListener(this);
 
         String[] permissions = {INTERNET, ACCESS_NETWORK_STATE};
 
@@ -185,6 +191,14 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
     }
 
     @Override
+    public void onRefresh() {
+        mSwipeRefreshLayout.setRefreshing(true);
+
+        NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
+        SyncWithServer.notesSync(getApplicationContext(), noteDao);
+    }
+
+    @Override
     protected void onResume() {
         LocalBroadcastManager.getInstance(this).registerReceiver(mChangedDbReceiver,
                 new IntentFilter(ACTION_CHANGED_DB));
@@ -235,6 +249,8 @@ public class MainActivity extends AppCompatActivity implements NoteItemActionHan
         public void onReceive(Context context, Intent intent) {
             List<Note> notes = intent.getParcelableArrayListExtra(NOTES);
             mRecyclerNoteAdapter.setNotes(notes);
+
+            mSwipeRefreshLayout.setRefreshing(false);
         }
     };
 }
