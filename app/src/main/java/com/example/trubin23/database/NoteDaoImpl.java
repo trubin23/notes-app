@@ -122,7 +122,11 @@ public class NoteDaoImpl implements NoteDao {
         SQLiteDatabase db = mDbOpenHelper.getWritableDatabase();
         db.beginTransaction();
         try {
-            db.insert(TABLE_NOTE, null, values);
+            long id = db.insert(TABLE_NOTE, null, values);
+            if (id == -1){
+                db.update(TABLE_NOTE, values, COLUMN_NOTE_UID + " = ?",
+                        new String[]{note.getUid()});
+            }
 
             db.setTransactionSuccessful();
         } catch (Exception e) {

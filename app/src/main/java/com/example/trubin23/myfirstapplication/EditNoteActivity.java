@@ -2,8 +2,10 @@ package com.example.trubin23.myfirstapplication;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
@@ -18,6 +20,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.trubin23.database.NoteDao;
+import com.flask.colorpicker.ColorPickerView;
+import com.flask.colorpicker.builder.ColorPickerClickListener;
+import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -34,7 +39,8 @@ public class EditNoteActivity extends AppCompatActivity {
     public static final String NOTE = "note";
 
     private static final String ACTION_BAR_TITLE = "action_bar_title";
-    private static final String LOAD_NOTE_STATE = "load_note_state";
+    private static final String NOTE_STATE = "note_state";
+    private static final String NOTE_COLOR = "note_color";
 
     @BindView(R.id.info_title)
     TextView mInfoTitle;
@@ -46,13 +52,14 @@ public class EditNoteActivity extends AppCompatActivity {
     ProgressBar mProgressBar;
 
     private MenuItem mAcceptMenuItem;
+
     private String mNoteUid;
+    private String mNoteColor;
 
     private NoteReceiver mNoteReceiver;
+    private NoteState mNoteState;
 
-    private LoadNote mLoadNote;
-
-    private enum LoadNote {
+    private enum NoteState {
         START,
         PROCESS,
         FINISH
@@ -80,7 +87,7 @@ public class EditNoteActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         mNoteUid = intent.getStringExtra(NOTE_UID);
-        if (mNoteUid == null){
+        if (mNoteUid == null) {
             mNoteUid = DEFAULT_ID;
         }
 
@@ -88,7 +95,7 @@ public class EditNoteActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
 
-            if (savedInstanceState==null) {
+            if (savedInstanceState == null) {
                 if (Objects.equals(mNoteUid, DEFAULT_ID)) {
                     actionBar.setTitle(R.string.new_note);
                 } else {
@@ -99,11 +106,12 @@ public class EditNoteActivity extends AppCompatActivity {
             }
         }
 
-        if (savedInstanceState==null) {
-            mLoadNote = LoadNote.START;
+        if (savedInstanceState == null) {
+            mNoteState = NoteState.START;
         } else {
-            mLoadNote = LoadNote.valueOf(
-                    savedInstanceState.getString(LOAD_NOTE_STATE));
+            mNoteState = NoteState.valueOf(
+                    savedInstanceState.getString(NOTE_STATE));
+            mNoteColor = savedInstanceState.getString(NOTE_COLOR);
         }
 
         mNoteReceiver = new NoteReceiver();
@@ -116,7 +124,8 @@ public class EditNoteActivity extends AppCompatActivity {
             outState.putCharSequence(ACTION_BAR_TITLE, actionBar.getTitle());
         }
 
-        outState.putString(LOAD_NOTE_STATE, mLoadNote.toString());
+        outState.putString(NOTE_STATE, mNoteState.toString());
+        outState.putString(NOTE_COLOR, mNoteColor);
 
         super.onSaveInstanceState(outState);
     }
@@ -150,17 +159,22 @@ public class EditNoteActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (R.id.action_pick_color == item.getItemId()) {
+            pickNoteColor();
+            return true;
+        }
+
         if (R.id.action_accept == item.getItemId()) {
             String noteUid = mNoteUid;
-            if (Objects.equals(mNoteUid, DEFAULT_ID)){
+            if (Objects.equals(mNoteUid, DEFAULT_ID)) {
                 noteUid = UUID.randomUUID().toString();
             }
             Note note = new Note(noteUid, mEditTitle.getText().toString(),
-                    mEditText.getText().toString(), null, null);
+                    mEditText.getText().toString(), mNoteColor, null);
 
-            NoteDao noteDao = ((MyCustomApplication)getApplication()).getNoteDao();
+            NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
 
-            if (Objects.equals(mNoteUid, DEFAULT_ID)){
+            if (Objects.equals(mNoteUid, DEFAULT_ID)) {
                 SyncWithServer.addNote(getApplicationContext(), noteDao, note);
             } else {
                 SyncWithServer.updateNote(getApplicationContext(), noteDao, note);
@@ -172,10 +186,23 @@ public class EditNoteActivity extends AppCompatActivity {
         return true;
     }
 
-    @Override
-    protected void onPause() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mNoteReceiver);
-        super.onPause();
+    private void pickNoteColor() {
+        ColorPickerDialogBuilder
+                .with(this)
+                .setTitle("Choose color")
+                .initialColor(Color.WHITE)
+                .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
+                .density(12)
+                .setPositiveButton(android.R.string.ok, new ColorPickerClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog,
+                                        int selectedColor, Integer[] allColors) {
+                        changeNoteColor(String.format("#%06X", (0xFFFFFF & selectedColor)));
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .build()
+                .show();
     }
 
     @Override
@@ -187,22 +214,38 @@ public class EditNoteActivity extends AppCompatActivity {
             mInfoTitle.setVisibility(View.GONE);
             mEditTitle.setVisibility(View.GONE);
 
-            if (mLoadNote != LoadNote.FINISH) {
+            if (mNoteState != NoteState.FINISH) {
                 mProgressBar.setVisibility(View.VISIBLE);
                 mEditText.setEnabled(false);
             }
 
-            if(mLoadNote == LoadNote.START) {
+            if (mNoteState == NoteState.START) {
                 Intent intent = new Intent(this, LoadNoteService.class);
                 intent.putExtra(NOTE_UID, mNoteUid);
 
                 startService(intent);
 
-                mLoadNote = LoadNote.PROCESS;
+                mNoteState = NoteState.PROCESS;
             }
         }
 
         super.onResume();
+    }
+
+    private void changeNoteColor(String stringColor) {
+        mNoteColor = stringColor;
+
+        mEditTitle.setBackgroundColor(Color.parseColor(stringColor));
+        mEditTitle.setTextColor(Utils.colorText(stringColor));
+
+        mEditText.setBackgroundColor(Color.parseColor(stringColor));
+        mEditText.setTextColor(Utils.colorText(stringColor));
+    }
+
+    @Override
+    protected void onPause() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mNoteReceiver);
+        super.onPause();
     }
 
     private class NoteReceiver extends BroadcastReceiver {
@@ -213,12 +256,14 @@ public class EditNoteActivity extends AppCompatActivity {
                 return;
             }
 
-            mLoadNote = LoadNote.FINISH;
+            mNoteState = NoteState.FINISH;
 
             mEditTitle.setText(note.getTitle());
             mEditText.setText(note.getContent());
             mEditText.setEnabled(true);
             mProgressBar.setVisibility(View.GONE);
+
+            changeNoteColor(note.getColor());
 
             ActionBar actionBar = getSupportActionBar();
             if (actionBar != null) {

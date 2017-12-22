@@ -6,28 +6,17 @@
     android:padding="@dimen/padding"
     android:orientation="vertical">
 
-        <LinearLayout
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:id="@+id/note_title"
-                    android:layout_marginRight="@dimen/margin_right"
-                    android:textSize="16sp"
-                    android:textColor="#000"
-                    android:ellipsize="end"
-                    android:maxLines = "1"
-                    />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/note_date"
-                    android:textSize="14sp"
-                    />
-        </LinearLayout>
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:id="@+id/note_title"
+            android:layout_marginRight="@dimen/margin_right"
+            android:textSize="16sp"
+            android:textColor="#000"
+            android:ellipsize="end"
+            android:maxLines = "1"
+            />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
