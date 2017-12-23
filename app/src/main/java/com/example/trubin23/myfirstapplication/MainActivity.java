@@ -1,12 +1,15 @@
 package com.example.trubin23.myfirstapplication;
 
+import android.app.LoaderManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.Loader;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -39,7 +42,10 @@ import static android.support.v4.content.PermissionChecker.PERMISSION_GRANTED;
 import static com.example.trubin23.myfirstapplication.Note.NOTE_UID;
 
 public class MainActivity extends AppCompatActivity
-        implements NoteItemActionHandler, SwipeRefreshLayout.OnRefreshListener {
+        implements NoteItemActionHandler,
+        SwipeRefreshLayout.OnRefreshListener,
+        LoaderManager.LoaderCallbacks<Cursor>
+{
 
     public static final String ACTION_REFRESH_NOTES = "action-refresh-notes";
     public static final String ACTION_CHANGED_DB = "action-changed_db";
@@ -229,6 +235,21 @@ public class MainActivity extends AppCompatActivity
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mChangedDbReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mRefreshNotesReceiver);
         super.onPause();
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new NotesCursorLoader(this);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        //TODO: set cursor in RecyclerNoteAdapter
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
     }
 
     private class ChangedDbReceiver extends BroadcastReceiver {

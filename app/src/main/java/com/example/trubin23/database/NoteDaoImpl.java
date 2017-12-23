@@ -72,6 +72,26 @@ public class NoteDaoImpl implements NoteDao {
         return note;
     }
 
+    @Nullable
+    public Cursor getCursorAllData() {
+        Cursor cursor = null;
+        SQLiteDatabase db = mDbOpenHelper.getReadableDatabase();
+        db.beginTransaction();
+        try {
+            cursor = db.query(TABLE_NOTE,
+                    COLUMNS, null, null, null, null, null);
+
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e(TAG, "public List<Note> getAllNote()", e);
+        } finally {
+            db.endTransaction();
+            db.close();
+        }
+
+        return cursor;
+    }
+
     @NonNull
     @Override
     public List<Note> getAllNote() {

@@ -1,5 +1,6 @@
 package com.example.trubin23.database;
 
+import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -30,6 +31,9 @@ public interface NoteDao {
 
     @Nullable
     Note getNote(@NonNull final String uid);
+
+    @Nullable
+    Cursor getCursorAllData();
 
     @NonNull
     List<Note> getAllNote();
