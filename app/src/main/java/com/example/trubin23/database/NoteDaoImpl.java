@@ -66,7 +66,6 @@ public class NoteDaoImpl implements NoteDao {
             Log.e(TAG, "public Note getNote(long id)", e);
         } finally {
             db.endTransaction();
-            db.close();
         }
 
         return note;
@@ -86,7 +85,6 @@ public class NoteDaoImpl implements NoteDao {
             Log.e(TAG, "public List<Note> getAllNote()", e);
         } finally {
             db.endTransaction();
-            db.close();
         }
 
         return cursor;
@@ -124,7 +122,6 @@ public class NoteDaoImpl implements NoteDao {
             Log.e(TAG, "public List<Note> getAllNote()", e);
         } finally {
             db.endTransaction();
-            db.close();
         }
 
         return notes;
@@ -153,7 +150,6 @@ public class NoteDaoImpl implements NoteDao {
             Log.e(TAG, "public void addNote(@NonNull final Note note)", e);
         } finally {
             db.endTransaction();
-            db.close();
         }
     }
 
@@ -170,7 +166,6 @@ public class NoteDaoImpl implements NoteDao {
             Log.e(TAG, "public void deleteNote(@NonNull final String uid)", e);
         } finally {
             db.endTransaction();
-            db.close();
         }
     }
 
@@ -193,7 +188,6 @@ public class NoteDaoImpl implements NoteDao {
             Log.e(TAG, "public void updateNote(@NonNull final Note note)", e);
         } finally {
             db.endTransaction();
-            db.close();
         }
     }
 }

@@ -1,10 +1,10 @@
 package com.example.trubin23.myfirstapplication;
 
 import android.content.Context;
-import android.content.CursorLoader;
 import android.database.Cursor;
 import android.support.annotation.NonNull;
 
+import android.support.v4.content.CursorLoader;
 import com.example.trubin23.database.NoteDao;
 
 /**

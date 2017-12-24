@@ -1,19 +1,19 @@
 package com.example.trubin23.myfirstapplication;
 
-import android.app.LoaderManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.Loader;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
@@ -46,9 +46,10 @@ public class MainActivity extends AppCompatActivity
         SwipeRefreshLayout.OnRefreshListener,
         LoaderManager.LoaderCallbacks<Cursor>
 {
+    public static final int CURSOR_LOADER_ID = 0;
 
     public static final String ACTION_REFRESH_NOTES = "action-refresh-notes";
-    public static final String ACTION_CHANGED_DB = "action-changed_db";
+    public static final String ACTION_CHANGED_DB = "action-changed-db";
     public static final String NOTES = "notes";
 
     private static final int EDIT_NOTE_REQUEST_CODE = 1;
@@ -56,7 +57,7 @@ public class MainActivity extends AppCompatActivity
 
     @BindView(R.id.swipe_refresh)
     SwipeRefreshLayout mSwipeRefreshLayout;
-    @BindView(R.id.rv)
+    @BindView(R.id.recycler_view)
     RecyclerView mRecyclerView;
     private RecyclerNoteAdapter mRecyclerNoteAdapter;
 
@@ -101,6 +102,9 @@ public class MainActivity extends AppCompatActivity
         String[] permissions = {INTERNET, ACCESS_NETWORK_STATE};
 
         onRequestPermissions(permissions);
+
+        // создаем лоадер для чтения данных
+        getSupportLoaderManager().initLoader(CURSOR_LOADER_ID, null, this);
     }
 
     private void onRequestPermissions(String... permissions) {
@@ -160,17 +164,17 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onEdit(@NonNull Note note) {
+    public void onEdit(@NonNull String uid) {
         Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
-        intent.putExtra(NOTE_UID, note.getUid());
+        intent.putExtra(NOTE_UID, uid);
         startActivityForResult(intent, EDIT_NOTE_REQUEST_CODE);
     }
 
     @Override
-    public void onDelete(@NonNull final Note note, final int position) {
+    public void onDelete(@NonNull final String uid, final String noteTitle, final int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 
-        builder.setTitle(note.getTitle());
+        builder.setTitle(noteTitle);
         builder.setMessage(R.string.message_about_delete);
 
         builder.setPositiveButton(getString(android.R.string.ok),
@@ -178,7 +182,7 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
-                        SyncWithServer.deleteNote(getApplicationContext(), noteDao, note.getUid());
+                        SyncWithServer.deleteNote(getApplicationContext(), noteDao, uid);
                     }
                 });
 
@@ -238,13 +242,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         return new NotesCursorLoader(this);
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        //TODO: set cursor in RecyclerNoteAdapter
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        ((RecyclerNoteAdapter) mRecyclerView.getAdapter()).swapCursor(cursor);
     }
 
     @Override
@@ -269,7 +273,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             List<Note> notes = intent.getParcelableArrayListExtra(NOTES);
-            mRecyclerNoteAdapter.setNotes(notes);
+            //mRecyclerNoteAdapter.setNotes(notes);
 
             mSwipeRefreshLayout.setRefreshing(false);
         }

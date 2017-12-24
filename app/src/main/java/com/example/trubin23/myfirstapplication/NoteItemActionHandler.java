@@ -7,6 +7,6 @@ import android.support.annotation.NonNull;
  */
 
 public interface NoteItemActionHandler {
-    void onEdit(@NonNull Note note);
-    void onDelete(@NonNull Note note, int position);
+    void onEdit(@NonNull String uid);
+    void onDelete(@NonNull String uid, String noteTitle, int position);
 }

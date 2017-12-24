@@ -1,5 +1,6 @@
 package com.example.trubin23.myfirstapplication;
 
+import android.database.Cursor;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -8,57 +9,43 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import com.example.trubin23.database.DatabaseHelper;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import com.example.trubin23.database.NoteDao;
+
+import java.util.Date;
 
 /**
- * Created by trubin23 on 29.11.17.
+ * Created by skyfishjy on 10/31/14.
  */
+public class RecyclerNoteAdapter extends CursorRecyclerViewAdapter<RecyclerNoteAdapter.NoteHolder>{
 
-public class RecyclerNoteAdapter extends RecyclerView.Adapter<RecyclerNoteAdapter.NoteHolder> {
-
-    private List<Note> mNotes;
     private NoteItemActionHandler mActionHandler;
 
-    RecyclerNoteAdapter(@Nullable NoteItemActionHandler actionHandler) {
-        mNotes = new ArrayList<>();
+    public RecyclerNoteAdapter(@Nullable NoteItemActionHandler actionHandler){
+        super();
         mActionHandler = actionHandler;
     }
 
     @Override
     public NoteHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
+        View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item, parent, false);
-        return new NoteHolder(view);
+        return new NoteHolder(itemView);
     }
 
     @Override
-    public void onBindViewHolder(final NoteHolder holder, int position) {
-        final Note note = mNotes.get(position);
+    public void onBindViewHolder(final NoteHolder holder, Cursor cursor) {
+        cursor.moveToPosition(cursor.getPosition());
+        holder.setData(cursor);
 
-        holder.noteTitle.setText(note.getTitle());
-        holder.noteTitle.setTextColor(Utils.colorText(note.getColor()));
-
-        holder.noteText.setText(note.getContent());
-        holder.noteText.setTextColor(Utils.colorText(note.getColor()));
-
-//        Date destroyDate = new Date((long) note.getDestroyDate() * 1000);
-//        holder.noteDate.setText(destroyDate.toString());
-
-        holder.itemView.setBackgroundColor(Color.parseColor(note.getColor()));
+        final String uid = cursor.getString(cursor.getColumnIndex(NoteDao.COLUMN_NOTE_UID));
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (mActionHandler != null) {
-                    mActionHandler.onEdit(note);
+                    mActionHandler.onEdit(uid);
                 }
             }
         });
@@ -68,7 +55,8 @@ public class RecyclerNoteAdapter extends RecyclerView.Adapter<RecyclerNoteAdapte
             public boolean onLongClick(View view) {
                 if (mActionHandler != null) {
                     final int itemPosition = holder.getAdapterPosition();
-                    mActionHandler.onDelete(note, itemPosition);
+                    String title = holder.noteTitle.getText().toString();
+                    mActionHandler.onDelete(uid, title, itemPosition);
 
                     return true;
                 } else {
@@ -76,61 +64,6 @@ public class RecyclerNoteAdapter extends RecyclerView.Adapter<RecyclerNoteAdapte
                 }
             }
         });
-    }
-
-    @Override
-    public int getItemCount() {
-        return mNotes.size();
-    }
-
-    @Nullable
-    Note getItem(int position) {
-        return mNotes.get(position);
-    }
-
-    @NonNull
-    List<Note> getNotes() {
-        return mNotes;
-    }
-
-    /**
-     * Sets a new list of notes in the RecyclerView
-     *
-     * @param notes note.getUid() must not be equal to DatabaseHelper.DEFAULT_ID
-     */
-    void setNotes(@Nullable List<Note> notes) {
-        mNotes = new ArrayList<>();
-
-        if (notes != null) {
-            for (Note note : notes) {
-                if (!Objects.equals(note.getUid(), DatabaseHelper.DEFAULT_ID)) {
-                    mNotes.add(note);
-                }
-            }
-        }
-
-        notifyDataSetChanged();
-    }
-
-    boolean addNote(@NonNull Note note) {
-        if (!Objects.equals(note.getUid(), DatabaseHelper.DEFAULT_ID)) {
-            mNotes.add(note);
-            notifyItemInserted(mNotes.size() - 1);
-
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    void updateNote(int position, @NonNull Note note) {
-        mNotes.set(position, note);
-        notifyItemChanged(position);
-    }
-
-    void deleteNote(int itemPosition) {
-        mNotes.remove(itemPosition);
-        notifyItemRemoved(itemPosition);
     }
 
     class NoteHolder extends RecyclerView.ViewHolder {
@@ -143,6 +76,19 @@ public class RecyclerNoteAdapter extends RecyclerView.Adapter<RecyclerNoteAdapte
         NoteHolder(@NonNull View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+        }
+
+        public void setData(Cursor cursor) {
+            noteTitle.setText(cursor.getString(cursor.getColumnIndex(NoteDao.COLUMN_NOTE_TITLE)));
+            noteText.setText(cursor.getString(cursor.getColumnIndex(NoteDao.COLUMN_NOTE_CONTENT)));
+
+            String color = cursor.getString(cursor.getColumnIndex(NoteDao.COLUMN_NOTE_COLOR));
+            noteTitle.setTextColor(Utils.colorText(color));
+            noteText.setTextColor(Utils.colorText(color));
+            itemView.setBackgroundColor(Color.parseColor(color));
+
+            //Date destroyDate = new Date((long) note.getDestroyDate() * 1000);
+            //noteDate.setText(destroyDate.toString());
         }
     }
 }
