@@ -13,6 +13,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,8 +21,6 @@ import android.widget.*;
 
 import com.example.trubin23.database.Note;
 import com.example.trubin23.database.NoteDao;
-import com.example.trubin23.database.asynctasktablenote.AsyncTaskAddNote;
-import com.example.trubin23.database.asynctasktablenote.AsyncTaskUpdateNote;
 import com.example.trubin23.network.*;
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
@@ -32,12 +31,16 @@ import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.reactivex.Completable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 import static com.example.trubin23.database.DatabaseHelper.DEFAULT_ID;
 import static com.example.trubin23.database.Note.NOTE_UID;
 
 public class EditNoteActivity extends AppCompatActivity {
 
+    public static final String TAG = "EditNoteActivity";
     public static final String ACTION_GET_EDIT_NOTE = "action-get-edit-note";
     public static final String NOTE = "note";
 
@@ -185,9 +188,15 @@ public class EditNoteActivity extends AppCompatActivity {
 
                     @Override
                     public void success(Note note){
-                        AsyncTaskAddNote addNote =
-                                new AsyncTaskAddNote(broadcastManager, noteDao, note);
-                        addNote.execute();
+                        Completable.create(emitter -> {
+                            noteDao.addNote(note);
+                            emitter.onComplete();
+                        })
+                                .subscribeOn(Schedulers.newThread())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(() -> broadcastManager.sendBroadcast(
+                                        new Intent(MainActivity.ACTION_CHANGED_DB)),
+                                           throwable -> Log.e(TAG, "noteDao.addNote", throwable));
                     }
 
                     @Override
@@ -204,9 +213,15 @@ public class EditNoteActivity extends AppCompatActivity {
 
                     @Override
                     public void success(Note note){
-                        AsyncTaskUpdateNote updateNote =
-                                new AsyncTaskUpdateNote(broadcastManager, noteDao, note);
-                        updateNote.execute();
+                        Completable.create(emitter -> {
+                            noteDao.updateNote(note);
+                            emitter.onComplete();
+                        })
+                                .subscribeOn(Schedulers.newThread())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(() -> broadcastManager.sendBroadcast(
+                                        new Intent(MainActivity.ACTION_CHANGED_DB)),
+                                           throwable -> Log.e(TAG, "noteDao.updateNote", throwable));
                     }
 
                     @Override

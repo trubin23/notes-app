@@ -23,6 +23,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,9 +38,16 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import com.example.trubin23.database.asynctasktablenote.AsyncTaskAddNote;
-import com.example.trubin23.database.asynctasktablenote.AsyncTaskAddNotes;
 import com.example.trubin23.network.*;
+import io.reactivex.*;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.Nullable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Cancellable;
+import io.reactivex.internal.operators.observable.ObservableFromCallable;
+import io.reactivex.internal.operators.observable.ObservableSingleSingle;
+import io.reactivex.observers.DisposableSingleObserver;
+import io.reactivex.schedulers.Schedulers;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -56,7 +64,8 @@ public class MainActivity extends AppCompatActivity
     public static final int CURSOR_LOADER_ID = 0;
 
     public static final String ACTION_CHANGED_DB = "action-changed-db";
-    public static final String NOTES = "notes";
+
+    private static final String TAG = "MainActivity";
 
     private static final int EDIT_NOTE_REQUEST_CODE = 1;
     private static final int MY_PERMISSIONS_REQUEST = 1;
@@ -82,13 +91,12 @@ public class MainActivity extends AppCompatActivity
 
         mRecyclerView.setHasFixedSize(true);
 
-        if (getResources().getConfiguration().orientation ==
-                Configuration.ORIENTATION_PORTRAIT) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             LinearLayoutManager llm = new LinearLayoutManager(this);
             mRecyclerView.setLayoutManager(llm);
         } else {
             StaggeredGridLayoutManager gridLayoutManager = new StaggeredGridLayoutManager(
-                    2, StaggeredGridLayoutManager.VERTICAL);//number or const
+                    2, StaggeredGridLayoutManager.VERTICAL);
             mRecyclerView.setLayoutManager(gridLayoutManager);
         }
 
@@ -124,7 +132,6 @@ public class MainActivity extends AppCompatActivity
             ActivityCompat.requestPermissions(this,
                     requestPermissions.toArray(new String[0]), MY_PERMISSIONS_REQUEST);
         }
-
     }
 
     @Override
@@ -192,9 +199,16 @@ public class MainActivity extends AppCompatActivity
                             Resources res = getApplicationContext().getResources();
                             @Override
                             public void success(Note note){
-                                AsyncTaskAddNote addNote =
-                                        new AsyncTaskAddNote(broadcastManager, noteDao, note);
-                                addNote.execute();
+                                NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
+                                Completable.create(emitter -> {
+                                    noteDao.deleteNote(note.getUid());
+                                    emitter.onComplete();
+                                })
+                                        .subscribeOn(Schedulers.newThread())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe(() -> getSupportLoaderManager().
+                                                           getLoader(CURSOR_LOADER_ID).forceLoad(),
+                                                   throwable -> Log.e(TAG, "noteDao.deleteNote", throwable));
                             }
 
                             @Override
@@ -228,18 +242,23 @@ public class MainActivity extends AppCompatActivity
     public void onRefresh() {
         mSwipeRefreshLayout.setRefreshing(true);
 
-        final LocalBroadcastManager broadcastManager =
-                LocalBroadcastManager.getInstance(getApplicationContext());
-        final NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
 
         RetrofitClient.getNotes(new ResponseProcessing<List<Note>>(){
             Resources res = getApplicationContext().getResources();
 
             @Override
             public void success(List<Note> notes){
-                AsyncTaskAddNotes addNotes =
-                        new AsyncTaskAddNotes(broadcastManager, noteDao, notes);
-                addNotes.execute();
+                NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
+                Completable.create(emitter -> {
+                    for (Note note : notes){
+                        noteDao.addNote(note);
+                    }
+                    emitter.onComplete();
+                })
+                        .subscribeOn(Schedulers.newThread())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(() -> getSupportLoaderManager().getLoader(CURSOR_LOADER_ID).forceLoad(),
+                                   throwable -> Log.e(TAG, "notes.forEach(noteDao::addNote)", throwable));
             }
 
             @Override
