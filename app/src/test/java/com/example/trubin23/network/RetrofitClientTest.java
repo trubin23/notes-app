@@ -16,7 +16,7 @@ import retrofit2.Response;
  */
 public class RetrofitClientTest {
 
-    private static final String mTempUid = "d0a9d8f8-0006-4b94-8699-1efd9ae84eeb";
+    private static final String mTempUid = "d0a9d8f8-0010-4b94-8699-1efd9ae84eeb";
 
     @Test
     public void getNotes() {
@@ -115,7 +115,7 @@ public class RetrofitClientTest {
         final CountDownLatch signal = new CountDownLatch(1);
 
         Note note = new Note(mTempUid, "title 0104", "content 0104",
-                "#010400", 10104);
+                "#bbbbff", 10104);
 
         RetrofitClient.updateNote(note, new Callback<Note>() {
             @Override

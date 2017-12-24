@@ -8,6 +8,7 @@
     <string name="text_note">Text note:</string>
     <string name="load_note">Load note…</string>
     <string name="action_accept">Action accept</string>
+    <string name="action_pick_color">Action pick color</string>
 
     <string name="notes_sync">Notes synchronization.</string>
     <string name="note_added">Note added.</string>
@@ -17,4 +18,5 @@
     <string name="error_code">Error code: </string>
     <string name="success">Success.</string>
     <string name="unknown_response_body">Unknown response body.</string>
+
 </resources>

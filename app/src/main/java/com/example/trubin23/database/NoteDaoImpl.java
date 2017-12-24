@@ -72,6 +72,26 @@ public class NoteDaoImpl implements NoteDao {
         return note;
     }
 
+    @Nullable
+    public Cursor getCursorAllData() {
+        Cursor cursor = null;
+        SQLiteDatabase db = mDbOpenHelper.getReadableDatabase();
+        db.beginTransaction();
+        try {
+            cursor = db.query(TABLE_NOTE,
+                    COLUMNS, null, null, null, null, null);
+
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e(TAG, "public List<Note> getAllNote()", e);
+        } finally {
+            db.endTransaction();
+            db.close();
+        }
+
+        return cursor;
+    }
+
     @NonNull
     @Override
     public List<Note> getAllNote() {
@@ -122,7 +142,11 @@ public class NoteDaoImpl implements NoteDao {
         SQLiteDatabase db = mDbOpenHelper.getWritableDatabase();
         db.beginTransaction();
         try {
-            db.insert(TABLE_NOTE, null, values);
+            long id = db.insert(TABLE_NOTE, null, values);
+            if (id == -1){
+                db.update(TABLE_NOTE, values, COLUMN_NOTE_UID + " = ?",
+                        new String[]{note.getUid()});
+            }
 
             db.setTransactionSuccessful();
         } catch (Exception e) {

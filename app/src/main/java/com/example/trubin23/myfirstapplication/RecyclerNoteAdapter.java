@@ -1,5 +1,6 @@
 package com.example.trubin23.myfirstapplication;
 
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
@@ -11,7 +12,6 @@ import android.widget.TextView;
 import com.example.trubin23.database.DatabaseHelper;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -44,9 +44,15 @@ public class RecyclerNoteAdapter extends RecyclerView.Adapter<RecyclerNoteAdapte
         final Note note = mNotes.get(position);
 
         holder.noteTitle.setText(note.getTitle());
+        holder.noteTitle.setTextColor(Utils.colorText(note.getColor()));
+
         holder.noteText.setText(note.getContent());
-        Date destroyDate = new Date((long) note.getDestroyDate() * 1000);
-        holder.noteDate.setText(destroyDate.toString());
+        holder.noteText.setTextColor(Utils.colorText(note.getColor()));
+
+//        Date destroyDate = new Date((long) note.getDestroyDate() * 1000);
+//        holder.noteDate.setText(destroyDate.toString());
+
+        holder.itemView.setBackgroundColor(Color.parseColor(note.getColor()));
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -133,9 +139,6 @@ public class RecyclerNoteAdapter extends RecyclerView.Adapter<RecyclerNoteAdapte
 
         @BindView(R.id.note_text)
         TextView noteText;
-
-        @BindView(R.id.note_date)
-        TextView noteDate;
 
         NoteHolder(@NonNull View itemView) {
             super(itemView);
