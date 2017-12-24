@@ -22,12 +22,12 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 import com.example.trubin23.database.NoteDao;
-import com.example.trubin23.database.asynctasktablenote.AsyncTaskRefreshNotes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +48,6 @@ public class MainActivity extends AppCompatActivity
 {
     public static final int CURSOR_LOADER_ID = 0;
 
-    public static final String ACTION_REFRESH_NOTES = "action-refresh-notes";
     public static final String ACTION_CHANGED_DB = "action-changed-db";
     public static final String NOTES = "notes";
 
@@ -62,7 +61,6 @@ public class MainActivity extends AppCompatActivity
     private RecyclerNoteAdapter mRecyclerNoteAdapter;
 
     private ChangedDbReceiver mChangedDbReceiver;
-    private RefreshNotesReceiver mRefreshNotesReceiver;
 
     private boolean mFirstStart;
 
@@ -95,7 +93,6 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView.setAdapter(mRecyclerNoteAdapter);
 
         mChangedDbReceiver = new ChangedDbReceiver();
-        mRefreshNotesReceiver = new RefreshNotesReceiver();
 
         mSwipeRefreshLayout.setOnRefreshListener(this);
 
@@ -213,22 +210,13 @@ public class MainActivity extends AppCompatActivity
         LocalBroadcastManager.getInstance(this).registerReceiver(mChangedDbReceiver,
                 new IntentFilter(ACTION_CHANGED_DB));
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(mRefreshNotesReceiver,
-                new IntentFilter(ACTION_REFRESH_NOTES));
-
-
         if (mFirstStart) {
             mFirstStart = false;
 
             NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
             SyncWithServer.notesSync(getApplicationContext(), noteDao);
         } else {
-            LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
-            NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
-
-            AsyncTaskRefreshNotes refreshNotes =
-                    new AsyncTaskRefreshNotes(broadcastManager, noteDao);
-            refreshNotes.execute();
+            getSupportLoaderManager().getLoader(CURSOR_LOADER_ID).forceLoad();
         }
 
         super.onResume();
@@ -237,7 +225,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mChangedDbReceiver);
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mRefreshNotesReceiver);
         super.onPause();
     }
 
@@ -256,26 +243,16 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        getSupportLoaderManager().destroyLoader(CURSOR_LOADER_ID);
+    }
+
     private class ChangedDbReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            LocalBroadcastManager broadcastManager =
-                    LocalBroadcastManager.getInstance(getApplicationContext());
-            NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
-
-            AsyncTaskRefreshNotes refreshNotes =
-                    new AsyncTaskRefreshNotes(broadcastManager, noteDao);
-            refreshNotes.execute();
-        }
-    };
-
-    private class RefreshNotesReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            List<Note> notes = intent.getParcelableArrayListExtra(NOTES);
-            //mRecyclerNoteAdapter.setNotes(notes);
-
-            mSwipeRefreshLayout.setRefreshing(false);
+            getSupportLoaderManager().getLoader(CURSOR_LOADER_ID).forceLoad();
         }
     };
 }

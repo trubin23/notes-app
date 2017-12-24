@@ -1,0 +1,50 @@
+package com.example.trubin23.network;
+
+import android.util.Log;
+import com.example.trubin23.database.asynctasktablenote.AsyncTaskAddNotes;
+import com.example.trubin23.myfirstapplication.Note;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+import java.util.List;
+
+/**
+ * Created by Andrey on 24.12.2017.
+ */
+
+public class ResponseProcessing<T> implements Callback {
+
+    private static final String TAG = "ResponseProcessing";
+
+    @Override
+    public void onResponse(Call call, Response response) {
+        if (response.isSuccessful()) {
+            T body = (T) response.body();
+            if (body != null) {
+                success(body);
+            } else {
+                successWithoutBody();
+            }
+        } else {
+            RestError restError = RetrofitClient.convertRestError(response.errorBody());
+            error(restError);
+        }
+    }
+
+    @Override
+    public void onFailure(Call call, Throwable t) {
+        Log.e(TAG, "onFailure", t);
+    }
+
+    public void success(T body) {
+    }
+
+    public void successWithoutBody(){
+        Log.w(TAG, "success response without body");
+    }
+
+    public void error(RestError restError) {
+        Log.e(TAG, "RestError code: " + restError.getCode());
+    }
+}

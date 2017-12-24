@@ -1,6 +1,7 @@
 package com.example.trubin23.myfirstapplication;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,7 +12,6 @@ import com.example.trubin23.database.NoteDao;
 import com.example.trubin23.database.asynctasktablenote.AsyncTaskAddNote;
 import com.example.trubin23.database.asynctasktablenote.AsyncTaskAddNotes;
 import com.example.trubin23.database.asynctasktablenote.AsyncTaskDeleteNote;
-import com.example.trubin23.database.asynctasktablenote.AsyncTaskRefreshNotes;
 import com.example.trubin23.database.asynctasktablenote.AsyncTaskUpdateNote;
 import com.example.trubin23.network.RestError;
 import com.example.trubin23.network.RetrofitClient;
@@ -61,9 +61,8 @@ class SyncWithServer {
                 }
 
                 if (responseState != ResponseState.Success) {
-                    AsyncTaskRefreshNotes refreshNotes =
-                            new AsyncTaskRefreshNotes(broadcastManager, noteDao);
-                    refreshNotes.execute();
+                    Intent intent = new Intent(MainActivity.ACTION_CHANGED_DB);
+                    broadcastManager.sendBroadcast(intent);
                 }
 
                 toastShow(appContext, eventName, responseState, response.code());
