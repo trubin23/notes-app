@@ -6,7 +6,7 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import com.example.trubin23.database.NoteDao;
 import com.example.trubin23.myfirstapplication.EditNoteActivity;
-import com.example.trubin23.myfirstapplication.Note;
+import com.example.trubin23.database.Note;
 
 /**
  * Created by Andrey on 18.12.2017.

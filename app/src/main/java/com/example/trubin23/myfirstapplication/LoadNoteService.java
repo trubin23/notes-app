@@ -5,9 +5,10 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 
+import com.example.trubin23.database.Note;
 import com.example.trubin23.database.NoteDao;
 
-import static com.example.trubin23.myfirstapplication.Note.NOTE_UID;
+import static com.example.trubin23.database.Note.NOTE_UID;
 
 /**
  * Created by trubin23 on 18.12.17.

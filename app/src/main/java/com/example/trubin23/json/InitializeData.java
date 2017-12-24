@@ -4,7 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.example.trubin23.myfirstapplication.Note;
+import com.example.trubin23.database.Note;
 import com.example.trubin23.myfirstapplication.R;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;

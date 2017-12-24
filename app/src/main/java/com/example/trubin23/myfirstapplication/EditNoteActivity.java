@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
@@ -15,11 +16,13 @@ import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.widget.*;
 
+import com.example.trubin23.database.Note;
 import com.example.trubin23.database.NoteDao;
+import com.example.trubin23.database.asynctasktablenote.AsyncTaskAddNote;
+import com.example.trubin23.database.asynctasktablenote.AsyncTaskUpdateNote;
+import com.example.trubin23.network.*;
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
@@ -31,7 +34,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.example.trubin23.database.DatabaseHelper.DEFAULT_ID;
-import static com.example.trubin23.myfirstapplication.Note.NOTE_UID;
+import static com.example.trubin23.database.Note.NOTE_UID;
 
 public class EditNoteActivity extends AppCompatActivity {
 
@@ -170,14 +173,50 @@ public class EditNoteActivity extends AppCompatActivity {
                 noteUid = UUID.randomUUID().toString();
             }
             Note note = new Note(noteUid, mEditTitle.getText().toString(),
-                    mEditText.getText().toString(), mNoteColor, null);
+                                 mEditText.getText().toString(), mNoteColor, null);
 
-            NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
+            final LocalBroadcastManager broadcastManager =
+                    LocalBroadcastManager.getInstance(getApplicationContext());
+            final NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
 
             if (Objects.equals(mNoteUid, DEFAULT_ID)) {
-                SyncWithServer.addNote(getApplicationContext(), noteDao, note);
+                RetrofitClient.addNote(note, new ResponseProcessing<Note>(){
+                    Resources res = getApplicationContext().getResources();
+
+                    @Override
+                    public void success(Note note){
+                        AsyncTaskAddNote addNote =
+                                new AsyncTaskAddNote(broadcastManager, noteDao, note);
+                        addNote.execute();
+                    }
+
+                    @Override
+                    public void error(RestError restError) {
+                        super.error(restError);
+                        Toast.makeText(getApplicationContext(), res.getString(R.string.note_added)  + "\n"
+                                               + res.getString(R.string.error_code) + restError.getCode(),
+                                       Toast.LENGTH_SHORT).show();
+                    }
+                });
             } else {
-                SyncWithServer.updateNote(getApplicationContext(), noteDao, note);
+                RetrofitClient.updateNote(note, new ResponseProcessing<Note>(){
+                    Resources res = getApplicationContext().getResources();
+
+                    @Override
+                    public void success(Note note){
+                        AsyncTaskUpdateNote updateNote =
+                                new AsyncTaskUpdateNote(broadcastManager, noteDao, note);
+                        updateNote.execute();
+                    }
+
+                    @Override
+                    public void error(RestError restError) {
+                        super.error(restError);
+                        Toast.makeText(getApplicationContext(), res.getString(R.string.note_updated ) + "\n"
+                                               + res.getString(R.string.error_code) + restError.getCode(),
+                                       Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         }
 

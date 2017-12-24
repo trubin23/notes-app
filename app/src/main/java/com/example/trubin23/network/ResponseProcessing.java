@@ -1,13 +1,9 @@
 package com.example.trubin23.network;
 
 import android.util.Log;
-import com.example.trubin23.database.asynctasktablenote.AsyncTaskAddNotes;
-import com.example.trubin23.myfirstapplication.Note;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import java.util.List;
 
 /**
  * Created by Andrey on 24.12.2017.

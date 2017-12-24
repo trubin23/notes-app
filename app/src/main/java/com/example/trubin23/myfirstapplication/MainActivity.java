@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -22,11 +23,12 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import android.widget.Toast;
+import com.example.trubin23.database.Note;
 import com.example.trubin23.database.NoteDao;
 
 import java.util.ArrayList;
@@ -35,11 +37,16 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import com.example.trubin23.database.asynctasktablenote.AsyncTaskAddNote;
+import com.example.trubin23.database.asynctasktablenote.AsyncTaskAddNotes;
+import com.example.trubin23.network.*;
+import retrofit2.Call;
+import retrofit2.Response;
 
 import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 import static android.Manifest.permission.INTERNET;
 import static android.support.v4.content.PermissionChecker.PERMISSION_GRANTED;
-import static com.example.trubin23.myfirstapplication.Note.NOTE_UID;
+import static com.example.trubin23.database.Note.NOTE_UID;
 
 public class MainActivity extends AppCompatActivity
         implements NoteItemActionHandler,
@@ -100,7 +107,6 @@ public class MainActivity extends AppCompatActivity
 
         onRequestPermissions(permissions);
 
-        // создаем лоадер для чтения данных
         getSupportLoaderManager().initLoader(CURSOR_LOADER_ID, null, this);
     }
 
@@ -178,8 +184,29 @@ public class MainActivity extends AppCompatActivity
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
-                        SyncWithServer.deleteNote(getApplicationContext(), noteDao, uid);
+                        final LocalBroadcastManager broadcastManager =
+                                LocalBroadcastManager.getInstance(getApplicationContext());
+                        final NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
+
+                        RetrofitClient.deleteNote(uid, new ResponseProcessing<Note>(){
+                            Resources res = getApplicationContext().getResources();
+                            @Override
+                            public void success(Note note){
+                                AsyncTaskAddNote addNote =
+                                        new AsyncTaskAddNote(broadcastManager, noteDao, note);
+                                addNote.execute();
+                            }
+
+                            @Override
+                            public void error(RestError restError) {
+                                super.error(restError);
+                                Toast.makeText(getApplicationContext(),
+                                               res.getString(R.string.note_deleted)  + "\n" +
+                                                       res.getString(R.string.error_code) +
+                                                       restError.getCode(),
+                                               Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     }
                 });
 
@@ -201,8 +228,42 @@ public class MainActivity extends AppCompatActivity
     public void onRefresh() {
         mSwipeRefreshLayout.setRefreshing(true);
 
-        NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
-        SyncWithServer.notesSync(getApplicationContext(), noteDao);
+        final LocalBroadcastManager broadcastManager =
+                LocalBroadcastManager.getInstance(getApplicationContext());
+        final NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
+
+        RetrofitClient.getNotes(new ResponseProcessing<List<Note>>(){
+            Resources res = getApplicationContext().getResources();
+
+            @Override
+            public void success(List<Note> notes){
+                AsyncTaskAddNotes addNotes =
+                        new AsyncTaskAddNotes(broadcastManager, noteDao, notes);
+                addNotes.execute();
+            }
+
+            @Override
+            public void successWithoutBody(){
+                super.successWithoutBody();
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+
+            @Override
+            public void error(RestError restError) {
+                super.error(restError);
+                Toast.makeText(getApplicationContext(),
+                               res.getString(R.string.notes_sync) + "\n" +
+                                       res.getString(R.string.error_code) + restError.getCode(),
+                               Toast.LENGTH_SHORT).show();
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+
+            @Override
+            public void onFailure(Call call, Throwable t){
+                super.onFailure(call, t);
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
     }
 
     @Override
@@ -212,9 +273,7 @@ public class MainActivity extends AppCompatActivity
 
         if (mFirstStart) {
             mFirstStart = false;
-
-            NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
-            SyncWithServer.notesSync(getApplicationContext(), noteDao);
+            onRefresh();
         } else {
             getSupportLoaderManager().getLoader(CURSOR_LOADER_ID).forceLoad();
         }
@@ -236,6 +295,12 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         ((RecyclerNoteAdapter) mRecyclerView.getAdapter()).swapCursor(cursor);
+
+        Resources res = getResources();
+        Toast.makeText(getApplicationContext(), res.getString(R.string.notes_sync) + "\n"
+                               + res.getString(R.string.success), Toast.LENGTH_SHORT).show();
+
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     @Override

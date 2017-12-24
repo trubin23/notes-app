@@ -4,7 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.example.trubin23.myfirstapplication.Note;
+import com.example.trubin23.database.Note;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;

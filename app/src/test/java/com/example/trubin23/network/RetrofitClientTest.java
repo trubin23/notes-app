@@ -1,6 +1,6 @@
 package com.example.trubin23.network;
 
-import com.example.trubin23.myfirstapplication.Note;
+import com.example.trubin23.database.Note;
 
 import org.junit.Test;
 

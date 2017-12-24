@@ -1,4 +1,4 @@
-package com.example.trubin23.myfirstapplication;
+package com.example.trubin23.database;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -13,7 +13,7 @@ import com.squareup.moshi.Json;
 
 public class Note implements Parcelable {
 
-    static final String NOTE_UID = "note_uid";
+    public static final String NOTE_UID = "note_uid";
 
     private static final String DEFAULT_COLOR = "#ffffff";
     private static final Integer DEFAULT_DESTROY_DATE = Integer.MAX_VALUE;
