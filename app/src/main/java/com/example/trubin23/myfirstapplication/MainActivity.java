@@ -198,7 +198,12 @@ public class MainActivity extends AppCompatActivity
                 Completable.fromAction(() -> noteDao.deleteNote(note.getUid()))
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(() -> forceLoad(),
+                        .subscribe(() -> {
+                                    forceLoad();
+                                    Resources res = getResources();
+                                    Toast.makeText(getApplicationContext(), res.getString(R.string.note_deleted)
+                                            + "\n" + res.getString(R.string.success), Toast.LENGTH_SHORT).show();
+                                },
                                 throwable -> Log.e(TAG, "noteDao.deleteNote", throwable));
             }
 
@@ -224,7 +229,12 @@ public class MainActivity extends AppCompatActivity
                 Completable.fromAction(() -> noteDao.notesSync(notes))
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(MainActivity.this::forceLoad,
+                        .subscribe(() -> {
+                                    forceLoad();
+                                    Resources res = getResources();
+                                    Toast.makeText(getApplicationContext(), res.getString(R.string.notes_sync)
+                                            + "\n" + res.getString(R.string.success), Toast.LENGTH_SHORT).show();
+                                },
                                 throwable -> Log.e(TAG, "notes.forEach(noteDao::addNote)", throwable));
             }
 
@@ -273,7 +283,7 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
     }
 
-    private void forceLoad(){
+    private void forceLoad() {
         getSupportLoaderManager().getLoader(CURSOR_LOADER_ID).forceLoad();
     }
 
@@ -291,10 +301,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         ((RecyclerNoteAdapter) mRecyclerView.getAdapter()).swapCursor(cursor);
-
-        Resources res = getResources();
-        Toast.makeText(getApplicationContext(), res.getString(R.string.notes_sync) + "\n"
-                + res.getString(R.string.success), Toast.LENGTH_SHORT).show();
 
         mSwipeRefreshLayout.setRefreshing(false);
     }

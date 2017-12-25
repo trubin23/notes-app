@@ -154,12 +154,12 @@ public class EditNoteActivity extends AppCompatActivity {
         }
     }
 
-    private void setMenuState(boolean enabled, int tint){
-        if (mAcceptMenuItem!= null) {
+    private void setMenuState(boolean enabled, int tint) {
+        if (mAcceptMenuItem != null) {
             mAcceptMenuItem.setEnabled(enabled);
             mAcceptMenuItem.getIcon().setTint(tint);
         }
-        if (mPickColorMenuItem!= null) {
+        if (mPickColorMenuItem != null) {
             mPickColorMenuItem.setEnabled(enabled);
             mPickColorMenuItem.getIcon().setTint(tint);
         }
@@ -217,7 +217,12 @@ public class EditNoteActivity extends AppCompatActivity {
                 Completable.fromAction(() -> noteDao.addNote(note))
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(() -> broadcastManager.sendBroadcast(new Intent(MainActivity.ACTION_CHANGED_DB)),
+                        .subscribe(() -> {
+                                    broadcastManager.sendBroadcast(new Intent(MainActivity.ACTION_CHANGED_DB));
+                                    Resources res = getResources();
+                                    Toast.makeText(getApplicationContext(), res.getString(R.string.note_added)
+                                            + "\n" + res.getString(R.string.success), Toast.LENGTH_SHORT).show();
+                                },
                                 throwable -> Log.e(TAG, "noteDao.addNote", throwable));
             }
 
@@ -245,8 +250,12 @@ public class EditNoteActivity extends AppCompatActivity {
                 Completable.fromAction(() -> noteDao.updateNote(note))
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(() -> broadcastManager.sendBroadcast(
-                                new Intent(MainActivity.ACTION_CHANGED_DB)),
+                        .subscribe(() -> {
+                                    broadcastManager.sendBroadcast(new Intent(MainActivity.ACTION_CHANGED_DB));
+                                    Resources res = getResources();
+                                    Toast.makeText(getApplicationContext(), res.getString(R.string.note_updated)
+                                            + "\n" + res.getString(R.string.success), Toast.LENGTH_SHORT).show();
+                                },
                                 throwable -> Log.e(TAG, "noteDao.updateNote", throwable));
             }
 
