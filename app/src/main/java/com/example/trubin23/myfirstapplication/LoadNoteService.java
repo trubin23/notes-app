@@ -18,8 +18,16 @@ public class LoadNoteService extends IntentService {
 
     private static final String NAME_WORKER_THREAD = "load_note_service";
 
+    private boolean mWorked;
+
     public LoadNoteService() {
         super(NAME_WORKER_THREAD);
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mWorked = true;
     }
 
     @Override
@@ -40,6 +48,14 @@ public class LoadNoteService extends IntentService {
 
         Intent intentResult = new Intent(EditNoteActivity.ACTION_GET_EDIT_NOTE);
         intentResult.putExtra(EditNoteActivity.NOTE, note);
-        broadcastManager.sendBroadcast(intentResult);
+        if (mWorked) {
+            broadcastManager.sendBroadcast(intentResult);
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        mWorked = false;
+        super.onDestroy();
     }
 }

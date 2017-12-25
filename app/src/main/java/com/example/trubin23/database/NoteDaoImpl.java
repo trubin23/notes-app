@@ -41,11 +41,11 @@ public class NoteDaoImpl implements NoteDao {
         SQLiteDatabase db = mDbOpenHelper.getReadableDatabase();
         db.beginTransaction();
         try {
-//            try {
-//                Thread.sleep(7000);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
+            try {
+                Thread.sleep(7000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             Cursor cursor = db.rawQuery(QUERY_NOTE, new String[]{uid});
 
             if (cursor.moveToFirst()) {
@@ -99,19 +99,17 @@ public class NoteDaoImpl implements NoteDao {
             Cursor cursor = db.query(TABLE_NOTE,
                     COLUMNS, null, null, null, null, null);
 
-            if (cursor.moveToFirst()) {
-                do {
-                    String uid = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_UID));
-                    String title = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_TITLE));
-                    String content = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_CONTENT));
-                    String color = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_COLOR));
-                    Integer destroyDate = Integer.parseInt(cursor.getString(
-                            cursor.getColumnIndex(COLUMN_NOTE_DESTROY_DATE)));
+            for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+                String uid = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_UID));
+                String title = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_TITLE));
+                String content = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_CONTENT));
+                String color = cursor.getString(cursor.getColumnIndex(COLUMN_NOTE_COLOR));
+                Integer destroyDate = Integer.parseInt(cursor.getString(
+                        cursor.getColumnIndex(COLUMN_NOTE_DESTROY_DATE)));
 
-                    Note note = new Note(uid, title, content, color, destroyDate);
+                Note note = new Note(uid, title, content, color, destroyDate);
 
-                    notes.add(note);
-                } while (cursor.moveToNext());
+                notes.add(note);
             }
             cursor.close();
 
@@ -138,7 +136,7 @@ public class NoteDaoImpl implements NoteDao {
         db.beginTransaction();
         try {
             long id = db.insert(TABLE_NOTE, null, values);
-            if (id == -1){
+            if (id == -1) {
                 db.update(TABLE_NOTE, values, COLUMN_NOTE_UID + " = ?",
                         new String[]{note.getUid()});
             }

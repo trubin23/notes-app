@@ -16,6 +16,7 @@ public class ResponseProcessing<T> implements Callback {
     @Override
     public void onResponse(Call call, Response response) {
         if (response.isSuccessful()) {
+            //noinspection unchecked
             T body = (T) response.body();
             if (body != null) {
                 success(body);

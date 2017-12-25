@@ -2,7 +2,6 @@ package com.example.trubin23.myfirstapplication;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
@@ -17,13 +16,17 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.*;
+import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.trubin23.database.Note;
 import com.example.trubin23.database.NoteDao;
-import com.example.trubin23.network.*;
+import com.example.trubin23.network.ResponseProcessing;
+import com.example.trubin23.network.RestError;
+import com.example.trubin23.network.RetrofitClient;
 import com.flask.colorpicker.ColorPickerView;
-import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 
 import java.util.Objects;
@@ -58,6 +61,7 @@ public class EditNoteActivity extends AppCompatActivity {
     ProgressBar mProgressBar;
 
     private MenuItem mAcceptMenuItem;
+    private MenuItem mPickColorMenuItem;
 
     private String mNoteUid;
     private String mNoteColor;
@@ -115,9 +119,8 @@ public class EditNoteActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             mNoteState = NoteState.START;
         } else {
-            mNoteState = NoteState.valueOf(
-                    savedInstanceState.getString(NOTE_STATE));
-            mNoteColor = savedInstanceState.getString(NOTE_COLOR);
+            mNoteState = NoteState.valueOf(savedInstanceState.getString(NOTE_STATE));
+            changeNoteColor(savedInstanceState.getString(NOTE_COLOR));
         }
 
         mNoteReceiver = new NoteReceiver();
@@ -138,6 +141,9 @@ public class EditNoteActivity extends AppCompatActivity {
 
     private void validNote() {
         if (mAcceptMenuItem == null) {
+            if (mPickColorMenuItem != null) {
+                mPickColorMenuItem.setEnabled(false);
+            }
             return;
         }
 
@@ -151,12 +157,17 @@ public class EditNoteActivity extends AppCompatActivity {
             mAcceptMenuItem.getIcon().setTint(getResources().getColor(
                     R.color.white));
         }
+
+        if (mAcceptMenuItem != null){
+            mPickColorMenuItem.setEnabled(mAcceptMenuItem.isEnabled());
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.edit_note, menu);
         mAcceptMenuItem = menu.findItem(R.id.action_accept);
+        mPickColorMenuItem = menu.findItem(R.id.action_pick_color);
 
         validNote();
 
@@ -196,7 +207,8 @@ public class EditNoteActivity extends AppCompatActivity {
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(() -> broadcastManager.sendBroadcast(
                                         new Intent(MainActivity.ACTION_CHANGED_DB)),
-                                           throwable -> Log.e(TAG, "noteDao.addNote", throwable));
+                                           throwable -> Log.e(TAG,
+                                                   "noteDao.addNote", throwable));
                     }
 
                     @Override
@@ -221,7 +233,8 @@ public class EditNoteActivity extends AppCompatActivity {
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(() -> broadcastManager.sendBroadcast(
                                         new Intent(MainActivity.ACTION_CHANGED_DB)),
-                                           throwable -> Log.e(TAG, "noteDao.updateNote", throwable));
+                                           throwable -> Log.e(TAG,
+                                                   "noteDao.updateNote", throwable));
                     }
 
                     @Override
@@ -235,9 +248,17 @@ public class EditNoteActivity extends AppCompatActivity {
             }
         }
 
-        finish();
+        onBackPressed();
 
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        Intent intent = new Intent(this, LoadNoteService.class);
+        stopService(intent);
     }
 
     private void pickNoteColor() {
@@ -247,13 +268,8 @@ public class EditNoteActivity extends AppCompatActivity {
                 .initialColor(Color.WHITE)
                 .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                 .density(12)
-                .setPositiveButton(android.R.string.ok, new ColorPickerClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog,
-                                        int selectedColor, Integer[] allColors) {
-                        changeNoteColor(String.format("#%06X", (0xFFFFFF & selectedColor)));
-                    }
-                })
+                .setPositiveButton(android.R.string.ok, (dialog, selectedColor, allColors) ->
+                        changeNoteColor(String.format("#%06X", (0xFFFFFF & selectedColor))))
                 .setNegativeButton(android.R.string.cancel, null)
                 .build()
                 .show();
@@ -289,11 +305,13 @@ public class EditNoteActivity extends AppCompatActivity {
     private void changeNoteColor(String stringColor) {
         mNoteColor = stringColor;
 
-        mEditTitle.setBackgroundColor(Color.parseColor(stringColor));
-        mEditTitle.setTextColor(Utils.colorText(stringColor));
+        if (mNoteColor != null) {
+            mEditTitle.setBackgroundColor(Color.parseColor(stringColor));
+            mEditTitle.setTextColor(Utils.colorText(stringColor));
 
-        mEditText.setBackgroundColor(Color.parseColor(stringColor));
-        mEditText.setTextColor(Utils.colorText(stringColor));
+            mEditText.setBackgroundColor(Color.parseColor(stringColor));
+            mEditText.setTextColor(Utils.colorText(stringColor));
+        }
     }
 
     @Override

@@ -27,10 +27,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-
 import android.widget.Toast;
+
 import com.example.trubin23.database.Note;
 import com.example.trubin23.database.NoteDao;
+import com.example.trubin23.network.ResponseProcessing;
+import com.example.trubin23.network.RestError;
+import com.example.trubin23.network.RetrofitClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,18 +41,10 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import com.example.trubin23.network.*;
-import io.reactivex.*;
+import io.reactivex.Completable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.Nullable;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Cancellable;
-import io.reactivex.internal.operators.observable.ObservableFromCallable;
-import io.reactivex.internal.operators.observable.ObservableSingleSingle;
-import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.Call;
-import retrofit2.Response;
 
 import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 import static android.Manifest.permission.INTERNET;
@@ -67,7 +62,6 @@ public class MainActivity extends AppCompatActivity
 
     private static final String TAG = "MainActivity";
 
-    private static final int EDIT_NOTE_REQUEST_CODE = 1;
     private static final int MY_PERMISSIONS_REQUEST = 1;
 
     @BindView(R.id.swipe_refresh)
@@ -170,14 +164,14 @@ public class MainActivity extends AppCompatActivity
     @OnClick(R.id.button_create_note)
     public void onClickCreateNote(View view) {
         Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
-        startActivityForResult(intent, EDIT_NOTE_REQUEST_CODE);
+        startActivity(intent);
     }
 
     @Override
     public void onEdit(@NonNull String uid) {
         Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
         intent.putExtra(NOTE_UID, uid);
-        startActivityForResult(intent, EDIT_NOTE_REQUEST_CODE);
+        startActivity(intent);
     }
 
     @Override
@@ -228,14 +222,6 @@ public class MainActivity extends AppCompatActivity
 
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == EDIT_NOTE_REQUEST_CODE) {
-            Intent intent = new Intent(this, LoadNoteService.class);
-            stopService(intent);
-        }
     }
 
     @Override
