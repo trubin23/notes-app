@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -158,7 +159,7 @@ public class EditNoteActivity extends AppCompatActivity {
                     R.color.white));
         }
 
-        if (mAcceptMenuItem != null){
+        if (mAcceptMenuItem != null) {
             mPickColorMenuItem.setEnabled(mAcceptMenuItem.isEnabled());
         }
     }
@@ -174,6 +175,72 @@ public class EditNoteActivity extends AppCompatActivity {
         return true;
     }
 
+    @NonNull
+    private ResponseProcessing<Note> addProcessing() {
+        return new ResponseProcessing<Note>() {
+            Resources res = getApplicationContext().getResources();
+
+            @Override
+            public void success(Note note) {
+                final LocalBroadcastManager broadcastManager =
+                        LocalBroadcastManager.getInstance(getApplicationContext());
+                final NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
+
+                Completable.create(emitter -> {
+                    noteDao.addNote(note);
+                    emitter.onComplete();
+                })
+                        .subscribeOn(Schedulers.newThread())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(() -> broadcastManager.sendBroadcast(
+                                new Intent(MainActivity.ACTION_CHANGED_DB)),
+                                throwable -> Log.e(TAG,
+                                        "noteDao.addNote", throwable));
+            }
+
+            @Override
+            public void error(RestError restError) {
+                super.error(restError);
+                Toast.makeText(getApplicationContext(), res.getString(R.string.note_added) + "\n"
+                                + res.getString(R.string.error_code) + restError.getCode(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        };
+    }
+
+    @NonNull
+    private ResponseProcessing<Note> updateProcessing() {
+        return new ResponseProcessing<Note>() {
+            Resources res = getApplicationContext().getResources();
+
+            @Override
+            public void success(Note note) {
+                final LocalBroadcastManager broadcastManager =
+                        LocalBroadcastManager.getInstance(getApplicationContext());
+                final NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
+
+                Completable.create(emitter -> {
+                    noteDao.updateNote(note);
+                    emitter.onComplete();
+                })
+                        .subscribeOn(Schedulers.newThread())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(() -> broadcastManager.sendBroadcast(
+                                new Intent(MainActivity.ACTION_CHANGED_DB)),
+                                throwable -> Log.e(TAG,
+                                        "noteDao.updateNote", throwable));
+            }
+
+            @Override
+            public void error(RestError restError) {
+                super.error(restError);
+                Toast.makeText(getApplicationContext(), res.getString(R.string.note_updated) + "\n"
+                                + res.getString(R.string.error_code) + restError.getCode(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        };
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (R.id.action_pick_color == item.getItemId()) {
@@ -187,64 +254,12 @@ public class EditNoteActivity extends AppCompatActivity {
                 noteUid = UUID.randomUUID().toString();
             }
             Note note = new Note(noteUid, mEditTitle.getText().toString(),
-                                 mEditText.getText().toString(), mNoteColor, null);
-
-            final LocalBroadcastManager broadcastManager =
-                    LocalBroadcastManager.getInstance(getApplicationContext());
-            final NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
+                    mEditText.getText().toString(), mNoteColor, null);
 
             if (Objects.equals(mNoteUid, DEFAULT_ID)) {
-                RetrofitClient.addNote(note, new ResponseProcessing<Note>(){
-                    Resources res = getApplicationContext().getResources();
-
-                    @Override
-                    public void success(Note note){
-                        Completable.create(emitter -> {
-                            noteDao.addNote(note);
-                            emitter.onComplete();
-                        })
-                                .subscribeOn(Schedulers.newThread())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(() -> broadcastManager.sendBroadcast(
-                                        new Intent(MainActivity.ACTION_CHANGED_DB)),
-                                           throwable -> Log.e(TAG,
-                                                   "noteDao.addNote", throwable));
-                    }
-
-                    @Override
-                    public void error(RestError restError) {
-                        super.error(restError);
-                        Toast.makeText(getApplicationContext(), res.getString(R.string.note_added)  + "\n"
-                                               + res.getString(R.string.error_code) + restError.getCode(),
-                                       Toast.LENGTH_SHORT).show();
-                    }
-                });
+                RetrofitClient.addNote(note, addProcessing());
             } else {
-                RetrofitClient.updateNote(note, new ResponseProcessing<Note>(){
-                    Resources res = getApplicationContext().getResources();
-
-                    @Override
-                    public void success(Note note){
-                        Completable.create(emitter -> {
-                            noteDao.updateNote(note);
-                            emitter.onComplete();
-                        })
-                                .subscribeOn(Schedulers.newThread())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(() -> broadcastManager.sendBroadcast(
-                                        new Intent(MainActivity.ACTION_CHANGED_DB)),
-                                           throwable -> Log.e(TAG,
-                                                   "noteDao.updateNote", throwable));
-                    }
-
-                    @Override
-                    public void error(RestError restError) {
-                        super.error(restError);
-                        Toast.makeText(getApplicationContext(), res.getString(R.string.note_updated ) + "\n"
-                                               + res.getString(R.string.error_code) + restError.getCode(),
-                                       Toast.LENGTH_SHORT).show();
-                    }
-                });
+                RetrofitClient.updateNote(note, updateProcessing());
             }
         }
 
@@ -277,8 +292,7 @@ public class EditNoteActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-                mNoteReceiver, new IntentFilter(ACTION_GET_EDIT_NOTE));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mNoteReceiver, new IntentFilter(ACTION_GET_EDIT_NOTE));
 
         if (!Objects.equals(mNoteUid, DEFAULT_ID)) {
             mInfoTitle.setVisibility(View.GONE);

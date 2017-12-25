@@ -9,20 +9,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
 import com.example.trubin23.database.NoteDao;
 
-import java.util.Date;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * Created by skyfishjy on 10/31/14.
  */
-public class RecyclerNoteAdapter extends CursorRecyclerViewAdapter<RecyclerNoteAdapter.NoteHolder>{
+public class RecyclerNoteAdapter extends CursorRecyclerViewAdapter<RecyclerNoteAdapter.NoteHolder> {
 
     private NoteItemActionHandler mActionHandler;
 
-    public RecyclerNoteAdapter(@Nullable NoteItemActionHandler actionHandler){
+    RecyclerNoteAdapter(@Nullable NoteItemActionHandler actionHandler) {
         super();
         mActionHandler = actionHandler;
     }

@@ -43,7 +43,7 @@ public class Note implements Parcelable {
     }
 
     @SuppressWarnings("unused") // Moshi uses this!
-    private Note(){
+    private Note() {
     }
 
     public Note(@NonNull Parcel in) {
@@ -95,7 +95,7 @@ public class Note implements Parcelable {
     }
 
     @NonNull
-    public Integer getDestroyDate() {
+    Integer getDestroyDate() {
         return mDestroyDate;
     }
 

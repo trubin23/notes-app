@@ -17,7 +17,6 @@
 
 package com.example.trubin23.myfirstapplication;
 
-import android.content.Context;
 import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.support.v7.widget.RecyclerView;
@@ -34,7 +33,7 @@ public abstract class CursorRecyclerViewAdapter<VH extends RecyclerView.ViewHold
 
     private DataSetObserver mDataSetObserver;
 
-    public CursorRecyclerViewAdapter() {
+    CursorRecyclerViewAdapter() {
         mDataValid = false;
         mDataSetObserver = new NotifyingDataSetObserver();
     }
@@ -73,7 +72,7 @@ public abstract class CursorRecyclerViewAdapter<VH extends RecyclerView.ViewHold
      * Change the underlying cursor to a new cursor. If there is an existing cursor it will be
      * closed.
      */
-    public void changeCursor(Cursor cursor) {
+    void changeCursor(Cursor cursor) {
         Cursor old = swapCursor(cursor);
         if (old != null) {
             old.close();
@@ -85,7 +84,7 @@ public abstract class CursorRecyclerViewAdapter<VH extends RecyclerView.ViewHold
      * {@link #changeCursor(Cursor)}, the returned old Cursor is <em>not</em>
      * closed.
      */
-    public Cursor swapCursor(Cursor newCursor) {
+    Cursor swapCursor(Cursor newCursor) {
         if (newCursor == mCursor) {
             return null;
         }

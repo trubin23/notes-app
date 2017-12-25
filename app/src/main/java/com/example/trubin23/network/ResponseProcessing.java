@@ -1,6 +1,8 @@
 package com.example.trubin23.network;
 
+import android.support.annotation.Nullable;
 import android.util.Log;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -34,10 +36,10 @@ public class ResponseProcessing<T> implements Callback {
         Log.e(TAG, "onFailure", t);
     }
 
-    public void success(T body) {
+    public void success(@Nullable T body) {
     }
 
-    public void successWithoutBody(){
+    public void successWithoutBody() {
         Log.w(TAG, "success response without body");
     }
 

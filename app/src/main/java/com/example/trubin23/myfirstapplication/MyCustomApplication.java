@@ -25,7 +25,7 @@ public class MyCustomApplication extends Application {
     }
 
     @NonNull
-    NoteDao getNoteDao(){
+    NoteDao getNoteDao() {
         return mNoteDao;
     }
 }

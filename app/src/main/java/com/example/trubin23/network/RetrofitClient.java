@@ -65,7 +65,7 @@ public class RetrofitClient {
     }
 
     @Nullable
-    public static RestError convertRestError(@Nullable ResponseBody errorBody){
+    public static RestError convertRestError(@Nullable ResponseBody errorBody) {
         if (mConverter != null && errorBody != null) {
             try {
                 return mConverter.convert(errorBody);
@@ -79,27 +79,27 @@ public class RetrofitClient {
         return null;
     }
 
-    public static void getNotes(@NonNull Callback<List<Note>> callback){
+    public static void getNotes(@NonNull Callback<List<Note>> callback) {
         SOService mService = getSOService();
         mService.getNotes().enqueue(callback);
     }
 
-    static void getNote(@NonNull String uid, @NonNull Callback<Note> callback){
+    static void getNote(@NonNull String uid, @NonNull Callback<Note> callback) {
         SOService mService = getSOService();
         mService.getNote(uid).enqueue(callback);
     }
 
-    public static void addNote(@NonNull Note note, @NonNull Callback<Note> callback){
+    public static void addNote(@NonNull Note note, @NonNull Callback<Note> callback) {
         SOService mService = getSOService();
         mService.addNote(note).enqueue(callback);
     }
 
-    public static void updateNote(@NonNull Note note, @NonNull Callback<Note> callback){
+    public static void updateNote(@NonNull Note note, @NonNull Callback<Note> callback) {
         SOService mService = getSOService();
         mService.updateNote(note.getUid(), note).enqueue(callback);
     }
 
-    public static void deleteNote(@NonNull String uid, @NonNull Callback<Note> callback){
+    public static void deleteNote(@NonNull String uid, @NonNull Callback<Note> callback) {
         SOService mService = getSOService();
         mService.deleteNote(uid).enqueue(callback);
     }

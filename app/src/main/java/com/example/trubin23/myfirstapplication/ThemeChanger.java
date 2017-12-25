@@ -65,7 +65,7 @@ class ThemeChanger {
         mAlertDialog = builder.create();
     }
 
-    void showDialog(){
+    void showDialog() {
         mAlertDialog.show();
     }
 

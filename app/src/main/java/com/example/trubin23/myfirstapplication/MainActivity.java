@@ -2,7 +2,6 @@ package com.example.trubin23.myfirstapplication;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -54,8 +53,7 @@ import static com.example.trubin23.database.Note.NOTE_UID;
 public class MainActivity extends AppCompatActivity
         implements NoteItemActionHandler,
         SwipeRefreshLayout.OnRefreshListener,
-        LoaderManager.LoaderCallbacks<Cursor>
-{
+        LoaderManager.LoaderCallbacks<Cursor> {
     public static final int CURSOR_LOADER_ID = 0;
 
     public static final String ACTION_CHANGED_DB = "action-changed-db";
@@ -68,7 +66,6 @@ public class MainActivity extends AppCompatActivity
     SwipeRefreshLayout mSwipeRefreshLayout;
     @BindView(R.id.recycler_view)
     RecyclerView mRecyclerView;
-    private RecyclerNoteAdapter mRecyclerNoteAdapter;
 
     private ChangedDbReceiver mChangedDbReceiver;
 
@@ -98,7 +95,7 @@ public class MainActivity extends AppCompatActivity
                 mRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
         mRecyclerView.addItemDecoration(dividerItemDecoration);
 
-        mRecyclerNoteAdapter = new RecyclerNoteAdapter(this);
+        RecyclerNoteAdapter mRecyclerNoteAdapter = new RecyclerNoteAdapter(this);
         mRecyclerView.setAdapter(mRecyclerNoteAdapter);
 
         mChangedDbReceiver = new ChangedDbReceiver();
@@ -107,12 +104,12 @@ public class MainActivity extends AppCompatActivity
 
         String[] permissions = {INTERNET, ACCESS_NETWORK_STATE};
 
-        onRequestPermissions(permissions);
+        requestPermissions(permissions);
 
         getSupportLoaderManager().initLoader(CURSOR_LOADER_ID, null, this);
     }
 
-    private void onRequestPermissions(String... permissions) {
+    private void requestPermissions(@NonNull String... permissions) {
         List<String> requestPermissions = new ArrayList<>();
 
         for (String permission : permissions) {
@@ -142,7 +139,7 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
-        onRequestPermissions(requestPermission.toArray(new String[0]));
+        requestPermissions(requestPermission.toArray(new String[0]));
     }
 
     @Override
@@ -175,48 +172,14 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onDelete(@NonNull final String uid, final String noteTitle, final int position) {
+    public void onDelete(@NonNull final String uid, @NonNull String noteTitle, final int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 
         builder.setTitle(noteTitle);
         builder.setMessage(R.string.message_about_delete);
 
         builder.setPositiveButton(getString(android.R.string.ok),
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        final LocalBroadcastManager broadcastManager =
-                                LocalBroadcastManager.getInstance(getApplicationContext());
-                        final NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
-
-                        RetrofitClient.deleteNote(uid, new ResponseProcessing<Note>(){
-                            Resources res = getApplicationContext().getResources();
-                            @Override
-                            public void success(Note note){
-                                NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
-                                Completable.create(emitter -> {
-                                    noteDao.deleteNote(note.getUid());
-                                    emitter.onComplete();
-                                })
-                                        .subscribeOn(Schedulers.newThread())
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribe(() -> getSupportLoaderManager().
-                                                           getLoader(CURSOR_LOADER_ID).forceLoad(),
-                                                   throwable -> Log.e(TAG, "noteDao.deleteNote", throwable));
-                            }
-
-                            @Override
-                            public void error(RestError restError) {
-                                super.error(restError);
-                                Toast.makeText(getApplicationContext(),
-                                               res.getString(R.string.note_deleted)  + "\n" +
-                                                       res.getString(R.string.error_code) +
-                                                       restError.getCode(),
-                                               Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    }
-                });
+                (dialogInterface, i) -> RetrofitClient.deleteNote(uid, deleteProcessing()));
 
         builder.setNegativeButton(getString(android.R.string.cancel), null);
 
@@ -224,19 +187,45 @@ public class MainActivity extends AppCompatActivity
         alertDialog.show();
     }
 
-    @Override
-    public void onRefresh() {
-        mSwipeRefreshLayout.setRefreshing(true);
-
-
-        RetrofitClient.getNotes(new ResponseProcessing<List<Note>>(){
+    @NonNull
+    private ResponseProcessing<Note> deleteProcessing() {
+        return new ResponseProcessing<Note>() {
             Resources res = getApplicationContext().getResources();
 
             @Override
-            public void success(List<Note> notes){
+            public void success(Note note) {
                 NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
                 Completable.create(emitter -> {
-                    for (Note note : notes){
+                    noteDao.deleteNote(note.getUid());
+                    emitter.onComplete();
+                })
+                        .subscribeOn(Schedulers.newThread())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(() -> getSupportLoaderManager().getLoader(CURSOR_LOADER_ID).forceLoad(),
+                                throwable -> Log.e(TAG, "noteDao.deleteNote", throwable));
+            }
+
+            @Override
+            public void error(RestError restError) {
+                super.error(restError);
+                Toast.makeText(getApplicationContext(),
+                        res.getString(R.string.note_deleted) + "\n" +
+                                res.getString(R.string.error_code) + restError.getCode(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        };
+    }
+
+    @NonNull
+    private ResponseProcessing<List<Note>> refreshProcessing() {
+        return new ResponseProcessing<List<Note>>() {
+            Resources res = getApplicationContext().getResources();
+
+            @Override
+            public void success(List<Note> notes) {
+                NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
+                Completable.create(emitter -> {
+                    for (Note note : notes) {
                         noteDao.addNote(note);
                     }
                     emitter.onComplete();
@@ -244,11 +233,11 @@ public class MainActivity extends AppCompatActivity
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(() -> getSupportLoaderManager().getLoader(CURSOR_LOADER_ID).forceLoad(),
-                                   throwable -> Log.e(TAG, "notes.forEach(noteDao::addNote)", throwable));
+                                throwable -> Log.e(TAG, "notes.forEach(noteDao::addNote)", throwable));
             }
 
             @Override
-            public void successWithoutBody(){
+            public void successWithoutBody() {
                 super.successWithoutBody();
                 mSwipeRefreshLayout.setRefreshing(false);
             }
@@ -256,19 +245,25 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void error(RestError restError) {
                 super.error(restError);
-                Toast.makeText(getApplicationContext(),
-                               res.getString(R.string.notes_sync) + "\n" +
-                                       res.getString(R.string.error_code) + restError.getCode(),
-                               Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), res.getString(R.string.notes_sync) + "\n" +
+                                res.getString(R.string.error_code) + restError.getCode(),
+                        Toast.LENGTH_SHORT).show();
                 mSwipeRefreshLayout.setRefreshing(false);
             }
 
             @Override
-            public void onFailure(Call call, Throwable t){
+            public void onFailure(Call call, Throwable t) {
                 super.onFailure(call, t);
                 mSwipeRefreshLayout.setRefreshing(false);
             }
-        });
+        };
+    }
+
+    @Override
+    public void onRefresh() {
+        mSwipeRefreshLayout.setRefreshing(true);
+
+        RetrofitClient.getNotes(refreshProcessing());
     }
 
     @Override
@@ -303,14 +298,13 @@ public class MainActivity extends AppCompatActivity
 
         Resources res = getResources();
         Toast.makeText(getApplicationContext(), res.getString(R.string.notes_sync) + "\n"
-                               + res.getString(R.string.success), Toast.LENGTH_SHORT).show();
+                + res.getString(R.string.success), Toast.LENGTH_SHORT).show();
 
         mSwipeRefreshLayout.setRefreshing(false);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-
     }
 
     @Override
@@ -324,5 +318,5 @@ public class MainActivity extends AppCompatActivity
         public void onReceive(Context context, Intent intent) {
             getSupportLoaderManager().getLoader(CURSOR_LOADER_ID).forceLoad();
         }
-    };
+    }
 }

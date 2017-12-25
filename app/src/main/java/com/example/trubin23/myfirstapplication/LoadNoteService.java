@@ -37,12 +37,12 @@ public class LoadNoteService extends IntentService {
         }
 
         String noteUid = intent.getStringExtra(NOTE_UID);
-        if (noteUid == null){
+        if (noteUid == null) {
             return;
         }
 
         LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
-        NoteDao noteDao = ((MyCustomApplication)getApplication()).getNoteDao();
+        NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
 
         Note note = noteDao.getNote(noteUid);
 

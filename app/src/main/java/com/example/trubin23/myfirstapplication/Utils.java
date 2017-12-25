@@ -15,7 +15,7 @@ class Utils {
         int green = Color.green(intColor);
         int blue = Color.blue(intColor);
         int y = (int) (0.2126 * red + 0.7152 * green + 0.0722 * blue);
-        if (y<128){
+        if (y < 128) {
             return Color.WHITE;
         } else {
             return Color.BLACK;

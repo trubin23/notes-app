@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.support.annotation.NonNull;
 
 import android.support.v4.content.CursorLoader;
+
 import com.example.trubin23.database.NoteDao;
 
 /**
@@ -15,7 +16,7 @@ class NotesCursorLoader extends CursorLoader {
 
     private NoteDao mNoteDao;
 
-    public NotesCursorLoader(@NonNull Context context) {
+    NotesCursorLoader(@NonNull Context context) {
         super(context);
         mNoteDao = ((MyCustomApplication) context.getApplicationContext()).getNoteDao();
     }

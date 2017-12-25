@@ -70,6 +70,7 @@ public class NoteDaoImpl implements NoteDao {
     }
 
     @Nullable
+    @Override
     public Cursor getCursorAllData() {
         Cursor cursor = null;
         SQLiteDatabase db = mDbOpenHelper.getReadableDatabase();
@@ -137,8 +138,7 @@ public class NoteDaoImpl implements NoteDao {
         try {
             long id = db.insert(TABLE_NOTE, null, values);
             if (id == -1) {
-                db.update(TABLE_NOTE, values, COLUMN_NOTE_UID + " = ?",
-                        new String[]{note.getUid()});
+                db.update(TABLE_NOTE, values, COLUMN_NOTE_UID + " = ?", new String[]{note.getUid()});
             }
 
             db.setTransactionSuccessful();
@@ -154,8 +154,7 @@ public class NoteDaoImpl implements NoteDao {
         SQLiteDatabase db = mDbOpenHelper.getWritableDatabase();
         db.beginTransaction();
         try {
-            db.delete(TABLE_NOTE, COLUMN_NOTE_UID + " = ?",
-                    new String[]{uid});
+            db.delete(TABLE_NOTE, COLUMN_NOTE_UID + " = ?", new String[]{uid});
 
             db.setTransactionSuccessful();
         } catch (Exception e) {
@@ -176,8 +175,7 @@ public class NoteDaoImpl implements NoteDao {
         SQLiteDatabase db = mDbOpenHelper.getWritableDatabase();
         db.beginTransaction();
         try {
-            db.update(TABLE_NOTE, values, COLUMN_NOTE_UID + " = ?",
-                    new String[]{note.getUid()});
+            db.update(TABLE_NOTE, values, COLUMN_NOTE_UID + " = ?", new String[]{note.getUid()});
 
             db.setTransactionSuccessful();
         } catch (Exception e) {
