@@ -36,7 +36,10 @@ import java.util.UUID;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.Completable;
+import io.reactivex.Single;
+import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.example.trubin23.database.DatabaseHelper.DEFAULT_ID;
@@ -69,6 +72,8 @@ public class EditNoteActivity extends AppCompatActivity {
 
     private NoteReceiver mNoteReceiver;
     private NoteState mNoteState;
+
+    private static Disposable disposable;
 
     private enum NoteState {
         START,
@@ -141,26 +146,22 @@ public class EditNoteActivity extends AppCompatActivity {
     }
 
     private void validNote() {
-        if (mAcceptMenuItem == null) {
-            if (mPickColorMenuItem != null) {
-                mPickColorMenuItem.setEnabled(false);
-            }
-            return;
-        }
-
         if (mEditTitle.getText().toString().trim().isEmpty() ||
                 mEditText.getText().toString().trim().isEmpty()) {
-            mAcceptMenuItem.setEnabled(false);
-            mAcceptMenuItem.getIcon().setTint(getResources().getColor(
-                    R.color.light_transparent));
+            setMenuState(false, getResources().getColor(R.color.light_transparent));
         } else {
-            mAcceptMenuItem.setEnabled(true);
-            mAcceptMenuItem.getIcon().setTint(getResources().getColor(
-                    R.color.white));
+            setMenuState(true, getResources().getColor(R.color.white));
         }
+    }
 
-        if (mAcceptMenuItem != null) {
-            mPickColorMenuItem.setEnabled(mAcceptMenuItem.isEnabled());
+    private void setMenuState(boolean enabled, int tint){
+        if (mAcceptMenuItem!= null) {
+            mAcceptMenuItem.setEnabled(enabled);
+            mAcceptMenuItem.getIcon().setTint(tint);
+        }
+        if (mPickColorMenuItem!= null) {
+            mPickColorMenuItem.setEnabled(enabled);
+            mPickColorMenuItem.getIcon().setTint(tint);
         }
     }
 
@@ -171,6 +172,33 @@ public class EditNoteActivity extends AppCompatActivity {
         mPickColorMenuItem = menu.findItem(R.id.action_pick_color);
 
         validNote();
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (R.id.action_pick_color == item.getItemId()) {
+            pickNoteColor();
+            return true;
+        }
+
+        if (R.id.action_accept == item.getItemId()) {
+            String noteUid = mNoteUid;
+            if (Objects.equals(mNoteUid, DEFAULT_ID)) {
+                noteUid = UUID.randomUUID().toString();
+            }
+            Note note = new Note(noteUid, mEditTitle.getText().toString(),
+                    mEditText.getText().toString(), mNoteColor, null);
+
+            if (Objects.equals(mNoteUid, DEFAULT_ID)) {
+                RetrofitClient.addNote(note, addProcessing());
+            } else {
+                RetrofitClient.updateNote(note, updateProcessing());
+            }
+        }
+
+        onBackPressed();
 
         return true;
     }
@@ -233,38 +261,13 @@ public class EditNoteActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (R.id.action_pick_color == item.getItemId()) {
-            pickNoteColor();
-            return true;
-        }
-
-        if (R.id.action_accept == item.getItemId()) {
-            String noteUid = mNoteUid;
-            if (Objects.equals(mNoteUid, DEFAULT_ID)) {
-                noteUid = UUID.randomUUID().toString();
-            }
-            Note note = new Note(noteUid, mEditTitle.getText().toString(),
-                    mEditText.getText().toString(), mNoteColor, null);
-
-            if (Objects.equals(mNoteUid, DEFAULT_ID)) {
-                RetrofitClient.addNote(note, addProcessing());
-            } else {
-                RetrofitClient.updateNote(note, updateProcessing());
-            }
-        }
-
-        onBackPressed();
-
-        return true;
-    }
-
-    @Override
     public void onBackPressed() {
         super.onBackPressed();
 
-        Intent intent = new Intent(this, LoadNoteService.class);
-        stopService(intent);
+        if (disposable != null && !disposable.isDisposed()) {
+            disposable.dispose();
+        }
+        disposable = null;
     }
 
     private void pickNoteColor() {
@@ -281,32 +284,6 @@ public class EditNoteActivity extends AppCompatActivity {
                 .show();
     }
 
-    @Override
-    protected void onResume() {
-        LocalBroadcastManager.getInstance(this).registerReceiver(mNoteReceiver, new IntentFilter(ACTION_GET_EDIT_NOTE));
-
-        if (!Objects.equals(mNoteUid, DEFAULT_ID)) {
-            mInfoTitle.setVisibility(View.GONE);
-            mEditTitle.setVisibility(View.GONE);
-
-            if (mNoteState != NoteState.FINISH) {
-                mProgressBar.setVisibility(View.VISIBLE);
-                mEditText.setEnabled(false);
-            }
-
-            if (mNoteState == NoteState.START) {
-                Intent intent = new Intent(this, LoadNoteService.class);
-                intent.putExtra(NOTE_UID, mNoteUid);
-
-                startService(intent);
-
-                mNoteState = NoteState.PROCESS;
-            }
-        }
-
-        super.onResume();
-    }
-
     private void changeNoteColor(String stringColor) {
         mNoteColor = stringColor;
 
@@ -316,6 +293,49 @@ public class EditNoteActivity extends AppCompatActivity {
 
             mEditText.setBackgroundColor(Color.parseColor(stringColor));
             mEditText.setTextColor(Utils.colorText(stringColor));
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mNoteReceiver,
+                new IntentFilter(ACTION_GET_EDIT_NOTE));
+
+        if (Objects.equals(mNoteUid, DEFAULT_ID)) {
+            return;
+        }
+
+        mInfoTitle.setVisibility(View.GONE);
+        mEditTitle.setVisibility(View.GONE);
+
+        if (mNoteState != NoteState.FINISH) {
+            mProgressBar.setVisibility(View.VISIBLE);
+            mEditText.setEnabled(false);
+        }
+
+        if (mNoteState == NoteState.START) {
+            mNoteState = NoteState.PROCESS;
+
+            if (disposable == null) {
+                NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
+
+                disposable = Single.create((SingleOnSubscribe<Note>) emitter ->
+                        emitter.onSuccess(noteDao.getNote(mNoteUid)))
+                        .subscribeOn(Schedulers.newThread())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(note -> {
+                            Intent intentResult = new Intent(ACTION_GET_EDIT_NOTE);
+                            intentResult.putExtra(NOTE, note);
+                            LocalBroadcastManager.getInstance(this).sendBroadcast(intentResult);
+                        }, throwable -> {
+                        });
+            } else {
+                String errorMessage = getResources().getString(R.string.failed_upload_note);
+                Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
+                Log.e(TAG, "NoteState.START, disposable != null");
+            }
         }
     }
 

@@ -23,7 +23,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".EditNoteActivity" />
-        <service android:name=".LoadNoteService" />
         <receiver android:name="com.example.trubin23.network.NetworkBroadcastReceiver">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE"

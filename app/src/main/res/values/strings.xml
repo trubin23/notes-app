@@ -9,6 +9,7 @@
     <string name="load_note">Load note…</string>
     <string name="action_accept">Action accept</string>
     <string name="action_pick_color">Action pick color</string>
+    <string name="failed_upload_note">Failed to load a note from the database for editing</string>
 
     <string name="notes_sync">Notes synchronization.</string>
     <string name="note_added">Note added.</string>
