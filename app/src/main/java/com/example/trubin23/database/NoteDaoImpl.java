@@ -125,6 +125,32 @@ public class NoteDaoImpl implements NoteDao {
     }
 
     @Override
+    public void notesSync(@NonNull List<Note> notes) {
+        SQLiteDatabase db = mDbOpenHelper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            db.delete(TABLE_NOTE, null, null);
+
+            for (Note note : notes){
+                ContentValues values = new ContentValues();
+                values.put(COLUMN_NOTE_UID, note.getUid());
+                values.put(COLUMN_NOTE_TITLE, note.getTitle());
+                values.put(COLUMN_NOTE_CONTENT, note.getContent());
+                values.put(COLUMN_NOTE_COLOR, note.getColor());
+                values.put(COLUMN_NOTE_DESTROY_DATE, note.getDestroyDate());
+
+                db.insert(TABLE_NOTE, null, values);
+            }
+
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e(TAG, "public void deleteNote(@NonNull final String uid)", e);
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    @Override
     public void addNote(@NonNull final Note note) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_NOTE_UID, note.getUid());
@@ -136,10 +162,7 @@ public class NoteDaoImpl implements NoteDao {
         SQLiteDatabase db = mDbOpenHelper.getWritableDatabase();
         db.beginTransaction();
         try {
-            long id = db.insert(TABLE_NOTE, null, values);
-            if (id == -1) {
-                db.update(TABLE_NOTE, values, COLUMN_NOTE_UID + " = ?", new String[]{note.getUid()});
-            }
+            db.insert(TABLE_NOTE, null, values);
 
             db.setTransactionSuccessful();
         } catch (Exception e) {

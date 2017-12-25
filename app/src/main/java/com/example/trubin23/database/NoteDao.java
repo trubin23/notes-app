@@ -36,6 +36,8 @@ public interface NoteDao {
     @NonNull
     List<Note> getAllNote();
 
+    void notesSync(@NonNull final List<Note> notes);
+
     void addNote(@NonNull final Note note);
 
     void deleteNote(@NonNull final String uid);

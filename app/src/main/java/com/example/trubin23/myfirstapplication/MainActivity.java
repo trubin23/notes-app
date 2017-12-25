@@ -195,13 +195,10 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void success(Note note) {
                 NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
-                Completable.create(emitter -> {
-                    noteDao.deleteNote(note.getUid());
-                    emitter.onComplete();
-                })
+                Completable.fromAction(() -> noteDao.deleteNote(note.getUid()))
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(() -> getSupportLoaderManager().getLoader(CURSOR_LOADER_ID).forceLoad(),
+                        .subscribe(() -> forceLoad(),
                                 throwable -> Log.e(TAG, "noteDao.deleteNote", throwable));
             }
 
@@ -224,15 +221,10 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void success(List<Note> notes) {
                 NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
-                Completable.create(emitter -> {
-                    for (Note note : notes) {
-                        noteDao.addNote(note);
-                    }
-                    emitter.onComplete();
-                })
+                Completable.fromAction(() -> noteDao.notesSync(notes))
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(() -> getSupportLoaderManager().getLoader(CURSOR_LOADER_ID).forceLoad(),
+                        .subscribe(MainActivity.this::forceLoad,
                                 throwable -> Log.e(TAG, "notes.forEach(noteDao::addNote)", throwable));
             }
 
@@ -252,7 +244,7 @@ public class MainActivity extends AppCompatActivity
             }
 
             @Override
-            public void onFailure(Call call, Throwable t) {
+            public void onFailure(Call<List<Note>> call, Throwable t) {
                 super.onFailure(call, t);
                 mSwipeRefreshLayout.setRefreshing(false);
             }
@@ -275,10 +267,14 @@ public class MainActivity extends AppCompatActivity
             mFirstStart = false;
             onRefresh();
         } else {
-            getSupportLoaderManager().getLoader(CURSOR_LOADER_ID).forceLoad();
+            forceLoad();
         }
 
         super.onResume();
+    }
+
+    private void forceLoad(){
+        getSupportLoaderManager().getLoader(CURSOR_LOADER_ID).forceLoad();
     }
 
     @Override
@@ -316,7 +312,7 @@ public class MainActivity extends AppCompatActivity
     private class ChangedDbReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            getSupportLoaderManager().getLoader(CURSOR_LOADER_ID).forceLoad();
+            forceLoad();
         }
     }
 }

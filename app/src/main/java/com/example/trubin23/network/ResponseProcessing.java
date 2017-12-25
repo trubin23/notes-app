@@ -11,15 +11,14 @@ import retrofit2.Response;
  * Created by Andrey on 24.12.2017.
  */
 
-public class ResponseProcessing<T> implements Callback {
+public class ResponseProcessing<T> implements Callback<T> {
 
     private static final String TAG = "ResponseProcessing";
 
     @Override
-    public void onResponse(Call call, Response response) {
+    public void onResponse(Call<T> call, Response<T> response) {
         if (response.isSuccessful()) {
-            //noinspection unchecked
-            T body = (T) response.body();
+            T body = response.body();
             if (body != null) {
                 success(body);
             } else {
@@ -32,7 +31,7 @@ public class ResponseProcessing<T> implements Callback {
     }
 
     @Override
-    public void onFailure(Call call, Throwable t) {
+    public void onFailure(Call<T> call, Throwable t) {
         Log.e(TAG, "onFailure", t);
     }
 

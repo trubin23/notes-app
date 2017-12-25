@@ -41,27 +41,21 @@ public class RecyclerNoteAdapter extends CursorRecyclerViewAdapter<RecyclerNoteA
 
         final String uid = cursor.getString(cursor.getColumnIndex(NoteDao.COLUMN_NOTE_UID));
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mActionHandler != null) {
-                    mActionHandler.onEdit(uid);
-                }
+        holder.itemView.setOnClickListener(view -> {
+            if (mActionHandler != null) {
+                mActionHandler.onEdit(uid);
             }
         });
 
-        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                if (mActionHandler != null) {
-                    final int itemPosition = holder.getAdapterPosition();
-                    String title = holder.noteTitle.getText().toString();
-                    mActionHandler.onDelete(uid, title, itemPosition);
+        holder.itemView.setOnLongClickListener(view -> {
+            if (mActionHandler != null) {
+                final int itemPosition = holder.getAdapterPosition();
+                String title = holder.noteTitle.getText().toString();
+                mActionHandler.onDelete(uid, title, itemPosition);
 
-                    return true;
-                } else {
-                    return false;
-                }
+                return true;
+            } else {
+                return false;
             }
         });
     }

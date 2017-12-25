@@ -186,16 +186,11 @@ public class EditNoteActivity extends AppCompatActivity {
                         LocalBroadcastManager.getInstance(getApplicationContext());
                 final NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
 
-                Completable.create(emitter -> {
-                    noteDao.addNote(note);
-                    emitter.onComplete();
-                })
+                Completable.fromAction(() -> noteDao.addNote(note))
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(() -> broadcastManager.sendBroadcast(
-                                new Intent(MainActivity.ACTION_CHANGED_DB)),
-                                throwable -> Log.e(TAG,
-                                        "noteDao.addNote", throwable));
+                        .subscribe(() -> broadcastManager.sendBroadcast(new Intent(MainActivity.ACTION_CHANGED_DB)),
+                                throwable -> Log.e(TAG, "noteDao.addNote", throwable));
             }
 
             @Override
@@ -219,16 +214,12 @@ public class EditNoteActivity extends AppCompatActivity {
                         LocalBroadcastManager.getInstance(getApplicationContext());
                 final NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
 
-                Completable.create(emitter -> {
-                    noteDao.updateNote(note);
-                    emitter.onComplete();
-                })
+                Completable.fromAction(() -> noteDao.updateNote(note))
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(() -> broadcastManager.sendBroadcast(
                                 new Intent(MainActivity.ACTION_CHANGED_DB)),
-                                throwable -> Log.e(TAG,
-                                        "noteDao.updateNote", throwable));
+                                throwable -> Log.e(TAG, "noteDao.updateNote", throwable));
             }
 
             @Override
