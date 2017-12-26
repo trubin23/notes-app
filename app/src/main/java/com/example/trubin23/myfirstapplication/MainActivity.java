@@ -4,15 +4,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -34,7 +31,6 @@ import com.example.trubin23.network.ResponseProcessing;
 import com.example.trubin23.network.RestError;
 import com.example.trubin23.network.RetrofitClient;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -47,7 +43,6 @@ import retrofit2.Call;
 
 import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 import static android.Manifest.permission.INTERNET;
-import static android.support.v4.content.PermissionChecker.PERMISSION_GRANTED;
 import static com.example.trubin23.database.Note.NOTE_UID;
 
 public class MainActivity extends AppCompatActivity
@@ -59,8 +54,6 @@ public class MainActivity extends AppCompatActivity
     public static final String ACTION_CHANGED_DB = "action-changed-db";
 
     private static final String TAG = "MainActivity";
-
-    private static final int MY_PERMISSIONS_REQUEST = 1;
 
     @BindView(R.id.swipe_refresh)
     SwipeRefreshLayout mSwipeRefreshLayout;
@@ -104,42 +97,7 @@ public class MainActivity extends AppCompatActivity
 
         String[] permissions = {INTERNET, ACCESS_NETWORK_STATE};
 
-        requestPermissions(permissions);
-
         getSupportLoaderManager().initLoader(CURSOR_LOADER_ID, null, this);
-    }
-
-    private void requestPermissions(@NonNull String... permissions) {
-        List<String> requestPermissions = new ArrayList<>();
-
-        for (String permission : permissions) {
-            if (ContextCompat.checkSelfPermission(this, permission) != PERMISSION_GRANTED) {
-                //if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission))
-                requestPermissions.add(permission);
-            }
-        }
-
-        if (!requestPermissions.isEmpty()) {
-            ActivityCompat.requestPermissions(this,
-                    requestPermissions.toArray(new String[0]), MY_PERMISSIONS_REQUEST);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode != MY_PERMISSIONS_REQUEST) {
-            return;
-        }
-
-        List<String> requestPermission = new ArrayList<>();
-        for (int i = 0; i < grantResults.length; i++) {
-            if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
-                requestPermission.add(permissions[i]);
-            }
-        }
-
-        requestPermissions(requestPermission.toArray(new String[0]));
     }
 
     @Override
