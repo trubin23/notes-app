@@ -48,11 +48,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.Call;
 
-import static android.Manifest.permission.ACCESS_NETWORK_STATE;
-import static android.Manifest.permission.INTERNET;
 import static com.example.trubin23.myfirstapplication.storage.database.Note.NOTE_UID;
 
-public class MainActivity extends AppCompatActivity
+public class NotesActivity extends AppCompatActivity
         implements NoteItemActionHandler,
         SwipeRefreshLayout.OnRefreshListener,
         LoaderManager.LoaderCallbacks<Cursor> {
@@ -60,7 +58,7 @@ public class MainActivity extends AppCompatActivity
 
     public static final String ACTION_CHANGED_DB = "action-changed-db";
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "NotesActivity";
 
     @BindView(R.id.swipe_refresh)
     SwipeRefreshLayout mSwipeRefreshLayout;
@@ -102,8 +100,6 @@ public class MainActivity extends AppCompatActivity
 
         mSwipeRefreshLayout.setOnRefreshListener(this);
 
-        String[] permissions = {INTERNET, ACCESS_NETWORK_STATE};
-
         getSupportLoaderManager().initLoader(CURSOR_LOADER_ID, null, this);
     }
 
@@ -125,20 +121,20 @@ public class MainActivity extends AppCompatActivity
 
     @OnClick(R.id.button_create_note)
     public void onClickCreateNote(View view) {
-        Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
+        Intent intent = new Intent(NotesActivity.this, EditNoteActivity.class);
         startActivity(intent);
     }
 
     @Override
     public void onEdit(@NonNull String uid) {
-        Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
+        Intent intent = new Intent(NotesActivity.this, EditNoteActivity.class);
         intent.putExtra(NOTE_UID, uid);
         startActivity(intent);
     }
 
     @Override
     public void onDelete(@NonNull final String uid, @NonNull String noteTitle, final int position) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(NotesActivity.this);
 
         builder.setTitle(noteTitle);
         builder.setMessage(R.string.message_about_delete);

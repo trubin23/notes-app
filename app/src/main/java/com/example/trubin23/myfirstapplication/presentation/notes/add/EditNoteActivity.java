@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -24,7 +23,8 @@ import android.widget.Toast;
 
 import com.example.trubin23.myfirstapplication.R;
 import com.example.trubin23.myfirstapplication.domain.MyCustomApplication;
-import com.example.trubin23.myfirstapplication.presentation.notes.show.MainActivity;
+import com.example.trubin23.myfirstapplication.presentation.common.BaseActivity;
+import com.example.trubin23.myfirstapplication.presentation.notes.show.NotesActivity;
 import com.example.trubin23.myfirstapplication.presentation.notes.utils.ThemeChanger;
 import com.example.trubin23.myfirstapplication.presentation.notes.utils.Utils;
 import com.example.trubin23.myfirstapplication.storage.database.Note;
@@ -50,7 +50,7 @@ import io.reactivex.schedulers.Schedulers;
 import static com.example.trubin23.myfirstapplication.storage.database.DatabaseHelper.DEFAULT_ID;
 import static com.example.trubin23.myfirstapplication.storage.database.Note.NOTE_UID;
 
-public class EditNoteActivity extends AppCompatActivity {
+public class EditNoteActivity extends BaseActivity implements EditNoteContract.View {
 
     public static final String TAG = "EditNoteActivity";
     public static final String ACTION_GET_EDIT_NOTE = "action-get-edit-note";
@@ -79,6 +79,8 @@ public class EditNoteActivity extends AppCompatActivity {
     private NoteState mNoteState;
 
     private static Disposable disposable;
+
+    private EditNotePresenter mPresenter;
 
     private enum NoteState {
         START,
@@ -135,6 +137,11 @@ public class EditNoteActivity extends AppCompatActivity {
         }
 
         mNoteReceiver = new NoteReceiver();
+    }
+
+    private void createPresenter() {
+        mPresenter = new EditNotePresenter();
+        bindPresenterToView(mPresenter);
     }
 
     @Override
@@ -223,7 +230,7 @@ public class EditNoteActivity extends AppCompatActivity {
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(() -> {
-                                    broadcastManager.sendBroadcast(new Intent(MainActivity.ACTION_CHANGED_DB));
+                                    broadcastManager.sendBroadcast(new Intent(NotesActivity.ACTION_CHANGED_DB));
                                     Resources res = getResources();
                                     Toast.makeText(getApplicationContext(), res.getString(R.string.note_added)
                                             + "\n" + res.getString(R.string.success), Toast.LENGTH_SHORT).show();
@@ -256,7 +263,7 @@ public class EditNoteActivity extends AppCompatActivity {
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(() -> {
-                                    broadcastManager.sendBroadcast(new Intent(MainActivity.ACTION_CHANGED_DB));
+                                    broadcastManager.sendBroadcast(new Intent(NotesActivity.ACTION_CHANGED_DB));
                                     Resources res = getResources();
                                     Toast.makeText(getApplicationContext(), res.getString(R.string.note_updated)
                                             + "\n" + res.getString(R.string.success), Toast.LENGTH_SHORT).show();

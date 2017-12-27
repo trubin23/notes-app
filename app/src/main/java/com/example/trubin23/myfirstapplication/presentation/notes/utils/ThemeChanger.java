@@ -1,7 +1,6 @@
 package com.example.trubin23.myfirstapplication.presentation.notes.utils;
 
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
@@ -56,12 +55,9 @@ public class ThemeChanger {
         String themeName = loadTheme(activity);
 
         builder.setSingleChoiceItems(themeNames, themeNameList.indexOf(themeName),
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int which) {
-                        changeToTheme(activity, themeNameList.get(which));
-                        dismiss();
-                    }
+                (dialogInterface, which) -> {
+                    changeToTheme(activity, themeNameList.get(which));
+                    dismiss();
                 });
 
         mAlertDialog = builder.create();
