@@ -1,4 +1,4 @@
-package com.example.trubin23.myfirstapplication;
+package com.example.trubin23.myfirstapplication.presentation.notes.show.notelist;
 
 import android.database.Cursor;
 import android.graphics.Color;
@@ -10,7 +10,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.trubin23.database.NoteDao;
+import com.example.trubin23.myfirstapplication.R;
+import com.example.trubin23.myfirstapplication.presentation.notes.utils.Utils;
+import com.example.trubin23.myfirstapplication.storage.database.NoteDao;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -22,7 +24,7 @@ public class RecyclerNoteAdapter extends CursorRecyclerViewAdapter<RecyclerNoteA
 
     private NoteItemActionHandler mActionHandler;
 
-    RecyclerNoteAdapter(@Nullable NoteItemActionHandler actionHandler) {
+    public RecyclerNoteAdapter(@Nullable NoteItemActionHandler actionHandler) {
         super();
         mActionHandler = actionHandler;
     }

@@ -1,13 +1,10 @@
-package com.example.trubin23.database;
+package com.example.trubin23.myfirstapplication.storage.database;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
 import android.util.Log;
-
-import static com.example.trubin23.database.NoteDao.TABLE_NOTE;
-import static com.example.trubin23.database.NoteDaoImpl.NOTE_CREATE_TABLE;
 
 /**
  * Created by trubin23 on 07.12.17.
@@ -29,10 +26,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.beginTransaction();
         try {
-            db.execSQL(NOTE_CREATE_TABLE);
+            db.execSQL(NoteDaoImpl.NOTE_CREATE_TABLE);
             db.setTransactionSuccessful();
         } catch (Exception e) {
-            Log.e(TAG, "create table " + TABLE_NOTE, e);
+            Log.e(TAG, "create table " + NoteDao.TABLE_NOTE, e);
         } finally {
             db.endTransaction();
         }

@@ -1,4 +1,4 @@
-package com.example.trubin23.myfirstapplication;
+package com.example.trubin23.myfirstapplication.presentation.notes.show.notelist;
 
 import android.support.annotation.NonNull;
 

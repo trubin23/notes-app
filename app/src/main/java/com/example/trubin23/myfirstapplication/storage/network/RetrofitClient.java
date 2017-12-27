@@ -1,10 +1,10 @@
-package com.example.trubin23.network;
+package com.example.trubin23.myfirstapplication.storage.network;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.example.trubin23.database.Note;
+import com.example.trubin23.myfirstapplication.storage.database.Note;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;

@@ -1,6 +1,8 @@
 package com.example.trubin23.network;
 
-import com.example.trubin23.database.Note;
+import com.example.trubin23.myfirstapplication.storage.database.Note;
+import com.example.trubin23.myfirstapplication.storage.network.RestError;
+import com.example.trubin23.myfirstapplication.storage.network.RetrofitClient;
 
 import org.junit.Test;
 

@@ -15,7 +15,7 @@
  *
  */
 
-package com.example.trubin23.myfirstapplication;
+package com.example.trubin23.myfirstapplication.presentation.notes.show.notelist;
 
 import android.database.Cursor;
 import android.database.DataSetObserver;
@@ -84,7 +84,7 @@ public abstract class CursorRecyclerViewAdapter<VH extends RecyclerView.ViewHold
      * {@link #changeCursor(Cursor)}, the returned old Cursor is <em>not</em>
      * closed.
      */
-    Cursor swapCursor(Cursor newCursor) {
+    public Cursor swapCursor(Cursor newCursor) {
         if (newCursor == mCursor) {
             return null;
         }

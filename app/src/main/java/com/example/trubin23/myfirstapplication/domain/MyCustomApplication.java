@@ -1,11 +1,11 @@
-package com.example.trubin23.myfirstapplication;
+package com.example.trubin23.myfirstapplication.domain;
 
 import android.app.Application;
 import android.support.annotation.NonNull;
 
-import com.example.trubin23.database.DatabaseHelper;
-import com.example.trubin23.database.NoteDao;
-import com.example.trubin23.database.NoteDaoImpl;
+import com.example.trubin23.myfirstapplication.storage.database.DatabaseHelper;
+import com.example.trubin23.myfirstapplication.storage.database.NoteDao;
+import com.example.trubin23.myfirstapplication.storage.database.NoteDaoImpl;
 
 /**
  * Created by trubin23 on 11.12.2017.
@@ -25,7 +25,7 @@ public class MyCustomApplication extends Application {
     }
 
     @NonNull
-    NoteDao getNoteDao() {
+    public NoteDao getNoteDao() {
         return mNoteDao;
     }
 }

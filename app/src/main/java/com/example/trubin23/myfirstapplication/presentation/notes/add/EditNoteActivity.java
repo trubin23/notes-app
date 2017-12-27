@@ -1,4 +1,4 @@
-package com.example.trubin23.myfirstapplication;
+package com.example.trubin23.myfirstapplication.presentation.notes.add;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -22,11 +22,16 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.trubin23.database.Note;
-import com.example.trubin23.database.NoteDao;
-import com.example.trubin23.network.ResponseProcessing;
-import com.example.trubin23.network.RestError;
-import com.example.trubin23.network.RetrofitClient;
+import com.example.trubin23.myfirstapplication.R;
+import com.example.trubin23.myfirstapplication.domain.MyCustomApplication;
+import com.example.trubin23.myfirstapplication.presentation.notes.show.MainActivity;
+import com.example.trubin23.myfirstapplication.presentation.notes.utils.ThemeChanger;
+import com.example.trubin23.myfirstapplication.presentation.notes.utils.Utils;
+import com.example.trubin23.myfirstapplication.storage.database.Note;
+import com.example.trubin23.myfirstapplication.storage.database.NoteDao;
+import com.example.trubin23.myfirstapplication.storage.network.ResponseProcessing;
+import com.example.trubin23.myfirstapplication.storage.network.RestError;
+import com.example.trubin23.myfirstapplication.storage.network.RetrofitClient;
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 
@@ -42,8 +47,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-import static com.example.trubin23.database.DatabaseHelper.DEFAULT_ID;
-import static com.example.trubin23.database.Note.NOTE_UID;
+import static com.example.trubin23.myfirstapplication.storage.database.DatabaseHelper.DEFAULT_ID;
+import static com.example.trubin23.myfirstapplication.storage.database.Note.NOTE_UID;
 
 public class EditNoteActivity extends AppCompatActivity {
 

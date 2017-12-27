@@ -1,4 +1,4 @@
-package com.example.trubin23.myfirstapplication;
+package com.example.trubin23.myfirstapplication.presentation.notes.utils;
 
 import android.graphics.Color;
 import android.support.annotation.NonNull;
@@ -7,8 +7,8 @@ import android.support.annotation.NonNull;
  * Created by trubin23 on 22.12.17.
  */
 
-class Utils {
-    static int colorText(@NonNull String stringColor) {
+public class Utils {
+    public static int colorText(@NonNull String stringColor) {
         int intColor = Color.parseColor(stringColor);
 
         int red = Color.red(intColor);

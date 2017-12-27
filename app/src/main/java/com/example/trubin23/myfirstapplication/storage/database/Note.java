@@ -1,4 +1,4 @@
-package com.example.trubin23.database;
+package com.example.trubin23.myfirstapplication.storage.database;
 
 import android.os.Parcel;
 import android.os.Parcelable;

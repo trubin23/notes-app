@@ -1,4 +1,4 @@
-package com.example.trubin23.myfirstapplication;
+package com.example.trubin23.myfirstapplication.presentation.notes.utils;
 
 import android.app.Activity;
 import android.content.DialogInterface;
@@ -9,6 +9,8 @@ import android.support.annotation.StyleRes;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
+import com.example.trubin23.myfirstapplication.R;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,7 +20,7 @@ import static android.content.Context.MODE_PRIVATE;
  * Created by trubin23 on 05.12.17.
  */
 
-class ThemeChanger {
+public class ThemeChanger {
 
     private enum Theme {
         RED(R.style.AppThemeRed),
@@ -44,7 +46,7 @@ class ThemeChanger {
 
     private AlertDialog mAlertDialog;
 
-    ThemeChanger(@NonNull final Activity activity) {
+    public ThemeChanger(@NonNull final Activity activity) {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(R.string.pick_theme);
 
@@ -65,7 +67,7 @@ class ThemeChanger {
         mAlertDialog = builder.create();
     }
 
-    void showDialog() {
+    public void showDialog() {
         mAlertDialog.show();
     }
 
@@ -80,7 +82,7 @@ class ThemeChanger {
         activity.startActivity(new Intent(activity, activity.getClass()));
     }
 
-    static void onActivityCreateSetTheme(@NonNull Activity activity) {
+    public static void onActivityCreateSetTheme(@NonNull Activity activity) {
         String themeName = loadTheme(activity);
 
         Theme theme = Theme.RED;

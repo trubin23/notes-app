@@ -1,4 +1,4 @@
-package com.example.trubin23.myfirstapplication;
+package com.example.trubin23.myfirstapplication.presentation.notes.show;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -25,11 +25,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.example.trubin23.database.Note;
-import com.example.trubin23.database.NoteDao;
-import com.example.trubin23.network.ResponseProcessing;
-import com.example.trubin23.network.RestError;
-import com.example.trubin23.network.RetrofitClient;
+import com.example.trubin23.myfirstapplication.R;
+import com.example.trubin23.myfirstapplication.domain.MyCustomApplication;
+import com.example.trubin23.myfirstapplication.presentation.notes.add.EditNoteActivity;
+import com.example.trubin23.myfirstapplication.presentation.notes.show.notelist.NoteItemActionHandler;
+import com.example.trubin23.myfirstapplication.presentation.notes.show.notelist.NotesCursorLoader;
+import com.example.trubin23.myfirstapplication.presentation.notes.show.notelist.RecyclerNoteAdapter;
+import com.example.trubin23.myfirstapplication.presentation.notes.utils.ThemeChanger;
+import com.example.trubin23.myfirstapplication.storage.database.Note;
+import com.example.trubin23.myfirstapplication.storage.database.NoteDao;
+import com.example.trubin23.myfirstapplication.storage.network.ResponseProcessing;
+import com.example.trubin23.myfirstapplication.storage.network.RestError;
+import com.example.trubin23.myfirstapplication.storage.network.RetrofitClient;
 
 import java.util.List;
 
@@ -43,7 +50,7 @@ import retrofit2.Call;
 
 import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 import static android.Manifest.permission.INTERNET;
-import static com.example.trubin23.database.Note.NOTE_UID;
+import static com.example.trubin23.myfirstapplication.storage.database.Note.NOTE_UID;
 
 public class MainActivity extends AppCompatActivity
         implements NoteItemActionHandler,

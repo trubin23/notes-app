@@ -1,4 +1,4 @@
-package com.example.trubin23.database;
+package com.example.trubin23.myfirstapplication.storage.database;
 
 import android.database.Cursor;
 import android.support.annotation.NonNull;

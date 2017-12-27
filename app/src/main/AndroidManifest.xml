@@ -7,19 +7,19 @@
 
     <application
         android:allowBackup="true"
-        android:name=".MyCustomApplication"
+        android:name=".domain.MyCustomApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppThemeBlue">
-        <activity android:name=".MainActivity">
+        <activity android:name=".presentation.notes.show.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".EditNoteActivity" />
+        <activity android:name=".presentation.notes.add.EditNoteActivity" />
     </application>
 
 </manifest>
