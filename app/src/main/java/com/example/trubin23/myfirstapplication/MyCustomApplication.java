@@ -1,4 +1,4 @@
-package com.example.trubin23.myfirstapplication.domain;
+package com.example.trubin23.myfirstapplication;
 
 import android.app.Application;
 import android.support.annotation.NonNull;
@@ -19,7 +19,7 @@ public class MyCustomApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        DatabaseHelper databaseHelper = new DatabaseHelper(this);
+        DatabaseHelper databaseHelper = DatabaseHelper.create(this);
 
         mNoteDao = new NoteDaoImpl(databaseHelper);
     }

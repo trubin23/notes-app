@@ -6,7 +6,7 @@ import android.support.annotation.NonNull;
 
 import android.support.v4.content.CursorLoader;
 
-import com.example.trubin23.myfirstapplication.domain.MyCustomApplication;
+import com.example.trubin23.myfirstapplication.MyCustomApplication;
 import com.example.trubin23.myfirstapplication.storage.database.NoteDao;
 
 /**

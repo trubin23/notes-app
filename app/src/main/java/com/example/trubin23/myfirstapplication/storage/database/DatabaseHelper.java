@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 /**
@@ -19,8 +20,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public static final String DEFAULT_ID = "00000000-0000-0000-0000-000000000000";
 
-    public DatabaseHelper(@NonNull Context context) {
+    private static DatabaseHelper mDatabaseHelper;
+
+    private DatabaseHelper(@NonNull Context context) {
         super(context, DB_NAME, null, DB_VERSION);
+    }
+
+    @Nullable
+    public static DatabaseHelper create(@NonNull Context context) {
+        if (mDatabaseHelper == null) {
+            return new DatabaseHelper(context);
+        }
+        return mDatabaseHelper;
+    }
+
+    @Nullable
+    public static DatabaseHelper getInstance() {
+        return mDatabaseHelper;
     }
 
     public void onCreate(SQLiteDatabase db) {

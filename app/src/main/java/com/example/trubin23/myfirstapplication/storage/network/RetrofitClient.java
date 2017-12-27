@@ -4,19 +4,18 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.example.trubin23.myfirstapplication.storage.database.Note;
+import com.example.trubin23.myfirstapplication.storage.model.Note;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.List;
 
-import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
 import okhttp3.ResponseBody;
 import retrofit2.Callback;
 import retrofit2.Converter;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.moshi.MoshiConverterFactory;
 
@@ -36,17 +35,14 @@ public class RetrofitClient {
     private static SOService getSOService() {
         if (mSOService == null) {
             OkHttpClient httpClient = new OkHttpClient().newBuilder().addInterceptor(
-                    new Interceptor() {
-                        @Override
-                        public Response intercept(Chain chain) throws IOException {
-                            Request request = chain.request();
-                            Request newRequest = request.newBuilder()
-                                    .addHeader("Content-Type", "application/json; charset=utf-8")
-                                    .addHeader("Authorization", "Bearer Leonardo")
-                                    .build();
+                    chain -> {
+                        Request request = chain.request();
+                        Request newRequest = request.newBuilder()
+                                .addHeader("Content-Type", "application/json; charset=utf-8")
+                                .addHeader("Authorization", "Bearer Leonardo")
+                                .build();
 
-                            return chain.proceed(newRequest);
-                        }
+                        return chain.proceed(newRequest);
                     }
             ).build();
 
@@ -102,5 +98,19 @@ public class RetrofitClient {
     public static void deleteNote(@NonNull String uid, @NonNull Callback<Note> callback) {
         SOService mService = getSOService();
         mService.deleteNote(uid).enqueue(callback);
+    }
+
+    @Nullable
+    public static Response<Note> addNoteSync(@NonNull Note note) {
+        SOService mService = getSOService();
+
+        Response<Note> noteResponse = null;
+        try {
+            noteResponse = mService.addNote(note).execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return noteResponse;
     }
 }

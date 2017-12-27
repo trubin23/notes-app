@@ -26,13 +26,13 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.example.trubin23.myfirstapplication.R;
-import com.example.trubin23.myfirstapplication.domain.MyCustomApplication;
+import com.example.trubin23.myfirstapplication.MyCustomApplication;
 import com.example.trubin23.myfirstapplication.presentation.notes.add.EditNoteActivity;
 import com.example.trubin23.myfirstapplication.presentation.notes.show.notelist.NoteItemActionHandler;
 import com.example.trubin23.myfirstapplication.presentation.notes.show.notelist.NotesCursorLoader;
 import com.example.trubin23.myfirstapplication.presentation.notes.show.notelist.RecyclerNoteAdapter;
 import com.example.trubin23.myfirstapplication.presentation.notes.utils.ThemeChanger;
-import com.example.trubin23.myfirstapplication.storage.database.Note;
+import com.example.trubin23.myfirstapplication.storage.model.Note;
 import com.example.trubin23.myfirstapplication.storage.database.NoteDao;
 import com.example.trubin23.myfirstapplication.storage.network.ResponseProcessing;
 import com.example.trubin23.myfirstapplication.storage.network.RestError;
@@ -48,7 +48,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.Call;
 
-import static com.example.trubin23.myfirstapplication.storage.database.Note.NOTE_UID;
+import static com.example.trubin23.myfirstapplication.storage.model.Note.NOTE_UID;
 
 public class NotesActivity extends AppCompatActivity
         implements NoteItemActionHandler,

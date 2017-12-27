@@ -1,6 +1,6 @@
 package com.example.trubin23.myfirstapplication.storage.network;
 
-import com.example.trubin23.myfirstapplication.storage.database.Note;
+import com.example.trubin23.myfirstapplication.storage.model.Note;
 
 import java.util.List;
 

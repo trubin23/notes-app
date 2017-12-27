@@ -7,7 +7,6 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.text.Editable;
@@ -22,16 +21,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.trubin23.myfirstapplication.R;
-import com.example.trubin23.myfirstapplication.domain.MyCustomApplication;
+import com.example.trubin23.myfirstapplication.MyCustomApplication;
 import com.example.trubin23.myfirstapplication.presentation.common.BaseActivity;
-import com.example.trubin23.myfirstapplication.presentation.notes.show.NotesActivity;
 import com.example.trubin23.myfirstapplication.presentation.notes.utils.ThemeChanger;
 import com.example.trubin23.myfirstapplication.presentation.notes.utils.Utils;
-import com.example.trubin23.myfirstapplication.storage.database.Note;
+import com.example.trubin23.myfirstapplication.storage.model.Note;
 import com.example.trubin23.myfirstapplication.storage.database.NoteDao;
-import com.example.trubin23.myfirstapplication.storage.network.ResponseProcessing;
-import com.example.trubin23.myfirstapplication.storage.network.RestError;
-import com.example.trubin23.myfirstapplication.storage.network.RetrofitClient;
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 
@@ -40,7 +35,6 @@ import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -48,7 +42,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.example.trubin23.myfirstapplication.storage.database.DatabaseHelper.DEFAULT_ID;
-import static com.example.trubin23.myfirstapplication.storage.database.Note.NOTE_UID;
+import static com.example.trubin23.myfirstapplication.storage.model.Note.NOTE_UID;
 
 public class EditNoteActivity extends BaseActivity implements EditNoteContract.View {
 
@@ -94,6 +88,8 @@ public class EditNoteActivity extends BaseActivity implements EditNoteContract.V
         ThemeChanger.onActivityCreateSetTheme(this);
         setContentView(R.layout.activity_edit_note);
         ButterKnife.bind(this);
+
+        createPresenter();
 
         mEditTitle.addTextChangedListener(new SimpleTextWatcher() {
             @Override
@@ -203,82 +199,13 @@ public class EditNoteActivity extends BaseActivity implements EditNoteContract.V
             Note note = new Note(noteUid, mEditTitle.getText().toString(),
                     mEditText.getText().toString(), mNoteColor, null);
 
-            if (Objects.equals(mNoteUid, DEFAULT_ID)) {
-                RetrofitClient.addNote(note, addProcessing());
-            } else {
-                RetrofitClient.updateNote(note, updateProcessing());
-            }
+            boolean addNote = Objects.equals(noteUid, DEFAULT_ID);
+            mPresenter.saveNote(note, addNote);
         }
 
         onBackPressed();
 
         return true;
-    }
-
-    @NonNull
-    private ResponseProcessing<Note> addProcessing() {
-        return new ResponseProcessing<Note>() {
-            Resources res = getApplicationContext().getResources();
-
-            @Override
-            public void success(Note note) {
-                final LocalBroadcastManager broadcastManager =
-                        LocalBroadcastManager.getInstance(getApplicationContext());
-                final NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
-
-                Completable.fromAction(() -> noteDao.addNote(note))
-                        .subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(() -> {
-                                    broadcastManager.sendBroadcast(new Intent(NotesActivity.ACTION_CHANGED_DB));
-                                    Resources res = getResources();
-                                    Toast.makeText(getApplicationContext(), res.getString(R.string.note_added)
-                                            + "\n" + res.getString(R.string.success), Toast.LENGTH_SHORT).show();
-                                },
-                                throwable -> Log.e(TAG, "noteDao.addNote", throwable));
-            }
-
-            @Override
-            public void error(RestError restError) {
-                super.error(restError);
-                Toast.makeText(getApplicationContext(), res.getString(R.string.note_added) + "\n"
-                                + res.getString(R.string.error_code) + restError.getCode(),
-                        Toast.LENGTH_SHORT).show();
-            }
-        };
-    }
-
-    @NonNull
-    private ResponseProcessing<Note> updateProcessing() {
-        return new ResponseProcessing<Note>() {
-            Resources res = getApplicationContext().getResources();
-
-            @Override
-            public void success(Note note) {
-                final LocalBroadcastManager broadcastManager =
-                        LocalBroadcastManager.getInstance(getApplicationContext());
-                final NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
-
-                Completable.fromAction(() -> noteDao.updateNote(note))
-                        .subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(() -> {
-                                    broadcastManager.sendBroadcast(new Intent(NotesActivity.ACTION_CHANGED_DB));
-                                    Resources res = getResources();
-                                    Toast.makeText(getApplicationContext(), res.getString(R.string.note_updated)
-                                            + "\n" + res.getString(R.string.success), Toast.LENGTH_SHORT).show();
-                                },
-                                throwable -> Log.e(TAG, "noteDao.updateNote", throwable));
-            }
-
-            @Override
-            public void error(RestError restError) {
-                super.error(restError);
-                Toast.makeText(getApplicationContext(), res.getString(R.string.note_updated) + "\n"
-                                + res.getString(R.string.error_code) + restError.getCode(),
-                        Toast.LENGTH_SHORT).show();
-            }
-        };
     }
 
     @Override
@@ -364,6 +291,20 @@ public class EditNoteActivity extends BaseActivity implements EditNoteContract.V
     protected void onPause() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mNoteReceiver);
         super.onPause();
+    }
+
+    @Override
+    public void showSuccessToast(int eventId) {
+        Resources res = getResources();
+        Toast.makeText(this, res.getString(eventId) + "\n"
+                + res.getString(R.string.success), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void showErrorToast(int eventId, int errorCode) {
+        Resources res = getResources();
+        Toast.makeText(this, res.getString(eventId) + "\n"
+                        + res.getString(R.string.error_code) + errorCode, Toast.LENGTH_SHORT).show();
     }
 
     private class NoteReceiver extends BroadcastReceiver {

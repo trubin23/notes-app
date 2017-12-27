@@ -1,4 +1,4 @@
-package com.example.trubin23.myfirstapplication.storage.database;
+package com.example.trubin23.myfirstapplication.storage.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -95,7 +95,7 @@ public class Note implements Parcelable {
     }
 
     @NonNull
-    Integer getDestroyDate() {
+    public Integer getDestroyDate() {
         return mDestroyDate;
     }
 
