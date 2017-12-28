@@ -1,7 +1,8 @@
 package com.example.trubin23.myfirstapplication.presentation.notes.model;
 
+import android.support.annotation.NonNull;
+
 import com.example.trubin23.myfirstapplication.domain.notes.model.NoteDomain;
-import com.example.trubin23.myfirstapplication.storage.model.NoteStorage;
 
 /**
  * Created by Andrey on 27.12.2017.
@@ -9,12 +10,14 @@ import com.example.trubin23.myfirstapplication.storage.model.NoteStorage;
 
 public class NoteViewMapper {
 
-    public static NoteDomain toDomainModel(NoteView noteStorage) {
+    @NonNull
+    public static NoteDomain toDomainModel(@NonNull NoteView noteStorage) {
         return new NoteDomain(noteStorage.getUid(), noteStorage.getTitle(),
                               noteStorage.getContent(), noteStorage.getColor());
     }
 
-    public static NoteView toViewModel(NoteDomain noteDomain) {
+    @NonNull
+    public static NoteView toViewModel(@NonNull NoteDomain noteDomain) {
         return new NoteView(noteDomain.getUid(), noteDomain.getTitle(),
                                noteDomain.getContent(), noteDomain.getColor());
     }

@@ -1,5 +1,8 @@
 package com.example.trubin23.myfirstapplication.storage.repository;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.example.trubin23.myfirstapplication.storage.database.DatabaseHelper;
 import com.example.trubin23.myfirstapplication.storage.database.NoteDao;
 import com.example.trubin23.myfirstapplication.storage.database.NoteDaoImpl;
@@ -14,7 +17,7 @@ import retrofit2.Response;
 
 public class NotesRepository {
 
-    public static boolean addNote(NoteStorage noteStorage) {
+    public static boolean addNote(@NonNull NoteStorage noteStorage) {
         Response<NoteStorage> noteResponse = RetrofitClient.addNoteSync(noteStorage);
         if (noteResponse == null)
             return false;
@@ -28,7 +31,7 @@ public class NotesRepository {
         return true;
     }
 
-    public static boolean updateNote(NoteStorage noteStorage) {
+    public static boolean updateNote(@NonNull NoteStorage noteStorage) {
         Response<NoteStorage> noteResponse = RetrofitClient.updateNoteSync(noteStorage);
         if (noteResponse == null)
             return false;
@@ -40,5 +43,18 @@ public class NotesRepository {
         }
 
         return true;
+    }
+
+    @Nullable
+    public static NoteStorage loadNote(@NonNull String uid) {
+        NoteStorage noteStorage = null;
+
+        DatabaseHelper databaseHelper = DatabaseHelper.getInstance();
+        if (databaseHelper != null) {
+            NoteDao noteDao = new NoteDaoImpl(databaseHelper);
+            noteStorage = noteDao.getNote(uid);
+        }
+
+        return noteStorage;
     }
 }

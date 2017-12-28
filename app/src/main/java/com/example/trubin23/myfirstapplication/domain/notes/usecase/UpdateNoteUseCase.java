@@ -1,5 +1,7 @@
 package com.example.trubin23.myfirstapplication.domain.notes.usecase;
 
+import android.support.annotation.NonNull;
+
 import com.example.trubin23.myfirstapplication.domain.common.BaseUseCase;
 import com.example.trubin23.myfirstapplication.domain.notes.model.NoteDomain;
 import com.example.trubin23.myfirstapplication.domain.notes.model.NoteDomainMapper;
@@ -27,7 +29,7 @@ public class UpdateNoteUseCase extends BaseUseCase<UpdateNoteUseCase.RequestValu
 
         private NoteDomain mNoteDomain;
 
-        public RequestValues(NoteDomain noteDomain) {
+        public RequestValues(@NonNull NoteDomain noteDomain) {
             mNoteDomain = noteDomain;
         }
 

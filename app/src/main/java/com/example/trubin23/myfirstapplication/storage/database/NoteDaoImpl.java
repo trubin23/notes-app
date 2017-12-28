@@ -43,11 +43,6 @@ public class NoteDaoImpl implements NoteDao {
         SQLiteDatabase db = mDbOpenHelper.getReadableDatabase();
         db.beginTransaction();
         try {
-            try {
-                Thread.sleep(7000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
             Cursor cursor = db.rawQuery(QUERY_NOTE, new String[]{uid});
 
             if (cursor.moveToFirst()) {

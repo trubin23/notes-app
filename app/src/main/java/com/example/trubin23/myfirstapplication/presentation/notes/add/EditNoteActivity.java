@@ -1,60 +1,39 @@
 package com.example.trubin23.myfirstapplication.presentation.notes.add;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
+import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.trubin23.myfirstapplication.MyCustomApplication;
 import com.example.trubin23.myfirstapplication.R;
 import com.example.trubin23.myfirstapplication.domain.notes.usecase.AddNoteUseCase;
+import com.example.trubin23.myfirstapplication.domain.notes.usecase.LoadNoteUseCase;
 import com.example.trubin23.myfirstapplication.domain.notes.usecase.UpdateNoteUseCase;
 import com.example.trubin23.myfirstapplication.presentation.common.BaseActivity;
 import com.example.trubin23.myfirstapplication.presentation.notes.model.NoteView;
 import com.example.trubin23.myfirstapplication.presentation.notes.utils.ThemeChanger;
 import com.example.trubin23.myfirstapplication.presentation.notes.utils.Utils;
-import com.example.trubin23.myfirstapplication.storage.database.NoteDao;
-import com.example.trubin23.myfirstapplication.storage.model.NoteStorage;
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 
-import java.util.Objects;
-import java.util.UUID;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.Single;
-import io.reactivex.SingleOnSubscribe;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
-import static com.example.trubin23.myfirstapplication.storage.database.DatabaseHelper.DEFAULT_ID;
 import static com.example.trubin23.myfirstapplication.storage.model.NoteStorage.NOTE_UID;
 
 public class EditNoteActivity extends BaseActivity implements EditNoteContract.View {
 
-    public static final String TAG = "EditNoteActivity";
-    public static final String ACTION_GET_EDIT_NOTE = "action-get-edit-note";
-    public static final String NOTE = "note";
-
     private static final String ACTION_BAR_TITLE = "action_bar_title";
-    private static final String NOTE_STATE = "note_state";
     private static final String NOTE_COLOR = "note_color";
 
     @BindView(R.id.info_title)
@@ -63,8 +42,6 @@ public class EditNoteActivity extends BaseActivity implements EditNoteContract.V
     EditText mEditTitle;
     @BindView(R.id.edit_text)
     EditText mEditText;
-    @BindView(R.id.indeterminate_bar)
-    ProgressBar mProgressBar;
 
     private MenuItem mAcceptMenuItem;
     private MenuItem mPickColorMenuItem;
@@ -72,18 +49,7 @@ public class EditNoteActivity extends BaseActivity implements EditNoteContract.V
     private String mNoteUid;
     private String mNoteColor;
 
-    private NoteReceiver mNoteReceiver;
-    private NoteState mNoteState;
-
-    private static Disposable disposable;
-
     private EditNotePresenter mPresenter;
-
-    private enum NoteState {
-        START,
-        PROCESS,
-        FINISH
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,39 +75,38 @@ public class EditNoteActivity extends BaseActivity implements EditNoteContract.V
 
         Intent intent = getIntent();
         mNoteUid = intent.getStringExtra(NOTE_UID);
-        if (mNoteUid == null) {
-            mNoteUid = DEFAULT_ID;
-        }
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
 
             if (savedInstanceState == null) {
-                if (Objects.equals(mNoteUid, DEFAULT_ID)) {
-                    actionBar.setTitle(R.string.new_note);
-                } else {
-                    actionBar.setTitle(R.string.load_note);
-                }
+                actionBar.setTitle(R.string.new_note);
             } else {
                 actionBar.setTitle(savedInstanceState.getCharSequence(ACTION_BAR_TITLE));
             }
         }
 
-        if (savedInstanceState == null) {
-            mNoteState = NoteState.START;
-        } else {
-            mNoteState = NoteState.valueOf(savedInstanceState.getString(NOTE_STATE));
-            changeNoteColor(savedInstanceState.getString(NOTE_COLOR));
+        if (mNoteUid != null){
+            mInfoTitle.setVisibility(View.GONE);
+            mEditTitle.setVisibility(View.GONE);
         }
 
-        mNoteReceiver = new NoteReceiver();
+        if (savedInstanceState == null) {
+            if (mNoteUid != null) {
+                mPresenter.loadNote(mNoteUid);
+            }
+        } else {
+            changeNoteColor(savedInstanceState.getString(NOTE_COLOR));
+        }
     }
 
     private void createPresenter() {
         AddNoteUseCase addNoteUseCase = new AddNoteUseCase();
         UpdateNoteUseCase updateNoteUseCase = new UpdateNoteUseCase();
-        mPresenter = new EditNotePresenter(mUseCaseHandler, addNoteUseCase, updateNoteUseCase);
+        LoadNoteUseCase loadNoteUseCase = new LoadNoteUseCase();
+        mPresenter = new EditNotePresenter(mUseCaseHandler, addNoteUseCase,
+                updateNoteUseCase, loadNoteUseCase);
         bindPresenterToView(mPresenter);
     }
 
@@ -152,7 +117,6 @@ public class EditNoteActivity extends BaseActivity implements EditNoteContract.V
             outState.putCharSequence(ACTION_BAR_TITLE, actionBar.getTitle());
         }
 
-        outState.putString(NOTE_STATE, mNoteState.toString());
         outState.putString(NOTE_COLOR, mNoteColor);
 
         super.onSaveInstanceState(outState);
@@ -193,37 +157,39 @@ public class EditNoteActivity extends BaseActivity implements EditNoteContract.V
     public boolean onOptionsItemSelected(MenuItem item) {
         if (R.id.action_pick_color == item.getItemId()) {
             pickNoteColor();
-            return true;
         }
 
         if (R.id.action_accept == item.getItemId()) {
-            String noteUid = mNoteUid;
-            if (Objects.equals(mNoteUid, DEFAULT_ID)) {
-                noteUid = UUID.randomUUID().toString();
-            }
-            NoteView noteView = new NoteView(noteUid, mEditTitle.getText().toString(),
+            NoteView noteView = new NoteView(mEditTitle.getText().toString(),
                                                    mEditText.getText().toString(), mNoteColor);
 
-            boolean addNote = Objects.equals(mNoteUid, DEFAULT_ID);
+            boolean addNote = mNoteUid == null;
             mPresenter.saveNote(noteView, addNote);
+        }
+
+        if (item.getItemId() == android.R.id.home){
+            finish();
         }
 
         return true;
     }
 
     @Override
-    public void savingInDb() {
+    public void savingDbComplete() {
         onBackPressed();
     }
 
     @Override
-    public void onBackPressed() {
-        super.onBackPressed();
+    public void setNote(@NonNull NoteView noteView) {
+        mEditTitle.setText(noteView.getTitle());
+        mEditText.setText(noteView.getContent());
 
-        if (disposable != null && !disposable.isDisposed()) {
-            disposable.dispose();
+        changeNoteColor(noteView.getColor());
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(noteView.getTitle());
         }
-        disposable = null;
     }
 
     private void pickNoteColor() {
@@ -253,60 +219,6 @@ public class EditNoteActivity extends BaseActivity implements EditNoteContract.V
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(mNoteReceiver,
-                new IntentFilter(ACTION_GET_EDIT_NOTE));
-
-        if (Objects.equals(mNoteUid, DEFAULT_ID)) {
-            return;
-        }
-
-        mInfoTitle.setVisibility(View.GONE);
-        mEditTitle.setVisibility(View.GONE);
-
-        if (mNoteState != NoteState.FINISH) {
-            mProgressBar.setVisibility(View.VISIBLE);
-            mEditText.setEnabled(false);
-        }
-
-        if (mNoteState == NoteState.START) {
-            mNoteState = NoteState.PROCESS;
-
-            if (disposable == null) {
-                NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
-
-                disposable = Single.create((SingleOnSubscribe<NoteStorage>) emitter ->
-                        emitter.onSuccess(noteDao.getNote(mNoteUid)))
-                        .subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(note -> {
-                            Intent intentResult = new Intent(ACTION_GET_EDIT_NOTE);
-                            intentResult.putExtra(NOTE, note);
-                            LocalBroadcastManager.getInstance(this).sendBroadcast(intentResult);
-                        }, throwable -> {
-                        });
-            } else {
-                String errorMessage = getResources().getString(R.string.failed_upload_note);
-                Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
-                Log.e(TAG, "NoteState.START, disposable != null");
-            }
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mNoteReceiver);
-        super.onPause();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Override
     public void showSuccessToast(int eventId) {
         Resources res = getResources();
         Toast.makeText(this, res.getString(eventId) + "\n"
@@ -318,30 +230,6 @@ public class EditNoteActivity extends BaseActivity implements EditNoteContract.V
         Resources res = getResources();
         Toast.makeText(this, res.getString(eventId) + "\n"
                         + res.getString(R.string.error), Toast.LENGTH_SHORT).show();
-    }
-
-    private class NoteReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            NoteStorage noteStorage = intent.getParcelableExtra(NOTE);
-            if (noteStorage == null) {
-                return;
-            }
-
-            mNoteState = NoteState.FINISH;
-
-            mEditTitle.setText(noteStorage.getTitle());
-            mEditText.setText(noteStorage.getContent());
-            mEditText.setEnabled(true);
-            mProgressBar.setVisibility(View.GONE);
-
-            changeNoteColor(noteStorage.getColor());
-
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.setTitle(noteStorage.getTitle());
-            }
-        }
     }
 
     private static class SimpleTextWatcher implements TextWatcher {

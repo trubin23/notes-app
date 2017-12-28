@@ -4,6 +4,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
+import java.util.UUID;
+
 /**
  * Created by trubin23 on 29.11.17.
  */
@@ -20,6 +22,10 @@ public class NoteView implements Parcelable {
         mTitle = title;
         mContent = content;
         mColor = color;
+    }
+
+    public NoteView(@NonNull String title, @NonNull String content, @NonNull String color) {
+        this(UUID.randomUUID().toString(), title, content, color);
     }
 
     public NoteView(@NonNull Parcel in) {

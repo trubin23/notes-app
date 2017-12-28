@@ -8,6 +8,7 @@ import com.example.trubin23.myfirstapplication.domain.common.BaseUseCase;
 import com.example.trubin23.myfirstapplication.domain.common.UseCaseHandler;
 import com.example.trubin23.myfirstapplication.domain.notes.model.NoteDomain;
 import com.example.trubin23.myfirstapplication.domain.notes.usecase.AddNoteUseCase;
+import com.example.trubin23.myfirstapplication.domain.notes.usecase.LoadNoteUseCase;
 import com.example.trubin23.myfirstapplication.domain.notes.usecase.UpdateNoteUseCase;
 import com.example.trubin23.myfirstapplication.presentation.common.BasePresenter;
 import com.example.trubin23.myfirstapplication.presentation.notes.model.NoteView;
@@ -23,17 +24,20 @@ class EditNotePresenter extends BasePresenter<EditNoteContract.View> implements 
 
     private final AddNoteUseCase mAddNoteUseCase;
     private final UpdateNoteUseCase mUpdateNoteUseCase;
+    private final LoadNoteUseCase mLoadNoteUseCase;
 
     EditNotePresenter(@NonNull UseCaseHandler useCaseHandler,
                       @NonNull AddNoteUseCase addNoteUseCase,
-                      @NonNull UpdateNoteUseCase updateNoteUseCase) {
+                      @NonNull UpdateNoteUseCase updateNoteUseCase,
+                      @NonNull LoadNoteUseCase loadNoteUseCase) {
         super(useCaseHandler);
         mAddNoteUseCase = addNoteUseCase;
         mUpdateNoteUseCase = updateNoteUseCase;
+        mLoadNoteUseCase = loadNoteUseCase;
     }
 
     @Override
-    public void saveNote(NoteView noteView, boolean addNote) {
+    public void saveNote(@NonNull NoteView noteView, boolean addNote) {
         if (addNote) {
             addNote(noteView);
         } else {
@@ -41,7 +45,7 @@ class EditNotePresenter extends BasePresenter<EditNoteContract.View> implements 
         }
     }
 
-    private void addNote(NoteView noteView) {
+    private void addNote(@NonNull NoteView noteView) {
         NoteDomain noteDomain = NoteViewMapper.toDomainModel(noteView);
         mUseCaseHandler.execute(mAddNoteUseCase, new AddNoteUseCase.RequestValues(noteDomain),
                 new BaseUseCase.UseCaseCallback<AddNoteUseCase.ResponseValues>() {
@@ -49,19 +53,19 @@ class EditNotePresenter extends BasePresenter<EditNoteContract.View> implements 
                     @Override
                     public void onSuccess(AddNoteUseCase.ResponseValues response) {
                         getView().showSuccessToast(R.string.note_added);
-                        getView().savingInDb();
+                        getView().savingDbComplete();
                     }
 
                     @Override
                     public void onError() {
                         getView().showErrorToast(R.string.note_added);
-                        getView().savingInDb();
+                        getView().savingDbComplete();
                         Log.e(TAG, "noteDao.addNote");
                     }
                 });
     }
 
-    private void updateNote(NoteView noteView) {
+    private void updateNote(@NonNull NoteView noteView) {
         NoteDomain noteDomain = NoteViewMapper.toDomainModel(noteView);
         mUseCaseHandler.execute(mUpdateNoteUseCase, new UpdateNoteUseCase.RequestValues(noteDomain),
                 new BaseUseCase.UseCaseCallback<UpdateNoteUseCase.ResponseValues>() {
@@ -69,14 +73,36 @@ class EditNotePresenter extends BasePresenter<EditNoteContract.View> implements 
                     @Override
                     public void onSuccess(UpdateNoteUseCase.ResponseValues response) {
                         getView().showSuccessToast(R.string.note_updated);
-                        getView().savingInDb();
+                        getView().savingDbComplete();
                     }
 
                     @Override
                     public void onError() {
                         getView().showErrorToast(R.string.note_updated);
-                        getView().savingInDb();
+                        getView().savingDbComplete();
                         Log.e(TAG, "noteDao.updateNote");
+                    }
+                });
+    }
+
+    @Override
+    public void loadNote(@NonNull String noteUid) {
+        mUseCaseHandler.execute(mLoadNoteUseCase, new LoadNoteUseCase.RequestValues(noteUid),
+                new BaseUseCase.UseCaseCallback<LoadNoteUseCase.ResponseValues>() {
+
+                    @Override
+                    public void onSuccess(LoadNoteUseCase.ResponseValues response) {
+                        NoteDomain noteDomain = response.getNoteDomainModel();
+                        NoteView noteView = NoteViewMapper.toViewModel(noteDomain);
+
+                        getView().showSuccessToast(R.string.note_loaded);
+                        getView().setNote(noteView);
+                    }
+
+                    @Override
+                    public void onError() {
+                        getView().showErrorToast(R.string.note_loaded);
+                        Log.e(TAG, "noteDao.note_loaded");
                     }
                 });
     }
