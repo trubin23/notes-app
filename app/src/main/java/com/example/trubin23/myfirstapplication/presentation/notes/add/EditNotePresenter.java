@@ -8,7 +8,7 @@ import com.example.trubin23.myfirstapplication.domain.common.BaseUseCase;
 import com.example.trubin23.myfirstapplication.domain.common.UseCaseHandler;
 import com.example.trubin23.myfirstapplication.domain.notes.model.NoteDomain;
 import com.example.trubin23.myfirstapplication.domain.notes.usecase.AddNoteUseCase;
-import com.example.trubin23.myfirstapplication.domain.notes.usecase.LoadNoteUseCase;
+import com.example.trubin23.myfirstapplication.domain.notes.usecase.GetNoteUseCase;
 import com.example.trubin23.myfirstapplication.domain.notes.usecase.UpdateNoteUseCase;
 import com.example.trubin23.myfirstapplication.presentation.common.BasePresenter;
 import com.example.trubin23.myfirstapplication.presentation.notes.model.NoteView;
@@ -24,16 +24,16 @@ class EditNotePresenter extends BasePresenter<EditNoteContract.View> implements 
 
     private final AddNoteUseCase mAddNoteUseCase;
     private final UpdateNoteUseCase mUpdateNoteUseCase;
-    private final LoadNoteUseCase mLoadNoteUseCase;
+    private final GetNoteUseCase mGetNoteUseCase;
 
     EditNotePresenter(@NonNull UseCaseHandler useCaseHandler,
                       @NonNull AddNoteUseCase addNoteUseCase,
                       @NonNull UpdateNoteUseCase updateNoteUseCase,
-                      @NonNull LoadNoteUseCase loadNoteUseCase) {
+                      @NonNull GetNoteUseCase getNoteUseCase) {
         super(useCaseHandler);
         mAddNoteUseCase = addNoteUseCase;
         mUpdateNoteUseCase = updateNoteUseCase;
-        mLoadNoteUseCase = loadNoteUseCase;
+        mGetNoteUseCase = getNoteUseCase;
     }
 
     @Override
@@ -87,11 +87,11 @@ class EditNotePresenter extends BasePresenter<EditNoteContract.View> implements 
 
     @Override
     public void loadNote(@NonNull String noteUid) {
-        mUseCaseHandler.execute(mLoadNoteUseCase, new LoadNoteUseCase.RequestValues(noteUid),
-                new BaseUseCase.UseCaseCallback<LoadNoteUseCase.ResponseValues>() {
+        mUseCaseHandler.execute(mGetNoteUseCase, new GetNoteUseCase.RequestValues(noteUid),
+                new BaseUseCase.UseCaseCallback<GetNoteUseCase.ResponseValues>() {
 
                     @Override
-                    public void onSuccess(LoadNoteUseCase.ResponseValues response) {
+                    public void onSuccess(GetNoteUseCase.ResponseValues response) {
                         NoteDomain noteDomain = response.getNoteDomainModel();
                         NoteView noteView = NoteViewMapper.toViewModel(noteDomain);
 

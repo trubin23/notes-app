@@ -17,7 +17,7 @@ import android.widget.Toast;
 
 import com.example.trubin23.myfirstapplication.R;
 import com.example.trubin23.myfirstapplication.domain.notes.usecase.AddNoteUseCase;
-import com.example.trubin23.myfirstapplication.domain.notes.usecase.LoadNoteUseCase;
+import com.example.trubin23.myfirstapplication.domain.notes.usecase.GetNoteUseCase;
 import com.example.trubin23.myfirstapplication.domain.notes.usecase.UpdateNoteUseCase;
 import com.example.trubin23.myfirstapplication.presentation.common.BaseActivity;
 import com.example.trubin23.myfirstapplication.presentation.notes.model.NoteView;
@@ -104,9 +104,9 @@ public class EditNoteActivity extends BaseActivity implements EditNoteContract.V
     private void createPresenter() {
         AddNoteUseCase addNoteUseCase = new AddNoteUseCase();
         UpdateNoteUseCase updateNoteUseCase = new UpdateNoteUseCase();
-        LoadNoteUseCase loadNoteUseCase = new LoadNoteUseCase();
+        GetNoteUseCase getNoteUseCase = new GetNoteUseCase();
         mPresenter = new EditNotePresenter(mUseCaseHandler, addNoteUseCase,
-                updateNoteUseCase, loadNoteUseCase);
+                updateNoteUseCase, getNoteUseCase);
         bindPresenterToView(mPresenter);
     }
 

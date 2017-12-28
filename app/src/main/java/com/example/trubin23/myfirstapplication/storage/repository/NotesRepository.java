@@ -1,5 +1,6 @@
 package com.example.trubin23.myfirstapplication.storage.repository;
 
+import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -66,7 +67,7 @@ public class NotesRepository {
     }
 
     @Nullable
-    public static NoteStorage loadNote(@NonNull String uid) {
+    public static NoteStorage getNote(@NonNull String uid) {
         NoteStorage noteStorage = null;
 
         DatabaseHelper databaseHelper = DatabaseHelper.getInstance();
@@ -76,5 +77,18 @@ public class NotesRepository {
         }
 
         return noteStorage;
+    }
+
+    @Nullable
+    public static Cursor getCursorAllData() {
+        Cursor cursor = null;
+
+        DatabaseHelper databaseHelper = DatabaseHelper.getInstance();
+        if (databaseHelper != null) {
+            NoteDao noteDao = new NoteDaoImpl(databaseHelper);
+            cursor = noteDao.getCursorAllData();
+        }
+
+        return cursor;
     }
 }

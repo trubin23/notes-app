@@ -24,15 +24,14 @@ import android.widget.Toast;
 
 import com.example.trubin23.myfirstapplication.MyCustomApplication;
 import com.example.trubin23.myfirstapplication.R;
+import com.example.trubin23.myfirstapplication.domain.notes.usecase.CursorNotesUseCase;
 import com.example.trubin23.myfirstapplication.domain.notes.usecase.DeleteNoteUseCase;
 import com.example.trubin23.myfirstapplication.presentation.common.BaseActivity;
 import com.example.trubin23.myfirstapplication.presentation.notes.add.EditNoteActivity;
 import com.example.trubin23.myfirstapplication.presentation.notes.show.notelist.NoteItemActionHandler;
 import com.example.trubin23.myfirstapplication.presentation.notes.show.notelist.RecyclerNoteAdapter;
 import com.example.trubin23.myfirstapplication.presentation.notes.utils.ThemeChanger;
-import com.example.trubin23.myfirstapplication.storage.database.DatabaseHelper;
 import com.example.trubin23.myfirstapplication.storage.database.NoteDao;
-import com.example.trubin23.myfirstapplication.storage.database.NoteDaoImpl;
 import com.example.trubin23.myfirstapplication.storage.model.NoteStorage;
 import com.example.trubin23.myfirstapplication.storage.network.ResponseProcessing;
 import com.example.trubin23.myfirstapplication.storage.network.RestError;
@@ -44,8 +43,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.reactivex.Completable;
-import io.reactivex.Single;
-import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.Call;
@@ -108,7 +105,8 @@ public class NotesActivity extends BaseActivity implements
 
     private void createPresenter() {
         DeleteNoteUseCase deleteNoteUseCase =  new DeleteNoteUseCase();
-        mPresenter = new NotesPresenter(mUseCaseHandler, deleteNoteUseCase);
+        CursorNotesUseCase cursorNotesUseCase = new CursorNotesUseCase();
+        mPresenter = new NotesPresenter(mUseCaseHandler, deleteNoteUseCase, cursorNotesUseCase);
         bindPresenterToView(mPresenter);
     }
 
@@ -169,7 +167,7 @@ public class NotesActivity extends BaseActivity implements
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(() -> {
-                                    reloadNotesFromDb();
+                                    mPresenter.reloadNotesFromDb();
                                     Resources res = getResources();
                                     Toast.makeText(getApplicationContext(), res.getString(R.string.notes_sync)
                                             + "\n" + res.getString(R.string.success), Toast.LENGTH_SHORT).show();
@@ -218,33 +216,19 @@ public class NotesActivity extends BaseActivity implements
             mFirstStart = false;
             onRefresh();
         } else {
-            reloadNotesFromDb();
+            mPresenter.reloadNotesFromDb();
         }
+    }
+
+    @Override
+    public void refreshRecyclerView(Cursor cursor) {
+        ((RecyclerNoteAdapter) mRecyclerView.getAdapter()).swapCursor(cursor);
     }
 
     @Override
     protected void onPause() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mChangedDbReceiver);
         super.onPause();
-    }
-
-    private void reloadNotesFromDb() {
-        mSwipeRefreshLayout.setRefreshing(true);
-        Single.create((SingleOnSubscribe<Cursor>) emitter -> {
-            DatabaseHelper databaseHelper = DatabaseHelper.getInstance();
-            if (databaseHelper != null) {
-                NoteDao noteDao = new NoteDaoImpl(databaseHelper);
-                emitter.onSuccess(noteDao.getCursorAllData());
-            }
-        })
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(cursor -> {
-                            ((RecyclerNoteAdapter) mRecyclerView.getAdapter()).swapCursor(cursor);
-                            mSwipeRefreshLayout.setRefreshing(false);
-                        },
-                        throwable -> mSwipeRefreshLayout.setRefreshing(false)
-                );
     }
 
     @Override
@@ -264,7 +248,7 @@ public class NotesActivity extends BaseActivity implements
     private class ChangedDbReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            reloadNotesFromDb();
+            mPresenter.reloadNotesFromDb();
         }
     }
 }

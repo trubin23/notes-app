@@ -12,18 +12,18 @@ import com.example.trubin23.myfirstapplication.storage.repository.NotesRepositor
  * Created by trubin23 on 28.12.17.
  */
 
-public class LoadNoteUseCase extends BaseUseCase<LoadNoteUseCase.RequestValues, LoadNoteUseCase.ResponseValues> {
+public class GetNoteUseCase extends BaseUseCase<GetNoteUseCase.RequestValues, GetNoteUseCase.ResponseValues> {
 
     @Override
-    protected void executeUseCase(LoadNoteUseCase.RequestValues requestValues) {
+    protected void executeUseCase(GetNoteUseCase.RequestValues requestValues) {
         String noteUid = requestValues.getNoteUid();
 
-        NoteStorage noteStorage = NotesRepository.loadNote(noteUid);
+        NoteStorage noteStorage = NotesRepository.getNote(noteUid);
 
         NoteDomain noteDomain = NoteDomainMapper.toDomainModel(noteStorage);
 
         if (noteStorage != null){
-            getUseCaseCallback().onSuccess(new LoadNoteUseCase.ResponseValues(noteDomain));
+            getUseCaseCallback().onSuccess(new GetNoteUseCase.ResponseValues(noteDomain));
         } else {
             getUseCaseCallback().onError();
         }
