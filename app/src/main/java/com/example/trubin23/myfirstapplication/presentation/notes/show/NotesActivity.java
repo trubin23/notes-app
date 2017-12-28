@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import com.example.trubin23.myfirstapplication.MyCustomApplication;
 import com.example.trubin23.myfirstapplication.R;
+import com.example.trubin23.myfirstapplication.domain.notes.usecase.DeleteNoteUseCase;
 import com.example.trubin23.myfirstapplication.presentation.common.BaseActivity;
 import com.example.trubin23.myfirstapplication.presentation.notes.add.EditNoteActivity;
 import com.example.trubin23.myfirstapplication.presentation.notes.show.notelist.NoteItemActionHandler;
@@ -69,12 +70,16 @@ public class NotesActivity extends BaseActivity implements
 
     private boolean mFirstStart;
 
+    private NotesPresenter mPresenter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ThemeChanger.onActivityCreateSetTheme(this);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        createPresenter();
 
         mFirstStart = savedInstanceState == null;
 
@@ -99,6 +104,12 @@ public class NotesActivity extends BaseActivity implements
         mChangedDbReceiver = new ChangedDbReceiver();
 
         mSwipeRefreshLayout.setOnRefreshListener(this);
+    }
+
+    private void createPresenter() {
+        DeleteNoteUseCase deleteNoteUseCase =  new DeleteNoteUseCase();
+        mPresenter = new NotesPresenter(mUseCaseHandler, deleteNoteUseCase);
+        bindPresenterToView(mPresenter);
     }
 
     @Override
@@ -138,43 +149,12 @@ public class NotesActivity extends BaseActivity implements
         builder.setMessage(R.string.message_about_delete);
 
         builder.setPositiveButton(getString(android.R.string.ok),
-                (dialogInterface, i) -> RetrofitClient.deleteNote(uid, deleteProcessing()));
+                (dialogInterface, i) -> mPresenter.deleteNote(uid));
 
         builder.setNegativeButton(getString(android.R.string.cancel), null);
 
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
-    }
-
-    @NonNull
-    private ResponseProcessing<NoteStorage> deleteProcessing() {
-        return new ResponseProcessing<NoteStorage>() {
-            Resources res = getApplicationContext().getResources();
-
-            @Override
-            public void success(NoteStorage noteStorage) {
-                NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
-                Completable.fromAction(() -> noteDao.deleteNote(noteStorage.getUid()))
-                        .subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(() -> {
-                                    forceLoad();
-                                    Resources res = getResources();
-                                    Toast.makeText(getApplicationContext(), res.getString(R.string.note_deleted)
-                                            + "\n" + res.getString(R.string.success), Toast.LENGTH_SHORT).show();
-                                },
-                                throwable -> Log.e(TAG, "noteDao.deleteNote", throwable));
-            }
-
-            @Override
-            public void error(RestError restError) {
-                super.error(restError);
-                Toast.makeText(getApplicationContext(),
-                        res.getString(R.string.note_deleted) + "\n" +
-                                res.getString(R.string.error) + restError.getCode(),
-                        Toast.LENGTH_SHORT).show();
-            }
-        };
     }
 
     @NonNull
@@ -189,7 +169,7 @@ public class NotesActivity extends BaseActivity implements
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(() -> {
-                                    forceLoad();
+                                    reloadNotesFromDb();
                                     Resources res = getResources();
                                     Toast.makeText(getApplicationContext(), res.getString(R.string.notes_sync)
                                             + "\n" + res.getString(R.string.success), Toast.LENGTH_SHORT).show();
@@ -238,7 +218,7 @@ public class NotesActivity extends BaseActivity implements
             mFirstStart = false;
             onRefresh();
         } else {
-            forceLoad();
+            reloadNotesFromDb();
         }
     }
 
@@ -248,7 +228,7 @@ public class NotesActivity extends BaseActivity implements
         super.onPause();
     }
 
-    private void forceLoad() {
+    private void reloadNotesFromDb() {
         mSwipeRefreshLayout.setRefreshing(true);
         Single.create((SingleOnSubscribe<Cursor>) emitter -> {
             DatabaseHelper databaseHelper = DatabaseHelper.getInstance();
@@ -268,14 +248,23 @@ public class NotesActivity extends BaseActivity implements
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    public void showSuccessToast(int eventId) {
+        Resources res = getResources();
+        Toast.makeText(this, res.getString(eventId) + "\n"
+                + res.getString(R.string.success), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void showErrorToast(int eventId) {
+        Resources res = getResources();
+        Toast.makeText(this, res.getString(eventId) + "\n"
+                + res.getString(R.string.error), Toast.LENGTH_SHORT).show();
     }
 
     private class ChangedDbReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            forceLoad();
+            reloadNotesFromDb();
         }
     }
 }

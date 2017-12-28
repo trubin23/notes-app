@@ -19,29 +19,49 @@ public class NotesRepository {
 
     public static boolean addNote(@NonNull NoteStorage noteStorage) {
         Response<NoteStorage> noteResponse = RetrofitClient.addNoteSync(noteStorage);
-        if (noteResponse == null)
+        if (noteResponse == null) {
             return false;
-
-        DatabaseHelper databaseHelper = DatabaseHelper.getInstance();
-        if (databaseHelper != null) {
-            NoteDao noteDao = new NoteDaoImpl(databaseHelper);
-            noteDao.addNote(noteStorage);
         }
 
+        DatabaseHelper databaseHelper = DatabaseHelper.getInstance();
+        if (databaseHelper == null) {
+            return false;
+        }
+
+        NoteDao noteDao = new NoteDaoImpl(databaseHelper);
+        noteDao.addNote(noteStorage);
         return true;
     }
 
     public static boolean updateNote(@NonNull NoteStorage noteStorage) {
         Response<NoteStorage> noteResponse = RetrofitClient.updateNoteSync(noteStorage);
-        if (noteResponse == null)
+        if (noteResponse == null) {
             return false;
-
-        DatabaseHelper databaseHelper = DatabaseHelper.getInstance();
-        if (databaseHelper != null) {
-            NoteDao noteDao = new NoteDaoImpl(databaseHelper);
-            noteDao.updateNote(noteStorage);
         }
 
+        DatabaseHelper databaseHelper = DatabaseHelper.getInstance();
+        if (databaseHelper == null) {
+            return false;
+        }
+
+        NoteDao noteDao = new NoteDaoImpl(databaseHelper);
+        noteDao.updateNote(noteStorage);
+        return true;
+    }
+
+    public static boolean deleteNote(@NonNull String uid) {
+        Response<NoteStorage> noteResponse = RetrofitClient.deleteNoteSync(uid);
+        if (noteResponse == null) {
+            return false;
+        }
+
+        DatabaseHelper databaseHelper = DatabaseHelper.getInstance();
+        if (databaseHelper == null) {
+            return false;
+        }
+
+        NoteDao noteDao = new NoteDaoImpl(databaseHelper);
+        noteDao.deleteNote(uid);
         return true;
     }
 

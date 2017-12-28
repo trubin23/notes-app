@@ -33,6 +33,7 @@ public class UpdateNoteUseCase extends BaseUseCase<UpdateNoteUseCase.RequestValu
             mNoteDomain = noteDomain;
         }
 
+        @NonNull
         NoteDomain getNoteDomainModel() {
             return mNoteDomain;
         }

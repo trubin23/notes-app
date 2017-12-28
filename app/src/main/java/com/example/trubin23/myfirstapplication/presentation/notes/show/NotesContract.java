@@ -1,5 +1,7 @@
 package com.example.trubin23.myfirstapplication.presentation.notes.show;
 
+import android.support.annotation.NonNull;
+
 import com.example.trubin23.myfirstapplication.presentation.common.BaseView;
 
 /**
@@ -9,11 +11,12 @@ import com.example.trubin23.myfirstapplication.presentation.common.BaseView;
 public class NotesContract {
 
     interface View extends BaseView {
-
+        void showSuccessToast(int eventId);
+        void showErrorToast(int eventId);
     }
 
     interface Presenter {
         void notesSync();
-        void deleteNote();
+        void deleteNote(@NonNull String noteUid);
     }
 }

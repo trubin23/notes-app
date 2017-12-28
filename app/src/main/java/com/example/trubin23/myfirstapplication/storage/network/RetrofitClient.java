@@ -127,4 +127,18 @@ public class RetrofitClient {
 
         return noteResponse;
     }
+
+    @Nullable
+    public static Response<NoteStorage> deleteNoteSync(@NonNull String noteUid) {
+        SOService mService = getSOService();
+
+        Response<NoteStorage> noteResponse = null;
+        try {
+            noteResponse = mService.deleteNote(noteUid).execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return noteResponse;
+    }
 }
