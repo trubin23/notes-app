@@ -9,8 +9,6 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
@@ -25,16 +23,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.example.trubin23.myfirstapplication.R;
 import com.example.trubin23.myfirstapplication.MyCustomApplication;
+import com.example.trubin23.myfirstapplication.R;
 import com.example.trubin23.myfirstapplication.presentation.notes.add.EditNoteActivity;
 import com.example.trubin23.myfirstapplication.presentation.notes.show.notelist.NoteItemActionHandler;
 import com.example.trubin23.myfirstapplication.presentation.notes.show.notelist.RecyclerNoteAdapter;
 import com.example.trubin23.myfirstapplication.presentation.notes.utils.ThemeChanger;
 import com.example.trubin23.myfirstapplication.storage.database.DatabaseHelper;
+import com.example.trubin23.myfirstapplication.storage.database.NoteDao;
 import com.example.trubin23.myfirstapplication.storage.database.NoteDaoImpl;
 import com.example.trubin23.myfirstapplication.storage.model.NoteStorage;
-import com.example.trubin23.myfirstapplication.storage.database.NoteDao;
 import com.example.trubin23.myfirstapplication.storage.network.ResponseProcessing;
 import com.example.trubin23.myfirstapplication.storage.network.RestError;
 import com.example.trubin23.myfirstapplication.storage.network.RetrofitClient;
@@ -81,11 +79,10 @@ public class NotesActivity extends AppCompatActivity
 
         mRecyclerView.setHasFixedSize(true);
 
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             LinearLayoutManager llm = new LinearLayoutManager(this);
             mRecyclerView.setLayoutManager(llm);
-        }
-        else {
+        } else {
             StaggeredGridLayoutManager gridLayoutManager = new StaggeredGridLayoutManager(
                     2, StaggeredGridLayoutManager.VERTICAL);
             mRecyclerView.setLayoutManager(gridLayoutManager);
@@ -112,7 +109,7 @@ public class NotesActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(R.id.theme_choicer == item.getItemId()) {
+        if (R.id.theme_choicer == item.getItemId()) {
             new ThemeChanger(this).showDialog();
         }
 
@@ -140,7 +137,7 @@ public class NotesActivity extends AppCompatActivity
         builder.setMessage(R.string.message_about_delete);
 
         builder.setPositiveButton(getString(android.R.string.ok),
-                                  (dialogInterface, i) -> RetrofitClient.deleteNote(uid, deleteProcessing()));
+                (dialogInterface, i) -> RetrofitClient.deleteNote(uid, deleteProcessing()));
 
         builder.setNegativeButton(getString(android.R.string.cancel), null);
 
@@ -160,21 +157,21 @@ public class NotesActivity extends AppCompatActivity
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(() -> {
-                                       forceLoad();
-                                       Resources res = getResources();
-                                       Toast.makeText(getApplicationContext(), res.getString(R.string.note_deleted)
-                                               + "\n" + res.getString(R.string.success), Toast.LENGTH_SHORT).show();
-                                   },
-                                   throwable -> Log.e(TAG, "noteDao.deleteNote", throwable));
+                                    forceLoad();
+                                    Resources res = getResources();
+                                    Toast.makeText(getApplicationContext(), res.getString(R.string.note_deleted)
+                                            + "\n" + res.getString(R.string.success), Toast.LENGTH_SHORT).show();
+                                },
+                                throwable -> Log.e(TAG, "noteDao.deleteNote", throwable));
             }
 
             @Override
             public void error(RestError restError) {
                 super.error(restError);
                 Toast.makeText(getApplicationContext(),
-                               res.getString(R.string.note_deleted) + "\n" +
-                                       res.getString(R.string.error) + restError.getCode(),
-                               Toast.LENGTH_SHORT).show();
+                        res.getString(R.string.note_deleted) + "\n" +
+                                res.getString(R.string.error) + restError.getCode(),
+                        Toast.LENGTH_SHORT).show();
             }
         };
     }
@@ -191,12 +188,12 @@ public class NotesActivity extends AppCompatActivity
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(() -> {
-                                       forceLoad();
-                                       Resources res = getResources();
-                                       Toast.makeText(getApplicationContext(), res.getString(R.string.notes_sync)
-                                               + "\n" + res.getString(R.string.success), Toast.LENGTH_SHORT).show();
-                                   },
-                                   throwable -> Log.e(TAG, "noteStorages.forEach(noteDao::addNote)", throwable));
+                                    forceLoad();
+                                    Resources res = getResources();
+                                    Toast.makeText(getApplicationContext(), res.getString(R.string.notes_sync)
+                                            + "\n" + res.getString(R.string.success), Toast.LENGTH_SHORT).show();
+                                },
+                                throwable -> Log.e(TAG, "noteStorages.forEach(noteDao::addNote)", throwable));
             }
 
             @Override
@@ -209,8 +206,8 @@ public class NotesActivity extends AppCompatActivity
             public void error(RestError restError) {
                 super.error(restError);
                 Toast.makeText(getApplicationContext(), res.getString(R.string.notes_sync) + "\n" +
-                                       res.getString(R.string.error) + restError.getCode(),
-                               Toast.LENGTH_SHORT).show();
+                                res.getString(R.string.error) + restError.getCode(),
+                        Toast.LENGTH_SHORT).show();
                 mSwipeRefreshLayout.setRefreshing(false);
             }
 
@@ -234,9 +231,9 @@ public class NotesActivity extends AppCompatActivity
         super.onResume();
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mChangedDbReceiver,
-                                                                 new IntentFilter(ACTION_CHANGED_DB));
+                new IntentFilter(ACTION_CHANGED_DB));
 
-        if(mFirstStart) {
+        if (mFirstStart) {
             mFirstStart = false;
             onRefresh();
         } else {
@@ -251,26 +248,22 @@ public class NotesActivity extends AppCompatActivity
     }
 
     private void forceLoad() {
-        //Single.create((SingleOnSubscribe<Cursor>) emitter -> {
-            mSwipeRefreshLayout.setRefreshing(true);
+        mSwipeRefreshLayout.setRefreshing(true);
+        Single.create((SingleOnSubscribe<Cursor>) emitter -> {
             DatabaseHelper databaseHelper = DatabaseHelper.getInstance();
             if (databaseHelper != null) {
                 NoteDao noteDao = new NoteDaoImpl(databaseHelper);
-                Cursor cursor = noteDao.getCursorAllData();
-                ((RecyclerNoteAdapter) mRecyclerView.getAdapter()).swapCursor(cursor);
-                mSwipeRefreshLayout.setRefreshing(false);
+                emitter.onSuccess(noteDao.getCursorAllData());
             }
-        //        emitter.onSuccess(noteDao.getCursorAllData());
-        //    }
-        //})
-        //        .subscribeOn(Schedulers.newThread())
-        //        .observeOn(AndroidSchedulers.mainThread())
-        //        .subscribe(cursor -> {
-        //                       ((RecyclerNoteAdapter) mRecyclerView.getAdapter()).swapCursor(cursor);
-        //                        mSwipeRefreshLayout.setRefreshing(false);
-        //                   },
-        //                   throwable -> mSwipeRefreshLayout.setRefreshing(false)
-        //        );
+        })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(cursor -> {
+                            ((RecyclerNoteAdapter) mRecyclerView.getAdapter()).swapCursor(cursor);
+                            mSwipeRefreshLayout.setRefreshing(false);
+                        },
+                        throwable -> mSwipeRefreshLayout.setRefreshing(false)
+                );
     }
 
     @Override
