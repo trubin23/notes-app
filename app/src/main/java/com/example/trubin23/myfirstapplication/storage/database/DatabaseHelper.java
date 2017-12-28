@@ -26,10 +26,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         super(context, DB_NAME, null, DB_VERSION);
     }
 
-    @Nullable
+    @NonNull
     public static DatabaseHelper create(@NonNull Context context) {
         if (mDatabaseHelper == null) {
-            return new DatabaseHelper(context);
+            mDatabaseHelper = new DatabaseHelper(context);
+            return mDatabaseHelper;
         }
         return mDatabaseHelper;
     }

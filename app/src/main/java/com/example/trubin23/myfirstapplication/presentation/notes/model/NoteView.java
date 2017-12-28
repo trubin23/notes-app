@@ -8,21 +8,21 @@ import android.support.annotation.NonNull;
  * Created by trubin23 on 29.11.17.
  */
 
-public class Note implements Parcelable {
+public class NoteView implements Parcelable {
 
     private String mUid;
     private String mTitle;
     private String mContent;
     private String mColor;
 
-    public Note(@NonNull String uid, @NonNull String title, @NonNull String content, @NonNull String color) {
+    public NoteView(@NonNull String uid, @NonNull String title, @NonNull String content, @NonNull String color) {
         mUid = uid;
         mTitle = title;
         mContent = content;
         mColor = color;
     }
 
-    public Note(@NonNull Parcel in) {
+    public NoteView(@NonNull Parcel in) {
         mUid = in.readString();
         mTitle = in.readString();
         mContent = in.readString();
@@ -62,15 +62,15 @@ public class Note implements Parcelable {
         parcel.writeString(mColor);
     }
 
-    public static final Creator<Note> CREATOR = new Creator<Note>() {
+    public static final Creator<NoteView> CREATOR = new Creator<NoteView>() {
         @Override
-        public Note createFromParcel(@NonNull Parcel in) {
-            return new Note(in);
+        public NoteView createFromParcel(@NonNull Parcel in) {
+            return new NoteView(in);
         }
 
         @Override
-        public Note[] newArray(int size) {
-            return new Note[size];
+        public NoteView[] newArray(int size) {
+            return new NoteView[size];
         }
     };
 }

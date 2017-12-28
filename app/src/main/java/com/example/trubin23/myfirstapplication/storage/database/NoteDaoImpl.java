@@ -7,7 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.example.trubin23.myfirstapplication.storage.model.Note;
+import com.example.trubin23.myfirstapplication.storage.model.NoteStorage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,8 +38,8 @@ public class NoteDaoImpl implements NoteDao {
 
     @Nullable
     @Override
-    public Note getNote(@NonNull final String uid) {
-        Note note = null;
+    public NoteStorage getNote(@NonNull final String uid) {
+        NoteStorage noteStorage = null;
         SQLiteDatabase db = mDbOpenHelper.getReadableDatabase();
         db.beginTransaction();
         try {
@@ -57,18 +57,18 @@ public class NoteDaoImpl implements NoteDao {
                 Integer destroyDate = Integer.parseInt(cursor.getString(
                         cursor.getColumnIndex(COLUMN_NOTE_DESTROY_DATE)));
 
-                note = new Note(uid, title, content, color, destroyDate);
+                noteStorage = new NoteStorage(uid, title, content, color, destroyDate);
             }
             cursor.close();
 
             db.setTransactionSuccessful();
         } catch (Exception e) {
-            Log.e(TAG, "public Note getNote(long id)", e);
+            Log.e(TAG, "public NoteView getNote(long id)", e);
         } finally {
             db.endTransaction();
         }
 
-        return note;
+        return noteStorage;
     }
 
     @Nullable
@@ -83,7 +83,7 @@ public class NoteDaoImpl implements NoteDao {
 
             db.setTransactionSuccessful();
         } catch (Exception e) {
-            Log.e(TAG, "public List<Note> getAllNote()", e);
+            Log.e(TAG, "public List<NoteView> getAllNote()", e);
         } finally {
             db.endTransaction();
         }
@@ -93,8 +93,8 @@ public class NoteDaoImpl implements NoteDao {
 
     @NonNull
     @Override
-    public List<Note> getAllNote() {
-        List<Note> notes = new ArrayList<>();
+    public List<NoteStorage> getAllNote() {
+        List<NoteStorage> noteStorages = new ArrayList<>();
 
         SQLiteDatabase db = mDbOpenHelper.getReadableDatabase();
         db.beginTransaction();
@@ -110,36 +110,36 @@ public class NoteDaoImpl implements NoteDao {
                 Integer destroyDate = Integer.parseInt(cursor.getString(
                         cursor.getColumnIndex(COLUMN_NOTE_DESTROY_DATE)));
 
-                Note note = new Note(uid, title, content, color, destroyDate);
+                NoteStorage noteStorage = new NoteStorage(uid, title, content, color, destroyDate);
 
-                notes.add(note);
+                noteStorages.add(noteStorage);
             }
             cursor.close();
 
             db.setTransactionSuccessful();
         } catch (Exception e) {
-            Log.e(TAG, "public List<Note> getAllNote()", e);
+            Log.e(TAG, "public List<NoteView> getAllNote()", e);
         } finally {
             db.endTransaction();
         }
 
-        return notes;
+        return noteStorages;
     }
 
     @Override
-    public void notesSync(@NonNull List<Note> notes) {
+    public void notesSync(@NonNull List<NoteStorage> noteStorages) {
         SQLiteDatabase db = mDbOpenHelper.getWritableDatabase();
         db.beginTransaction();
         try {
             db.delete(TABLE_NOTE, null, null);
 
-            for (Note note : notes){
+            for (NoteStorage noteStorage : noteStorages){
                 ContentValues values = new ContentValues();
-                values.put(COLUMN_NOTE_UID, note.getUid());
-                values.put(COLUMN_NOTE_TITLE, note.getTitle());
-                values.put(COLUMN_NOTE_CONTENT, note.getContent());
-                values.put(COLUMN_NOTE_COLOR, note.getColor());
-                values.put(COLUMN_NOTE_DESTROY_DATE, note.getDestroyDate());
+                values.put(COLUMN_NOTE_UID, noteStorage.getUid());
+                values.put(COLUMN_NOTE_TITLE, noteStorage.getTitle());
+                values.put(COLUMN_NOTE_CONTENT, noteStorage.getContent());
+                values.put(COLUMN_NOTE_COLOR, noteStorage.getColor());
+                values.put(COLUMN_NOTE_DESTROY_DATE, noteStorage.getDestroyDate());
 
                 db.insert(TABLE_NOTE, null, values);
             }
@@ -153,22 +153,22 @@ public class NoteDaoImpl implements NoteDao {
     }
 
     @Override
-    public void addNote(@NonNull final Note note) {
+    public void addNote(@NonNull final NoteStorage noteStorage) {
         ContentValues values = new ContentValues();
-        values.put(COLUMN_NOTE_UID, note.getUid());
-        values.put(COLUMN_NOTE_TITLE, note.getTitle());
-        values.put(COLUMN_NOTE_CONTENT, note.getContent());
-        values.put(COLUMN_NOTE_COLOR, note.getColor());
-        values.put(COLUMN_NOTE_DESTROY_DATE, note.getDestroyDate());
+        values.put(COLUMN_NOTE_UID, noteStorage.getUid());
+        values.put(COLUMN_NOTE_TITLE, noteStorage.getTitle());
+        values.put(COLUMN_NOTE_CONTENT, noteStorage.getContent());
+        values.put(COLUMN_NOTE_COLOR, noteStorage.getColor());
+        values.put(COLUMN_NOTE_DESTROY_DATE, noteStorage.getDestroyDate());
 
         SQLiteDatabase db = mDbOpenHelper.getWritableDatabase();
         db.beginTransaction();
         try {
-            db.insert(TABLE_NOTE, null, values);
+            long id = db.insert(TABLE_NOTE, null, values);
 
             db.setTransactionSuccessful();
         } catch (Exception e) {
-            Log.e(TAG, "public void addNote(@NonNull final Note note)", e);
+            Log.e(TAG, "public void addNote(@NonNull final NoteView noteStorage)", e);
         } finally {
             db.endTransaction();
         }
@@ -190,21 +190,21 @@ public class NoteDaoImpl implements NoteDao {
     }
 
     @Override
-    public void updateNote(@NonNull final Note note) {
+    public void updateNote(@NonNull final NoteStorage noteStorage) {
         ContentValues values = new ContentValues();
-        values.put(COLUMN_NOTE_TITLE, note.getTitle());
-        values.put(COLUMN_NOTE_CONTENT, note.getContent());
-        values.put(COLUMN_NOTE_COLOR, note.getColor());
-        values.put(COLUMN_NOTE_DESTROY_DATE, note.getDestroyDate());
+        values.put(COLUMN_NOTE_TITLE, noteStorage.getTitle());
+        values.put(COLUMN_NOTE_CONTENT, noteStorage.getContent());
+        values.put(COLUMN_NOTE_COLOR, noteStorage.getColor());
+        values.put(COLUMN_NOTE_DESTROY_DATE, noteStorage.getDestroyDate());
 
         SQLiteDatabase db = mDbOpenHelper.getWritableDatabase();
         db.beginTransaction();
         try {
-            db.update(TABLE_NOTE, values, COLUMN_NOTE_UID + " = ?", new String[]{note.getUid()});
+            db.update(TABLE_NOTE, values, COLUMN_NOTE_UID + " = ?", new String[]{ noteStorage.getUid()});
 
             db.setTransactionSuccessful();
         } catch (Exception e) {
-            Log.e(TAG, "public void updateNote(@NonNull final Note note)", e);
+            Log.e(TAG, "public void updateNote(@NonNull final NoteView noteStorage)", e);
         } finally {
             db.endTransaction();
         }

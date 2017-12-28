@@ -29,10 +29,11 @@ import com.example.trubin23.myfirstapplication.R;
 import com.example.trubin23.myfirstapplication.MyCustomApplication;
 import com.example.trubin23.myfirstapplication.presentation.notes.add.EditNoteActivity;
 import com.example.trubin23.myfirstapplication.presentation.notes.show.notelist.NoteItemActionHandler;
-import com.example.trubin23.myfirstapplication.presentation.notes.show.notelist.NotesCursorLoader;
 import com.example.trubin23.myfirstapplication.presentation.notes.show.notelist.RecyclerNoteAdapter;
 import com.example.trubin23.myfirstapplication.presentation.notes.utils.ThemeChanger;
-import com.example.trubin23.myfirstapplication.storage.model.Note;
+import com.example.trubin23.myfirstapplication.storage.database.DatabaseHelper;
+import com.example.trubin23.myfirstapplication.storage.database.NoteDaoImpl;
+import com.example.trubin23.myfirstapplication.storage.model.NoteStorage;
 import com.example.trubin23.myfirstapplication.storage.database.NoteDao;
 import com.example.trubin23.myfirstapplication.storage.network.ResponseProcessing;
 import com.example.trubin23.myfirstapplication.storage.network.RestError;
@@ -44,17 +45,17 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.reactivex.Completable;
+import io.reactivex.Single;
+import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.Call;
 
-import static com.example.trubin23.myfirstapplication.storage.model.Note.NOTE_UID;
+import static com.example.trubin23.myfirstapplication.storage.model.NoteStorage.NOTE_UID;
 
 public class NotesActivity extends AppCompatActivity
         implements NoteItemActionHandler,
-        SwipeRefreshLayout.OnRefreshListener,
-        LoaderManager.LoaderCallbacks<Cursor> {
-    public static final int CURSOR_LOADER_ID = 0;
+        SwipeRefreshLayout.OnRefreshListener {
 
     public static final String ACTION_CHANGED_DB = "action-changed-db";
 
@@ -80,10 +81,11 @@ public class NotesActivity extends AppCompatActivity
 
         mRecyclerView.setHasFixedSize(true);
 
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             LinearLayoutManager llm = new LinearLayoutManager(this);
             mRecyclerView.setLayoutManager(llm);
-        } else {
+        }
+        else {
             StaggeredGridLayoutManager gridLayoutManager = new StaggeredGridLayoutManager(
                     2, StaggeredGridLayoutManager.VERTICAL);
             mRecyclerView.setLayoutManager(gridLayoutManager);
@@ -99,8 +101,6 @@ public class NotesActivity extends AppCompatActivity
         mChangedDbReceiver = new ChangedDbReceiver();
 
         mSwipeRefreshLayout.setOnRefreshListener(this);
-
-        getSupportLoaderManager().initLoader(CURSOR_LOADER_ID, null, this);
     }
 
     @Override
@@ -112,7 +112,7 @@ public class NotesActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (R.id.theme_choicer == item.getItemId()) {
+        if(R.id.theme_choicer == item.getItemId()) {
             new ThemeChanger(this).showDialog();
         }
 
@@ -140,7 +140,7 @@ public class NotesActivity extends AppCompatActivity
         builder.setMessage(R.string.message_about_delete);
 
         builder.setPositiveButton(getString(android.R.string.ok),
-                (dialogInterface, i) -> RetrofitClient.deleteNote(uid, deleteProcessing()));
+                                  (dialogInterface, i) -> RetrofitClient.deleteNote(uid, deleteProcessing()));
 
         builder.setNegativeButton(getString(android.R.string.cancel), null);
 
@@ -149,54 +149,54 @@ public class NotesActivity extends AppCompatActivity
     }
 
     @NonNull
-    private ResponseProcessing<Note> deleteProcessing() {
-        return new ResponseProcessing<Note>() {
+    private ResponseProcessing<NoteStorage> deleteProcessing() {
+        return new ResponseProcessing<NoteStorage>() {
             Resources res = getApplicationContext().getResources();
 
             @Override
-            public void success(Note note) {
+            public void success(NoteStorage noteStorage) {
                 NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
-                Completable.fromAction(() -> noteDao.deleteNote(note.getUid()))
+                Completable.fromAction(() -> noteDao.deleteNote(noteStorage.getUid()))
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(() -> {
-                                    forceLoad();
-                                    Resources res = getResources();
-                                    Toast.makeText(getApplicationContext(), res.getString(R.string.note_deleted)
-                                            + "\n" + res.getString(R.string.success), Toast.LENGTH_SHORT).show();
-                                },
-                                throwable -> Log.e(TAG, "noteDao.deleteNote", throwable));
+                                       forceLoad();
+                                       Resources res = getResources();
+                                       Toast.makeText(getApplicationContext(), res.getString(R.string.note_deleted)
+                                               + "\n" + res.getString(R.string.success), Toast.LENGTH_SHORT).show();
+                                   },
+                                   throwable -> Log.e(TAG, "noteDao.deleteNote", throwable));
             }
 
             @Override
             public void error(RestError restError) {
                 super.error(restError);
                 Toast.makeText(getApplicationContext(),
-                        res.getString(R.string.note_deleted) + "\n" +
-                                res.getString(R.string.error_code) + restError.getCode(),
-                        Toast.LENGTH_SHORT).show();
+                               res.getString(R.string.note_deleted) + "\n" +
+                                       res.getString(R.string.error) + restError.getCode(),
+                               Toast.LENGTH_SHORT).show();
             }
         };
     }
 
     @NonNull
-    private ResponseProcessing<List<Note>> refreshProcessing() {
-        return new ResponseProcessing<List<Note>>() {
+    private ResponseProcessing<List<NoteStorage>> refreshProcessing() {
+        return new ResponseProcessing<List<NoteStorage>>() {
             Resources res = getApplicationContext().getResources();
 
             @Override
-            public void success(List<Note> notes) {
+            public void success(List<NoteStorage> noteStorages) {
                 NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
-                Completable.fromAction(() -> noteDao.notesSync(notes))
+                Completable.fromAction(() -> noteDao.notesSync(noteStorages))
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(() -> {
-                                    forceLoad();
-                                    Resources res = getResources();
-                                    Toast.makeText(getApplicationContext(), res.getString(R.string.notes_sync)
-                                            + "\n" + res.getString(R.string.success), Toast.LENGTH_SHORT).show();
-                                },
-                                throwable -> Log.e(TAG, "notes.forEach(noteDao::addNote)", throwable));
+                                       forceLoad();
+                                       Resources res = getResources();
+                                       Toast.makeText(getApplicationContext(), res.getString(R.string.notes_sync)
+                                               + "\n" + res.getString(R.string.success), Toast.LENGTH_SHORT).show();
+                                   },
+                                   throwable -> Log.e(TAG, "noteStorages.forEach(noteDao::addNote)", throwable));
             }
 
             @Override
@@ -209,13 +209,13 @@ public class NotesActivity extends AppCompatActivity
             public void error(RestError restError) {
                 super.error(restError);
                 Toast.makeText(getApplicationContext(), res.getString(R.string.notes_sync) + "\n" +
-                                res.getString(R.string.error_code) + restError.getCode(),
-                        Toast.LENGTH_SHORT).show();
+                                       res.getString(R.string.error) + restError.getCode(),
+                               Toast.LENGTH_SHORT).show();
                 mSwipeRefreshLayout.setRefreshing(false);
             }
 
             @Override
-            public void onFailure(Call<List<Note>> call, Throwable t) {
+            public void onFailure(Call<List<NoteStorage>> call, Throwable t) {
                 super.onFailure(call, t);
                 mSwipeRefreshLayout.setRefreshing(false);
             }
@@ -231,21 +231,17 @@ public class NotesActivity extends AppCompatActivity
 
     @Override
     protected void onResume() {
-        LocalBroadcastManager.getInstance(this).registerReceiver(mChangedDbReceiver,
-                new IntentFilter(ACTION_CHANGED_DB));
+        super.onResume();
 
-        if (mFirstStart) {
+        LocalBroadcastManager.getInstance(this).registerReceiver(mChangedDbReceiver,
+                                                                 new IntentFilter(ACTION_CHANGED_DB));
+
+        if(mFirstStart) {
             mFirstStart = false;
             onRefresh();
         } else {
             forceLoad();
         }
-
-        super.onResume();
-    }
-
-    private void forceLoad() {
-        getSupportLoaderManager().getLoader(CURSOR_LOADER_ID).forceLoad();
     }
 
     @Override
@@ -254,26 +250,32 @@ public class NotesActivity extends AppCompatActivity
         super.onPause();
     }
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return new NotesCursorLoader(this);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        ((RecyclerNoteAdapter) mRecyclerView.getAdapter()).swapCursor(cursor);
-
-        mSwipeRefreshLayout.setRefreshing(false);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
+    private void forceLoad() {
+        //Single.create((SingleOnSubscribe<Cursor>) emitter -> {
+            mSwipeRefreshLayout.setRefreshing(true);
+            DatabaseHelper databaseHelper = DatabaseHelper.getInstance();
+            if (databaseHelper != null) {
+                NoteDao noteDao = new NoteDaoImpl(databaseHelper);
+                Cursor cursor = noteDao.getCursorAllData();
+                ((RecyclerNoteAdapter) mRecyclerView.getAdapter()).swapCursor(cursor);
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        //        emitter.onSuccess(noteDao.getCursorAllData());
+        //    }
+        //})
+        //        .subscribeOn(Schedulers.newThread())
+        //        .observeOn(AndroidSchedulers.mainThread())
+        //        .subscribe(cursor -> {
+        //                       ((RecyclerNoteAdapter) mRecyclerView.getAdapter()).swapCursor(cursor);
+        //                        mSwipeRefreshLayout.setRefreshing(false);
+        //                   },
+        //                   throwable -> mSwipeRefreshLayout.setRefreshing(false)
+        //        );
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        getSupportLoaderManager().destroyLoader(CURSOR_LOADER_ID);
     }
 
     private class ChangedDbReceiver extends BroadcastReceiver {

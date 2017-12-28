@@ -4,7 +4,7 @@ import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.example.trubin23.myfirstapplication.storage.model.Note;
+import com.example.trubin23.myfirstapplication.storage.model.NoteStorage;
 
 import java.util.List;
 
@@ -30,19 +30,19 @@ public interface NoteDao {
     };
 
     @Nullable
-    Note getNote(@NonNull final String uid);
+    NoteStorage getNote(@NonNull final String uid);
 
     @Nullable
     Cursor getCursorAllData();
 
     @NonNull
-    List<Note> getAllNote();
+    List<NoteStorage> getAllNote();
 
-    void notesSync(@NonNull final List<Note> notes);
+    void notesSync(@NonNull final List<NoteStorage> noteStorages);
 
-    void addNote(@NonNull final Note note);
+    void addNote(@NonNull final NoteStorage noteStorage);
 
     void deleteNote(@NonNull final String uid);
 
-    void updateNote(@NonNull final Note note);
+    void updateNote(@NonNull final NoteStorage noteStorage);
 }

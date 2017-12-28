@@ -11,7 +11,7 @@ import com.squareup.moshi.Json;
  * Created by trubin23 on 29.11.17.
  */
 
-public class Note implements Parcelable {
+public class NoteStorage implements Parcelable {
 
     public static final String NOTE_UID = "note_uid";
 
@@ -29,8 +29,8 @@ public class Note implements Parcelable {
     @Json(name = "destroy_date")
     private Integer mDestroyDate = DEFAULT_DESTROY_DATE;
 
-    public Note(@NonNull String uid, @NonNull String title, @NonNull String content,
-                @Nullable String color, @Nullable Integer destroyDate) {
+    public NoteStorage(@NonNull String uid, @NonNull String title, @NonNull String content,
+                       @Nullable String color, @Nullable Integer destroyDate) {
         mUid = uid;
         mTitle = title;
         mContent = content;
@@ -43,10 +43,10 @@ public class Note implements Parcelable {
     }
 
     @SuppressWarnings("unused") // Moshi uses this!
-    private Note() {
+    private NoteStorage() {
     }
 
-    public Note(@NonNull Parcel in) {
+    public NoteStorage(@NonNull Parcel in) {
         mUid = in.readString();
         mTitle = in.readString();
         mContent = in.readString();
@@ -121,15 +121,15 @@ public class Note implements Parcelable {
         parcel.writeInt(mDestroyDate);
     }
 
-    public static final Creator<Note> CREATOR = new Creator<Note>() {
+    public static final Creator<NoteStorage> CREATOR = new Creator<NoteStorage>() {
         @Override
-        public Note createFromParcel(@NonNull Parcel in) {
-            return new Note(in);
+        public NoteStorage createFromParcel(@NonNull Parcel in) {
+            return new NoteStorage(in);
         }
 
         @Override
-        public Note[] newArray(int size) {
-            return new Note[size];
+        public NoteStorage[] newArray(int size) {
+            return new NoteStorage[size];
         }
     };
 }

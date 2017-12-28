@@ -1,6 +1,6 @@
 package com.example.trubin23.myfirstapplication.storage.network;
 
-import com.example.trubin23.myfirstapplication.storage.model.Note;
+import com.example.trubin23.myfirstapplication.storage.model.NoteStorage;
 
 import java.util.List;
 
@@ -19,17 +19,17 @@ import retrofit2.http.Path;
 public interface SOService {
 
     @GET("/notes")
-    Call<List<Note>> getNotes();
+    Call<List<NoteStorage>> getNotes();
 
     @GET("/notes/{uid}")
-    Call<Note> getNote(@Path("uid") String uid);
+    Call<NoteStorage> getNote(@Path("uid") String uid);
 
     @POST("/notes")
-    Call<Note> addNote(@Body Note note);
+    Call<NoteStorage> addNote(@Body NoteStorage noteStorage);
 
     @PUT("/notes/{uid}")
-    Call<Note> updateNote(@Path("uid") String uid, @Body Note note);
+    Call<NoteStorage> updateNote(@Path("uid") String uid, @Body NoteStorage noteStorage);
 
     @DELETE("/notes/{uid}")
-    Call<Note> deleteNote(@Path("uid") String uid);
+    Call<NoteStorage> deleteNote(@Path("uid") String uid);
 }

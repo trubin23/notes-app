@@ -22,10 +22,13 @@ import android.widget.Toast;
 
 import com.example.trubin23.myfirstapplication.R;
 import com.example.trubin23.myfirstapplication.MyCustomApplication;
+import com.example.trubin23.myfirstapplication.domain.notes.usecase.AddNoteUseCase;
 import com.example.trubin23.myfirstapplication.presentation.common.BaseActivity;
+import com.example.trubin23.myfirstapplication.presentation.notes.model.NoteView;
+import com.example.trubin23.myfirstapplication.presentation.notes.show.NotesActivity;
 import com.example.trubin23.myfirstapplication.presentation.notes.utils.ThemeChanger;
 import com.example.trubin23.myfirstapplication.presentation.notes.utils.Utils;
-import com.example.trubin23.myfirstapplication.storage.model.Note;
+import com.example.trubin23.myfirstapplication.storage.model.NoteStorage;
 import com.example.trubin23.myfirstapplication.storage.database.NoteDao;
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
@@ -42,7 +45,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.example.trubin23.myfirstapplication.storage.database.DatabaseHelper.DEFAULT_ID;
-import static com.example.trubin23.myfirstapplication.storage.model.Note.NOTE_UID;
+import static com.example.trubin23.myfirstapplication.storage.model.NoteStorage.NOTE_UID;
 
 public class EditNoteActivity extends BaseActivity implements EditNoteContract.View {
 
@@ -136,7 +139,8 @@ public class EditNoteActivity extends BaseActivity implements EditNoteContract.V
     }
 
     private void createPresenter() {
-        mPresenter = new EditNotePresenter();
+        AddNoteUseCase addNoteUseCase = new AddNoteUseCase();
+        mPresenter = new EditNotePresenter(mUseCaseHandler, addNoteUseCase);
         bindPresenterToView(mPresenter);
     }
 
@@ -196,16 +200,19 @@ public class EditNoteActivity extends BaseActivity implements EditNoteContract.V
             if (Objects.equals(mNoteUid, DEFAULT_ID)) {
                 noteUid = UUID.randomUUID().toString();
             }
-            Note note = new Note(noteUid, mEditTitle.getText().toString(),
-                    mEditText.getText().toString(), mNoteColor, null);
+            NoteView noteView = new NoteView(noteUid, mEditTitle.getText().toString(),
+                                                   mEditText.getText().toString(), mNoteColor);
 
-            boolean addNote = Objects.equals(noteUid, DEFAULT_ID);
-            mPresenter.saveNote(note, addNote);
+            boolean addNote = Objects.equals(mNoteUid, DEFAULT_ID);
+            mPresenter.saveNote(noteView, addNote);
         }
 
-        onBackPressed();
-
         return true;
+    }
+
+    @Override
+    public void savingInDb() {
+        onBackPressed();
     }
 
     @Override
@@ -269,7 +276,7 @@ public class EditNoteActivity extends BaseActivity implements EditNoteContract.V
             if (disposable == null) {
                 NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
 
-                disposable = Single.create((SingleOnSubscribe<Note>) emitter ->
+                disposable = Single.create((SingleOnSubscribe<NoteStorage>) emitter ->
                         emitter.onSuccess(noteDao.getNote(mNoteUid)))
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -294,6 +301,11 @@ public class EditNoteActivity extends BaseActivity implements EditNoteContract.V
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
     public void showSuccessToast(int eventId) {
         Resources res = getResources();
         Toast.makeText(this, res.getString(eventId) + "\n"
@@ -301,32 +313,32 @@ public class EditNoteActivity extends BaseActivity implements EditNoteContract.V
     }
 
     @Override
-    public void showErrorToast(int eventId, int errorCode) {
+    public void showErrorToast(int eventId) {
         Resources res = getResources();
         Toast.makeText(this, res.getString(eventId) + "\n"
-                        + res.getString(R.string.error_code) + errorCode, Toast.LENGTH_SHORT).show();
+                        + res.getString(R.string.error), Toast.LENGTH_SHORT).show();
     }
 
     private class NoteReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Note note = intent.getParcelableExtra(NOTE);
-            if (note == null) {
+            NoteStorage noteStorage = intent.getParcelableExtra(NOTE);
+            if (noteStorage == null) {
                 return;
             }
 
             mNoteState = NoteState.FINISH;
 
-            mEditTitle.setText(note.getTitle());
-            mEditText.setText(note.getContent());
+            mEditTitle.setText(noteStorage.getTitle());
+            mEditText.setText(noteStorage.getContent());
             mEditText.setEnabled(true);
             mProgressBar.setVisibility(View.GONE);
 
-            changeNoteColor(note.getColor());
+            changeNoteColor(noteStorage.getColor());
 
             ActionBar actionBar = getSupportActionBar();
             if (actionBar != null) {
-                actionBar.setTitle(note.getTitle());
+                actionBar.setTitle(noteStorage.getTitle());
             }
         }
     }

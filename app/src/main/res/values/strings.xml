@@ -16,7 +16,7 @@
     <string name="note_updated">Note updated.</string>
     <string name="note_deleted">Note deleted.</string>
     <string name="network_error">Network error.</string>
-    <string name="error_code">Error code: </string>
+    <string name="error">Error.</string>
     <string name="success">Success.</string>
     <string name="unknown_response_body">Unknown response body.</string>
 

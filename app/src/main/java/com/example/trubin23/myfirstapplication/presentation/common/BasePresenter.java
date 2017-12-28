@@ -1,6 +1,7 @@
 package com.example.trubin23.myfirstapplication.presentation.common;
 
 import android.util.Log;
+import com.example.trubin23.myfirstapplication.domain.common.UseCaseHandler;
 
 /**
  * Created by trubin23 on 27.12.17.
@@ -10,10 +11,13 @@ public class BasePresenter<T extends BaseView> implements BasePresenterInterface
 
     private static final String TAG = BasePresenter.class.getSimpleName();
 
-    private T mView;
+    protected UseCaseHandler mUseCaseHandler;
 
-    public BasePresenter() {
+    public BasePresenter(UseCaseHandler useCaseHandler) {
+        mUseCaseHandler = useCaseHandler;
     }
+
+    private T mView;
 
     @Override
     public void bind(T view) {

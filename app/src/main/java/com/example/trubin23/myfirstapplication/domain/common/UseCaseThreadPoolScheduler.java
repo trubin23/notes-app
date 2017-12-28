@@ -24,7 +24,7 @@ class UseCaseThreadPoolScheduler implements UseCaseScheduler {
                 new Handler());
     }
 
-    UseCaseThreadPoolScheduler(ThreadPoolExecutor threadPoolExecutor, Handler uiHandler) {
+    private UseCaseThreadPoolScheduler(ThreadPoolExecutor threadPoolExecutor, Handler uiHandler) {
         mThreadPoolExecutor = threadPoolExecutor;
         mUiHandler = uiHandler;
     }
@@ -37,23 +37,13 @@ class UseCaseThreadPoolScheduler implements UseCaseScheduler {
     @Override
     public <V extends BaseUseCase.ResponseValues> void onSuccess(final V response,
                                                                  final BaseUseCase.UseCaseCallback<V> useCaseCallback) {
-        mUiHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                useCaseCallback.onSuccess(response);
-            }
-        });
+        mUiHandler.post(() -> useCaseCallback.onSuccess(response));
     }
 
     @Override
     public <V extends BaseUseCase.ResponseValues> void onError(
             final BaseUseCase.UseCaseCallback<V> useCaseCallback) {
-        mUiHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                useCaseCallback.onError();
-            }
-        });
+        mUiHandler.post(useCaseCallback::onError);
     }
 
 }
