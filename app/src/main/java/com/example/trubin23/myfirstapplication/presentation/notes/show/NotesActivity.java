@@ -12,7 +12,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -25,6 +24,7 @@ import android.widget.Toast;
 
 import com.example.trubin23.myfirstapplication.MyCustomApplication;
 import com.example.trubin23.myfirstapplication.R;
+import com.example.trubin23.myfirstapplication.presentation.common.BaseActivity;
 import com.example.trubin23.myfirstapplication.presentation.notes.add.EditNoteActivity;
 import com.example.trubin23.myfirstapplication.presentation.notes.show.notelist.NoteItemActionHandler;
 import com.example.trubin23.myfirstapplication.presentation.notes.show.notelist.RecyclerNoteAdapter;
@@ -51,8 +51,9 @@ import retrofit2.Call;
 
 import static com.example.trubin23.myfirstapplication.storage.model.NoteStorage.NOTE_UID;
 
-public class NotesActivity extends AppCompatActivity
-        implements NoteItemActionHandler,
+public class NotesActivity extends BaseActivity implements
+        NotesContract.View,
+        NoteItemActionHandler,
         SwipeRefreshLayout.OnRefreshListener {
 
     public static final String ACTION_CHANGED_DB = "action-changed-db";
