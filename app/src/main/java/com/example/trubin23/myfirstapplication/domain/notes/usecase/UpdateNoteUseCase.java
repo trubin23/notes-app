@@ -6,7 +6,7 @@ import com.example.trubin23.myfirstapplication.domain.notes.model.NoteDomainMapp
 import com.example.trubin23.myfirstapplication.storage.model.NoteStorage;
 import com.example.trubin23.myfirstapplication.storage.repository.NotesRepository;
 
-public class AddNoteUseCase extends BaseUseCase<AddNoteUseCase.RequestValues, AddNoteUseCase.ResponseValues> {
+public class UpdateNoteUseCase extends BaseUseCase<UpdateNoteUseCase.RequestValues, UpdateNoteUseCase.ResponseValues> {
 
     @Override
     protected void executeUseCase(RequestValues requestValues) {
@@ -14,7 +14,7 @@ public class AddNoteUseCase extends BaseUseCase<AddNoteUseCase.RequestValues, Ad
 
         NoteStorage noteStorage = NoteDomainMapper.toStorageModel(noteDomain);
 
-        boolean result = NotesRepository.addNote(noteStorage);
+        boolean result = NotesRepository.updateNote(noteStorage);
 
         if (result){
             getUseCaseCallback().onSuccess(new ResponseValues());

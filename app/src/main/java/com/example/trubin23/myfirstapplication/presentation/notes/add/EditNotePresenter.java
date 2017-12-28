@@ -8,6 +8,7 @@ import com.example.trubin23.myfirstapplication.domain.common.BaseUseCase;
 import com.example.trubin23.myfirstapplication.domain.common.UseCaseHandler;
 import com.example.trubin23.myfirstapplication.domain.notes.model.NoteDomain;
 import com.example.trubin23.myfirstapplication.domain.notes.usecase.AddNoteUseCase;
+import com.example.trubin23.myfirstapplication.domain.notes.usecase.UpdateNoteUseCase;
 import com.example.trubin23.myfirstapplication.presentation.common.BasePresenter;
 import com.example.trubin23.myfirstapplication.presentation.notes.model.NoteView;
 import com.example.trubin23.myfirstapplication.presentation.notes.model.NoteViewMapper;
@@ -21,64 +22,62 @@ class EditNotePresenter extends BasePresenter<EditNoteContract.View> implements 
     private static final String TAG = EditNotePresenter.class.getSimpleName();
 
     private final AddNoteUseCase mAddNoteUseCase;
+    private final UpdateNoteUseCase mUpdateNoteUseCase;
 
     EditNotePresenter(@NonNull UseCaseHandler useCaseHandler,
-                             @NonNull AddNoteUseCase saveNoteUseCase) {
+                      @NonNull AddNoteUseCase addNoteUseCase,
+                      @NonNull UpdateNoteUseCase updateNoteUseCase) {
         super(useCaseHandler);
-        mAddNoteUseCase = saveNoteUseCase;
+        mAddNoteUseCase = addNoteUseCase;
+        mUpdateNoteUseCase = updateNoteUseCase;
     }
 
     @Override
     public void saveNote(NoteView noteView, boolean addNote) {
         if (addNote) {
-            NoteDomain noteDomain = NoteViewMapper.toDomainModel(noteView);
-            mUseCaseHandler.execute(mAddNoteUseCase, new AddNoteUseCase.RequestValues(noteDomain),
-                                    new BaseUseCase.UseCaseCallback<AddNoteUseCase.ResponseValues>(){
-
-                                        @Override
-                                        public void onSuccess(AddNoteUseCase.ResponseValues response) {
-                                            getView().showSuccessToast(R.string.note_added);
-                                            getView().savingInDb();
-                                        }
-
-                                        @Override
-                                        public void onError() {
-                                            getView().showErrorToast(R.string.note_added);
-                                            getView().savingInDb();
-                                            Log.e(TAG, "noteDao.addNote");
-                                        }
-                                    });
+            addNote(noteView);
         } else {
-            //RetrofitClient.updateNote(noteView, updateProcessing());
+            updateNote(noteView);
         }
     }
-/*
 
-    @NonNull
-    private ResponseProcessing<NoteStorage> updateProcessing() {
-        return new ResponseProcessing<NoteStorage>() {
+    private void addNote(NoteView noteView) {
+        NoteDomain noteDomain = NoteViewMapper.toDomainModel(noteView);
+        mUseCaseHandler.execute(mAddNoteUseCase, new AddNoteUseCase.RequestValues(noteDomain),
+                new BaseUseCase.UseCaseCallback<AddNoteUseCase.ResponseValues>() {
 
-            @Override
-            public void success(NoteStorage noteStorage) {
-                final NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
+                    @Override
+                    public void onSuccess(AddNoteUseCase.ResponseValues response) {
+                        getView().showSuccessToast(R.string.note_added);
+                        getView().savingInDb();
+                    }
 
-                Completable.fromAction(() -> noteDao.updateNote(noteStorage))
-                        .subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(() -> {
-                                    final LocalBroadcastManager broadcastManager =
-                                            LocalBroadcastManager.getInstance(getApplicationContext());
-                                    broadcastManager.sendBroadcast(new Intent(NotesActivity.ACTION_CHANGED_DB));
-                                    getView().showSuccessToast(R.string.note_updated);
-                                },
-                                throwable -> Log.e(TAG, "noteDao.updateNote", throwable));
-            }
+                    @Override
+                    public void onError() {
+                        getView().showErrorToast(R.string.note_added);
+                        getView().savingInDb();
+                        Log.e(TAG, "noteDao.addNote");
+                    }
+                });
+    }
 
-            @Override
-            public void error(RestError restError) {
-                super.error(restError);
-                getView().showErrorToast(R.string.note_updated, restError.getCode());
-            }
-        };
-    }*/
+    private void updateNote(NoteView noteView) {
+        NoteDomain noteDomain = NoteViewMapper.toDomainModel(noteView);
+        mUseCaseHandler.execute(mUpdateNoteUseCase, new UpdateNoteUseCase.RequestValues(noteDomain),
+                new BaseUseCase.UseCaseCallback<UpdateNoteUseCase.ResponseValues>() {
+
+                    @Override
+                    public void onSuccess(UpdateNoteUseCase.ResponseValues response) {
+                        getView().showSuccessToast(R.string.note_updated);
+                        getView().savingInDb();
+                    }
+
+                    @Override
+                    public void onError() {
+                        getView().showErrorToast(R.string.note_updated);
+                        getView().savingInDb();
+                        Log.e(TAG, "noteDao.updateNote");
+                    }
+                });
+    }
 }

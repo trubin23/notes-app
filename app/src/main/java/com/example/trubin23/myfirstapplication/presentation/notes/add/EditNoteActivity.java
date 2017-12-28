@@ -20,16 +20,16 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.trubin23.myfirstapplication.R;
 import com.example.trubin23.myfirstapplication.MyCustomApplication;
+import com.example.trubin23.myfirstapplication.R;
 import com.example.trubin23.myfirstapplication.domain.notes.usecase.AddNoteUseCase;
+import com.example.trubin23.myfirstapplication.domain.notes.usecase.UpdateNoteUseCase;
 import com.example.trubin23.myfirstapplication.presentation.common.BaseActivity;
 import com.example.trubin23.myfirstapplication.presentation.notes.model.NoteView;
-import com.example.trubin23.myfirstapplication.presentation.notes.show.NotesActivity;
 import com.example.trubin23.myfirstapplication.presentation.notes.utils.ThemeChanger;
 import com.example.trubin23.myfirstapplication.presentation.notes.utils.Utils;
-import com.example.trubin23.myfirstapplication.storage.model.NoteStorage;
 import com.example.trubin23.myfirstapplication.storage.database.NoteDao;
+import com.example.trubin23.myfirstapplication.storage.model.NoteStorage;
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 
@@ -140,7 +140,8 @@ public class EditNoteActivity extends BaseActivity implements EditNoteContract.V
 
     private void createPresenter() {
         AddNoteUseCase addNoteUseCase = new AddNoteUseCase();
-        mPresenter = new EditNotePresenter(mUseCaseHandler, addNoteUseCase);
+        UpdateNoteUseCase updateNoteUseCase = new UpdateNoteUseCase();
+        mPresenter = new EditNotePresenter(mUseCaseHandler, addNoteUseCase, updateNoteUseCase);
         bindPresenterToView(mPresenter);
     }
 

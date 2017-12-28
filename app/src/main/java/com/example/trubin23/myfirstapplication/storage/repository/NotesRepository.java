@@ -14,7 +14,7 @@ import retrofit2.Response;
 
 public class NotesRepository {
 
-    public static boolean saveNote(NoteStorage noteStorage) {
+    public static boolean addNote(NoteStorage noteStorage) {
         Response<NoteStorage> noteResponse = RetrofitClient.addNoteSync(noteStorage);
         if (noteResponse == null)
             return false;
@@ -23,6 +23,20 @@ public class NotesRepository {
         if (databaseHelper != null) {
             NoteDao noteDao = new NoteDaoImpl(databaseHelper);
             noteDao.addNote(noteStorage);
+        }
+
+        return true;
+    }
+
+    public static boolean updateNote(NoteStorage noteStorage) {
+        Response<NoteStorage> noteResponse = RetrofitClient.updateNoteSync(noteStorage);
+        if (noteResponse == null)
+            return false;
+
+        DatabaseHelper databaseHelper = DatabaseHelper.getInstance();
+        if (databaseHelper != null) {
+            NoteDao noteDao = new NoteDaoImpl(databaseHelper);
+            noteDao.updateNote(noteStorage);
         }
 
         return true;
