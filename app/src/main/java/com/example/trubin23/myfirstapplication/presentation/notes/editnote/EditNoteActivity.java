@@ -1,4 +1,4 @@
-package com.example.trubin23.myfirstapplication.presentation.notes.add;
+package com.example.trubin23.myfirstapplication.presentation.notes.editnote;
 
 import android.content.Intent;
 import android.content.res.Resources;
@@ -160,7 +160,7 @@ public class EditNoteActivity extends BaseActivity implements EditNoteContract.V
         }
 
         if (R.id.action_accept == item.getItemId()) {
-            NoteView noteView = new NoteView(mEditTitle.getText().toString(),
+            NoteView noteView = new NoteView(mNoteUid, mEditTitle.getText().toString(),
                                                    mEditText.getText().toString(), mNoteColor);
 
             boolean addNote = mNoteUid == null;

@@ -1,4 +1,4 @@
-package com.example.trubin23.myfirstapplication.presentation.notes.add;
+package com.example.trubin23.myfirstapplication.presentation.notes.editnote;
 
 import android.support.annotation.NonNull;
 import android.util.Log;

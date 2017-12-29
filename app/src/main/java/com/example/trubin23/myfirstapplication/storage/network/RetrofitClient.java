@@ -107,6 +107,9 @@ public class RetrofitClient {
         Response<NoteStorage> noteResponse = null;
         try {
             noteResponse = mService.addNote(noteStorage).execute();
+            if (!noteResponse.isSuccessful()) {
+                return null;
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -121,6 +124,9 @@ public class RetrofitClient {
         Response<NoteStorage> noteResponse = null;
         try {
             noteResponse = mService.updateNote(noteStorage.getUid(), noteStorage).execute();
+            if (!noteResponse.isSuccessful()) {
+                return null;
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -135,6 +141,9 @@ public class RetrofitClient {
         Response<NoteStorage> noteResponse = null;
         try {
             noteResponse = mService.deleteNote(noteUid).execute();
+            if (!noteResponse.isSuccessful()) {
+                return null;
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -148,6 +157,10 @@ public class RetrofitClient {
         Response<List<NoteStorage>> notesResponse = null;
         try {
             notesResponse = mService.getNotes().execute();
+            if (!notesResponse.isSuccessful()) {
+                return null;
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }

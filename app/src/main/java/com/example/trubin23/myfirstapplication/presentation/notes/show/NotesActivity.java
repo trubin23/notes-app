@@ -26,7 +26,7 @@ import com.example.trubin23.myfirstapplication.domain.notes.usecase.CursorNotesU
 import com.example.trubin23.myfirstapplication.domain.notes.usecase.DeleteNoteUseCase;
 import com.example.trubin23.myfirstapplication.domain.notes.usecase.NetworkSyncNotesUseCase;
 import com.example.trubin23.myfirstapplication.presentation.common.BaseActivity;
-import com.example.trubin23.myfirstapplication.presentation.notes.add.EditNoteActivity;
+import com.example.trubin23.myfirstapplication.presentation.notes.editnote.EditNoteActivity;
 import com.example.trubin23.myfirstapplication.presentation.notes.show.notelist.NoteItemActionHandler;
 import com.example.trubin23.myfirstapplication.presentation.notes.show.notelist.RecyclerNoteAdapter;
 import com.example.trubin23.myfirstapplication.presentation.notes.utils.ThemeChanger;
@@ -43,8 +43,6 @@ public class NotesActivity extends BaseActivity implements
         SwipeRefreshLayout.OnRefreshListener {
 
     public static final String ACTION_CHANGED_DB = "action-changed-db";
-
-    private static final String TAG = "NotesActivity";
 
     @BindView(R.id.swipe_refresh)
     SwipeRefreshLayout mSwipeRefreshLayout;
@@ -152,6 +150,17 @@ public class NotesActivity extends BaseActivity implements
     }
 
     @Override
+    public void refreshRecyclerView(Cursor cursor) {
+        ((RecyclerNoteAdapter) mRecyclerView.getAdapter()).swapCursor(cursor);
+        mSwipeRefreshLayout.setRefreshing(false);
+    }
+
+    @Override
+    public void stopSwipeRefresh() {
+        mSwipeRefreshLayout.setRefreshing(false);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
 
@@ -164,16 +173,6 @@ public class NotesActivity extends BaseActivity implements
         } else {
             mPresenter.reloadNotesFromDb();
         }
-    }
-
-    @Override
-    public void refreshRecyclerView(Cursor cursor) {
-        ((RecyclerNoteAdapter) mRecyclerView.getAdapter()).swapCursor(cursor);
-        mSwipeRefreshLayout.setRefreshing(false);
-    }
-
-    public void stopSwipeRefresh() {
-        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     @Override

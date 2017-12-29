@@ -3,6 +3,7 @@ package com.example.trubin23.myfirstapplication.presentation.notes.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.util.UUID;
 
@@ -17,15 +18,15 @@ public class NoteView implements Parcelable {
     private String mContent;
     private String mColor;
 
-    public NoteView(@NonNull String uid, @NonNull String title, @NonNull String content, @NonNull String color) {
-        mUid = uid;
+    public NoteView(@Nullable String uid, @NonNull String title, @NonNull String content, @NonNull String color) {
+        if (uid == null){
+            mUid = UUID.randomUUID().toString();
+        } else {
+            mUid = uid;
+        }
         mTitle = title;
         mContent = content;
         mColor = color;
-    }
-
-    public NoteView(@NonNull String title, @NonNull String content, @NonNull String color) {
-        this(UUID.randomUUID().toString(), title, content, color);
     }
 
     public NoteView(@NonNull Parcel in) {

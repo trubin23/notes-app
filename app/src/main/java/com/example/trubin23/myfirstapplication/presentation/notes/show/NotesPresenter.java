@@ -1,5 +1,6 @@
 package com.example.trubin23.myfirstapplication.presentation.notes.show;
 
+import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -39,7 +40,8 @@ public class NotesPresenter extends BasePresenter<NotesContract.View> implements
                 new BaseUseCase.UseCaseCallback<NetworkSyncNotesUseCase.ResponseValues>() {
                     @Override
                     public void onSuccess(NetworkSyncNotesUseCase.ResponseValues response) {
-                        getView().refreshRecyclerView(response.getCursor());
+                        Cursor cursor = response.getCursor();
+                        getView().refreshRecyclerView(cursor);
                     }
 
                     @Override
@@ -57,7 +59,8 @@ public class NotesPresenter extends BasePresenter<NotesContract.View> implements
                 new BaseUseCase.UseCaseCallback<CursorNotesUseCase.ResponseValues>() {
                     @Override
                     public void onSuccess(CursorNotesUseCase.ResponseValues response) {
-                        getView().refreshRecyclerView(response.getCursor());
+                        Cursor cursor = response.getCursor();
+                        getView().refreshRecyclerView(cursor);
                     }
 
                     @Override
@@ -75,13 +78,13 @@ public class NotesPresenter extends BasePresenter<NotesContract.View> implements
 
                     @Override
                     public void onSuccess(DeleteNoteUseCase.ResponseValues response) {
-                        getView().showSuccessToast(R.string.note_added);
-                        //notesSync();
+                        getView().showSuccessToast(R.string.note_deleted);
+                        reloadNotesFromDb();
                     }
 
                     @Override
                     public void onError() {
-                        getView().showErrorToast(R.string.note_added);
+                        getView().showErrorToast(R.string.note_deleted);
                         Log.e(TAG, "noteDao.addNote");
                     }
                 });

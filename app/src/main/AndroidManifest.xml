@@ -19,7 +19,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".presentation.notes.add.EditNoteActivity" />
+        <activity android:name=".presentation.notes.editnote.EditNoteActivity" />
     </application>
 
 </manifest>
