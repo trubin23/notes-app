@@ -13,6 +13,7 @@ public class NotesContract {
 
     interface View extends BaseView {
         void refreshRecyclerView(Cursor cursor);
+        void stopSwipeRefresh();
         void showSuccessToast(int eventId);
         void showErrorToast(int eventId);
     }

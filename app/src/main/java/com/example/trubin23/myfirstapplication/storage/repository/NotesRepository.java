@@ -10,6 +10,8 @@ import com.example.trubin23.myfirstapplication.storage.database.NoteDaoImpl;
 import com.example.trubin23.myfirstapplication.storage.model.NoteStorage;
 import com.example.trubin23.myfirstapplication.storage.network.RetrofitClient;
 
+import java.util.List;
+
 import retrofit2.Response;
 
 /**
@@ -90,5 +92,26 @@ public class NotesRepository {
         }
 
         return cursor;
+    }
+
+    public static Cursor networkSyncNotes() {
+        Response<List<NoteStorage>> notesResponse = RetrofitClient.getNotesSync();
+        if (notesResponse == null) {
+            return null;
+        }
+
+        List<NoteStorage> notes = notesResponse.body();
+        if (notes == null){
+            return null;
+        }
+
+        DatabaseHelper databaseHelper = DatabaseHelper.getInstance();
+        if (databaseHelper == null) {
+            return null;
+        }
+
+        NoteDao noteDao = new NoteDaoImpl(databaseHelper);
+        noteDao.notesSync(notes);
+        return noteDao.getCursorAllData();
     }
 }

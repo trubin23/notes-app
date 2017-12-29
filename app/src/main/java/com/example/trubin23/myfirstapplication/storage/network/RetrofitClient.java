@@ -141,4 +141,17 @@ public class RetrofitClient {
 
         return noteResponse;
     }
+
+    public static Response<List<NoteStorage>> getNotesSync() {
+        SOService mService = getSOService();
+
+        Response<List<NoteStorage>> notesResponse = null;
+        try {
+            notesResponse = mService.getNotes().execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return notesResponse;
+    }
 }

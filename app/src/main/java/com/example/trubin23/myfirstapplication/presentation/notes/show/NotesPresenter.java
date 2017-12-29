@@ -8,6 +8,7 @@ import com.example.trubin23.myfirstapplication.domain.common.BaseUseCase;
 import com.example.trubin23.myfirstapplication.domain.common.UseCaseHandler;
 import com.example.trubin23.myfirstapplication.domain.notes.usecase.CursorNotesUseCase;
 import com.example.trubin23.myfirstapplication.domain.notes.usecase.DeleteNoteUseCase;
+import com.example.trubin23.myfirstapplication.domain.notes.usecase.NetworkSyncNotesUseCase;
 import com.example.trubin23.myfirstapplication.presentation.common.BasePresenter;
 
 /**
@@ -20,18 +21,34 @@ public class NotesPresenter extends BasePresenter<NotesContract.View> implements
 
     private final DeleteNoteUseCase mDeleteNoteUseCase;
     private final CursorNotesUseCase mCursorNotesUseCase;
+    private final NetworkSyncNotesUseCase mNetworkSyncNotesUseCase;
 
     NotesPresenter(@NonNull UseCaseHandler useCaseHandler,
                    @NonNull DeleteNoteUseCase deleteNoteUseCase,
-                   @NonNull CursorNotesUseCase cursorNotesUseCase) {
+                   @NonNull CursorNotesUseCase cursorNotesUseCase,
+                   @NonNull NetworkSyncNotesUseCase networkSyncNotesUseCase) {
         super(useCaseHandler);
         mDeleteNoteUseCase = deleteNoteUseCase;
         mCursorNotesUseCase = cursorNotesUseCase;
+        mNetworkSyncNotesUseCase = networkSyncNotesUseCase;
     }
 
     @Override
     public void notesWithNetworkSync() {
+        mUseCaseHandler.execute(mNetworkSyncNotesUseCase, new NetworkSyncNotesUseCase.RequestValues(),
+                new BaseUseCase.UseCaseCallback<NetworkSyncNotesUseCase.ResponseValues>() {
+                    @Override
+                    public void onSuccess(NetworkSyncNotesUseCase.ResponseValues response) {
+                        getView().refreshRecyclerView(response.getCursor());
+                    }
 
+                    @Override
+                    public void onError() {
+                        getView().showErrorToast(R.string.note_added);
+                        getView().stopSwipeRefresh();
+                        Log.e(TAG, "noteDao.addNote");
+                    }
+                });
     }
 
     @Override

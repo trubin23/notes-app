@@ -16,36 +16,24 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.example.trubin23.myfirstapplication.MyCustomApplication;
 import com.example.trubin23.myfirstapplication.R;
 import com.example.trubin23.myfirstapplication.domain.notes.usecase.CursorNotesUseCase;
 import com.example.trubin23.myfirstapplication.domain.notes.usecase.DeleteNoteUseCase;
+import com.example.trubin23.myfirstapplication.domain.notes.usecase.NetworkSyncNotesUseCase;
 import com.example.trubin23.myfirstapplication.presentation.common.BaseActivity;
 import com.example.trubin23.myfirstapplication.presentation.notes.add.EditNoteActivity;
 import com.example.trubin23.myfirstapplication.presentation.notes.show.notelist.NoteItemActionHandler;
 import com.example.trubin23.myfirstapplication.presentation.notes.show.notelist.RecyclerNoteAdapter;
 import com.example.trubin23.myfirstapplication.presentation.notes.utils.ThemeChanger;
-import com.example.trubin23.myfirstapplication.storage.database.NoteDao;
-import com.example.trubin23.myfirstapplication.storage.model.NoteStorage;
-import com.example.trubin23.myfirstapplication.storage.network.ResponseProcessing;
-import com.example.trubin23.myfirstapplication.storage.network.RestError;
-import com.example.trubin23.myfirstapplication.storage.network.RetrofitClient;
-
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.Completable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
-import retrofit2.Call;
 
 import static com.example.trubin23.myfirstapplication.storage.model.NoteStorage.NOTE_UID;
 
@@ -104,9 +92,11 @@ public class NotesActivity extends BaseActivity implements
     }
 
     private void createPresenter() {
-        DeleteNoteUseCase deleteNoteUseCase =  new DeleteNoteUseCase();
+        DeleteNoteUseCase deleteNoteUseCase = new DeleteNoteUseCase();
         CursorNotesUseCase cursorNotesUseCase = new CursorNotesUseCase();
-        mPresenter = new NotesPresenter(mUseCaseHandler, deleteNoteUseCase, cursorNotesUseCase);
+        NetworkSyncNotesUseCase networkSyncNotesUseCase = new NetworkSyncNotesUseCase();
+        mPresenter = new NotesPresenter(mUseCaseHandler, deleteNoteUseCase,
+                cursorNotesUseCase, networkSyncNotesUseCase);
         bindPresenterToView(mPresenter);
     }
 
@@ -155,54 +145,10 @@ public class NotesActivity extends BaseActivity implements
         alertDialog.show();
     }
 
-    @NonNull
-    private ResponseProcessing<List<NoteStorage>> refreshProcessing() {
-        return new ResponseProcessing<List<NoteStorage>>() {
-            Resources res = getApplicationContext().getResources();
-
-            @Override
-            public void success(List<NoteStorage> noteStorages) {
-                NoteDao noteDao = ((MyCustomApplication) getApplication()).getNoteDao();
-                Completable.fromAction(() -> noteDao.notesSync(noteStorages))
-                        .subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(() -> {
-                                    mPresenter.reloadNotesFromDb();
-                                    Resources res = getResources();
-                                    Toast.makeText(getApplicationContext(), res.getString(R.string.notes_sync)
-                                            + "\n" + res.getString(R.string.success), Toast.LENGTH_SHORT).show();
-                                },
-                                throwable -> Log.e(TAG, "noteStorages.forEach(noteDao::addNote)", throwable));
-            }
-
-            @Override
-            public void successWithoutBody() {
-                super.successWithoutBody();
-                mSwipeRefreshLayout.setRefreshing(false);
-            }
-
-            @Override
-            public void error(RestError restError) {
-                super.error(restError);
-                Toast.makeText(getApplicationContext(), res.getString(R.string.notes_sync) + "\n" +
-                                res.getString(R.string.error) + restError.getCode(),
-                        Toast.LENGTH_SHORT).show();
-                mSwipeRefreshLayout.setRefreshing(false);
-            }
-
-            @Override
-            public void onFailure(Call<List<NoteStorage>> call, Throwable t) {
-                super.onFailure(call, t);
-                mSwipeRefreshLayout.setRefreshing(false);
-            }
-        };
-    }
-
     @Override
     public void onRefresh() {
         mSwipeRefreshLayout.setRefreshing(true);
-
-        RetrofitClient.getNotes(refreshProcessing());
+        mPresenter.notesWithNetworkSync();
     }
 
     @Override
@@ -223,6 +169,11 @@ public class NotesActivity extends BaseActivity implements
     @Override
     public void refreshRecyclerView(Cursor cursor) {
         ((RecyclerNoteAdapter) mRecyclerView.getAdapter()).swapCursor(cursor);
+        mSwipeRefreshLayout.setRefreshing(false);
+    }
+
+    public void stopSwipeRefresh() {
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     @Override
