@@ -43,6 +43,8 @@ dependencies {
     compile 'com.squareup.retrofit2:retrofit:2.3.0'
     compile 'com.squareup.retrofit2:converter-moshi:2.3.0'
     compile 'com.github.QuadFlask:colorpicker:0.0.13'
+    compile 'io.reactivex.rxjava2:rxjava:2.1.5'
+    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
 
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
 }

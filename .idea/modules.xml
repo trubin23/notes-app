@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/MyFirstApplication.iml" filepath="$PROJECT_DIR$/MyFirstApplication.iml" />
+      <module fileurl="file://C:\workspace\github\notes-app\MyFirstApplication.iml" filepath="C:\workspace\github\notes-app\MyFirstApplication.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/notes-app.iml" filepath="$PROJECT_DIR$/notes-app.iml" />
     </modules>
